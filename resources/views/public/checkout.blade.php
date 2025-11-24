@@ -34,6 +34,11 @@
 
                     <form action="{{ route('booking.process-payment') }}" method="POST">
                         @csrf
+                        
+                        <!-- Hidden bed IDs to pass with form submission -->
+                        @foreach($beds as $bed)
+                            <input type="hidden" name="bed_ids[]" value="{{ $bed->id }}">
+                        @endforeach
 
                         <div class="space-y-6">
                             <!-- Phone -->
