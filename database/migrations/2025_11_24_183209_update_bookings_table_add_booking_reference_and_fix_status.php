@@ -11,8 +11,15 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        // Change status enum to include new values
-        DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM('pending', 'confirmed', 'checked_in', 'active', 'completed', 'cancelled') DEFAULT 'pending'");
+        // SQLite doesn't support MODIFY COLUMN, so we'll use a different approach
+        // For SQLite, we need to recreate the table or just skip the enum change
+        // Since SQLite doesn't have enum types, we'll just ensure the column exists
+        
+        // Check if we're using MySQL
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM('pending', 'confirmed', 'checked_in', 'active', 'completed', 'cancelled') DEFAULT 'pending'");
+        }
+        // For SQLite, the status column already exists as TEXT, which accepts any value
     }
 
     /**
@@ -20,7 +27,9 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        // Revert status enum
-        DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM('active', 'completed', 'cancelled') DEFAULT 'active'");
+        // Revert status enum (only for MySQL)
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM('active', 'completed', 'cancelled') DEFAULT 'active'");
+        }
     }
 };
