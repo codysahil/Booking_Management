@@ -16,6 +16,12 @@ class BedController extends Controller
             'monthly_rent' => 'required|numeric|min:0',
         ]);
 
+        // Check if room has reached capacity
+        $currentBedCount = $room->beds()->count();
+        if ($currentBedCount >= $room->capacity) {
+            return back()->withErrors(['error' => "Cannot add more beds. Room capacity is {$room->capacity} and currently has {$currentBedCount} beds."]);
+        }
+
         $room->beds()->create([
             'bed_number' => $request->bed_number,
             'monthly_rent' => $request->monthly_rent,
