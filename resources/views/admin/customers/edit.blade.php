@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
-@section('header', 'Edit Employee')
+@section('header', 'Edit Customer')
 
 @section('content')
 <div class="max-w-5xl mx-auto">
     <div class="mb-6">
-        <a href="{{ route('admin.employees.show', $employee) }}" class="text-primary-600 hover:text-primary-700 font-medium">
-            ← Back to Employee Details
+        <a href="{{ route('admin.customers.show', $customer) }}" class="text-primary-600 hover:text-primary-700 font-medium">
+            ← Back to Customer Details
         </a>
     </div>
 
@@ -21,7 +21,7 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.employees.update', $employee) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <form action="{{ route('admin.customers.update', $customer) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @method('PUT')
 
@@ -32,46 +32,44 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-                    <input type="text" name="name" required value="{{ old('name', $employee->name) }}"
+                    <input type="text" name="name" required value="{{ old('name', $customer->name) }}"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Role *</label>
-                    <select name="role" required
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
+                    <input type="date" name="dob" required value="{{ old('dob', $customer->dob->format('Y-m-d')) }}"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">-- Select Role --</option>
-                        <option value="Manager" {{ old('role', $employee->role) == 'Manager' ? 'selected' : '' }}>Manager</option>
-                        <option value="Warden" {{ old('role', $employee->role) == 'Warden' ? 'selected' : '' }}>Warden</option>
-                        <option value="Cook" {{ old('role', $employee->role) == 'Cook' ? 'selected' : '' }}>Cook</option>
-                        <option value="Security" {{ old('role', $employee->role) == 'Security' ? 'selected' : '' }}>Security</option>
-                        <option value="Cleaner" {{ old('role', $employee->role) == 'Cleaner' ? 'selected' : '' }}>Cleaner</option>
-                    </select>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
-                    <input type="tel" name="phone" required value="{{ old('phone', $employee->phone) }}"
+                    <input type="tel" name="phone" required value="{{ old('phone', $customer->phone) }}"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Assigned Branch *</label>
-                    <select name="branch_id" required
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Guardian Phone *</label>
+                    <input type="tel" name="guardian_phone" required value="{{ old('guardian_phone', $customer->guardian_phone) }}"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">-- Select Branch --</option>
-                        @foreach($branches as $branch)
-                            <option value="{{ $branch->id }}" {{ old('branch_id', $employee->branch_id) == $branch->id ? 'selected' : '' }}>
-                                {{ $branch->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" name="email" value="{{ old('email', $customer->email) }}"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Work/College Details</label>
+                    <textarea name="work_details" rows="2"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('work_details', $customer->work_details) }}</textarea>
                 </div>
 
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Address *</label>
                     <textarea name="address" rows="3" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('address', $employee->address) }}</textarea>
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('address', $customer->address) }}</textarea>
                 </div>
             </div>
         </div>
@@ -85,9 +83,9 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
                     
-                    @if($employee->photo_path)
+                    @if($customer->photo_path)
                         <div class="mb-4">
-                            <img src="{{ Storage::url($employee->photo_path) }}" alt="Current Photo" 
+                            <img src="{{ Storage::url($customer->photo_path) }}" alt="Current Photo" 
                                 class="w-full max-w-xs rounded-lg border-2 border-gray-200">
                             <p class="text-xs text-gray-500 mt-2">Current Photo</p>
                         </div>
@@ -107,10 +105,10 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">ID Proof</label>
                     
-                    @if($employee->proof_path)
+                    @if($customer->id_proof_path)
                         <div class="mb-4">
-                            @if(str_ends_with($employee->proof_path, '.pdf'))
-                                <a href="{{ Storage::url($employee->proof_path) }}" target="_blank" 
+                            @if(str_ends_with($customer->id_proof_path, '.pdf'))
+                                <a href="{{ Storage::url($customer->id_proof_path) }}" target="_blank" 
                                     class="inline-flex items-center px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100">
                                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
@@ -118,14 +116,14 @@
                                     View Current PDF
                                 </a>
                             @else
-                                <img src="{{ Storage::url($employee->proof_path) }}" alt="Current ID Proof" 
+                                <img src="{{ Storage::url($customer->id_proof_path) }}" alt="Current ID Proof" 
                                     class="w-full max-w-xs rounded-lg border-2 border-gray-200">
                             @endif
                             <p class="text-xs text-gray-500 mt-2">Current ID Proof</p>
                         </div>
                     @endif
                     
-                    <input type="file" name="proof" accept="image/*,.pdf" id="proof-input"
+                    <input type="file" name="id_proof" accept="image/*,.pdf" id="proof-input"
                         class="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                     <p class="text-xs text-gray-500 mt-2">Upload new document to replace (Max: 2MB)</p>
                     
@@ -139,13 +137,13 @@
 
         <!-- Submit Button -->
         <div class="flex justify-end space-x-4">
-            <a href="{{ route('admin.employees.show', $employee) }}" 
+            <a href="{{ route('admin.customers.show', $customer) }}" 
                 class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition">
                 Cancel
             </a>
             <button type="submit"
                 class="px-6 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white rounded-lg font-bold hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 transition shadow-lg">
-                Update Employee
+                Update Customer
             </button>
         </div>
     </form>

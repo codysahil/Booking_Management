@@ -36,7 +36,9 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        \Log::info('Customer store method called', $request->all());
+        
+        $validated = $request->validate([
             'customer_id' => 'nullable|exists:customers,id',
             'booking_id' => 'nullable|exists:bookings,id',
             'name' => 'required|string|max:255',
@@ -46,19 +48,28 @@ class CustomerController extends Controller
             'address' => 'required|string',
             'guardian_phone' => 'required|string|max:20',
             'work_details' => 'nullable|string',
-            'photo' => 'required|image|max:2048',
-            'id_proof' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'bed_id' => 'required_without:booking_id|exists:beds,id',
+            'photo' => 'nullable|image|max:2048',
+            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'bed_id' => 'nullable|exists:beds,id',
             'check_in_date' => 'required|date',
             'stay_type' => 'required|in:permanent,day_basis',
             'advance_amount' => 'required|numeric|min:0',
         ]);
+        
+        // Validate bed_id is present when not updating existing booking
+        if (!$request->booking_id && !$request->bed_id) {
+            return back()->withErrors(['bed_id' => 'Please select a bed'])->withInput();
+        }
 
         \DB::beginTransaction();
         try {
+            \Log::info('Starting customer creation process');
+            
             // Handle File Uploads
-            $photoPath = $request->file('photo')->store('customers/photos', 'public');
-            $proofPath = $request->file('id_proof')->store('customers/proofs', 'public');
+            $photoPath = $request->hasFile('photo') ? $request->file('photo')->store('customers/photos', 'public') : null;
+            $proofPath = $request->hasFile('id_proof') ? $request->file('id_proof')->store('customers/proofs', 'public') : null;
+            
+            \Log::info('Files uploaded', ['photo' => $photoPath, 'proof' => $proofPath]);
 
             // Update existing customer or create new
             if ($request->customer_id) {
@@ -99,7 +110,7 @@ class CustomerController extends Controller
                 // Update existing booking
                 $booking = \App\Models\Booking::find($request->booking_id);
                 $booking->update([
-                    'status' => 'checked_in',
+                    'status' => 'active',
                     'check_in_date' => $request->check_in_date,
                     'advance_paid' => $request->advance_amount,
                 ]);
@@ -112,7 +123,7 @@ class CustomerController extends Controller
                     'booking_reference' => $bookingReference,
                     'bed_id' => $bed->id,
                     'check_in_date' => $request->check_in_date,
-                    'status' => 'checked_in',
+                    'status' => 'active',
                     'advance_paid' => $request->advance_amount,
                 ]);
             }
@@ -127,14 +138,19 @@ class CustomerController extends Controller
                 'payment_type' => 'Advance',
                 'payment_method' => $request->payment_method ?? 'cash',
                 'transaction_ref' => 'ADV-' . strtoupper(\Str::random(12)),
-                'status' => 'completed',
+                'status' => 'paid',
                 'paid_at' => now(),
             ]);
 
             \DB::commit();
+            \Log::info('Customer created successfully', ['customer_id' => $customer->id]);
             return redirect()->route('admin.customers.index')->with('success', 'Customer check-in completed successfully!');
         } catch (\Exception $e) {
             \DB::rollBack();
+            \Log::error('Customer creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return back()->withErrors(['error' => 'Failed to complete check-in: ' . $e->getMessage()])->withInput();
         }
     }
@@ -143,5 +159,51 @@ class CustomerController extends Controller
     {
         $customer->load(['bookings.bed.room.branch', 'payments', 'requests']);
         return view('admin.customers.show', compact('customer'));
+    }
+
+    public function edit(Customer $customer)
+    {
+        $branches = Branch::with(['rooms.beds'])->get();
+        return view('admin.customers.edit', compact('customer', 'branches'));
+    }
+
+    public function update(Request $request, Customer $customer)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email',
+            'dob' => 'required|date',
+            'address' => 'required|string',
+            'guardian_phone' => 'required|string|max:20',
+            'work_details' => 'nullable|string',
+            'photo' => 'nullable|image|max:2048',
+            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        try {
+            // Handle file uploads
+            if ($request->hasFile('photo')) {
+                // Delete old photo
+                if ($customer->photo_path) {
+                    Storage::disk('public')->delete($customer->photo_path);
+                }
+                $validated['photo_path'] = $request->file('photo')->store('customers/photos', 'public');
+            }
+
+            if ($request->hasFile('id_proof')) {
+                // Delete old proof
+                if ($customer->id_proof_path) {
+                    Storage::disk('public')->delete($customer->id_proof_path);
+                }
+                $validated['id_proof_path'] = $request->file('id_proof')->store('customers/proofs', 'public');
+            }
+
+            $customer->update($validated);
+
+            return redirect()->route('admin.customers.show', $customer)->with('success', 'Customer updated successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to update customer: ' . $e->getMessage()])->withInput();
+        }
     }
 }

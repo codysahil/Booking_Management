@@ -59,13 +59,21 @@
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Employee Photo</label>
-                        <input type="file" name="photo" accept="image/*" required
+                        <input type="file" name="photo" accept="image/*" id="photo-input"
                             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+                        <div id="photo-preview" class="mt-4 hidden">
+                            <img src="" alt="Preview" class="w-full max-w-xs rounded-lg border-2 border-primary-200">
+                            <p class="text-xs text-primary-600 mt-2">Photo Preview</p>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">ID Proof</label>
-                        <input type="file" name="proof" required
+                        <input type="file" name="proof" id="proof-input"
                             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+                        <div id="proof-preview" class="mt-4 hidden">
+                            <img src="" alt="Preview" class="w-full max-w-xs rounded-lg border-2 border-primary-200">
+                            <p class="text-xs text-primary-600 mt-2">Document Preview</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -82,4 +90,36 @@
             </div>
         </form>
     </div>
+
+    <script>
+        document.getElementById('photo-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('photo-preview');
+                    preview.querySelector('img').src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('proof-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('proof-preview');
+                    preview.querySelector('img').src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else if (file && file.type === 'application/pdf') {
+                const preview = document.getElementById('proof-preview');
+                preview.innerHTML = '<p class="text-sm text-gray-600">PDF file selected: ' + file.name + '</p>';
+                preview.classList.remove('hidden');
+            }
+        });
+    </script>
 @endsection

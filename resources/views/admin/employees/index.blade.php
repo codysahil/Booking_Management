@@ -54,6 +54,7 @@
                                 <div class="text-sm text-gray-900">{{ $employee->phone }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="{{ route('admin.employees.show', $employee) }}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
                                 <a href="{{ route('admin.employees.edit', $employee) }}" class="text-primary-600 hover:text-primary-900 mr-3">Edit</a>
                                 <form action="{{ route('admin.employees.destroy', $employee) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this employee?');">
                                     @csrf

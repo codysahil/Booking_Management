@@ -8,7 +8,7 @@
                 <h1 class="text-5xl md:text-6xl font-display font-bold text-gray-900 mb-6">
                     About
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500">
-                        SereneStay
+                        Honeybees Hostel
                     </span>
                 </h1>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -26,13 +26,13 @@
                     <h2 class="text-4xl font-display font-bold text-gray-900 mb-6">Our Story</h2>
                     <div class="space-y-4 text-gray-600 leading-relaxed">
                         <p>
-                            SereneStay was born from a simple yet powerful vision: to create a home away from home where women can feel safe, supported, and inspired to pursue their dreams.
+                            Honeybees Hostel was born from a simple yet powerful vision: to create a home away from home where women can feel safe, supported, and inspired to pursue their dreams.
                         </p>
                         <p>
                             We understand the challenges women face when moving to a new city - finding safe accommodation, building a support network, and maintaining work-life balance. That's why we've created more than just a hostel; we've built a community.
                         </p>
                         <p>
-                            Every aspect of SereneStay is designed with women's needs in mind, from our 24/7 security to our community events that foster meaningful connections and personal growth.
+                            Every aspect of Honeybees Hostel is designed with women's needs in mind, from our 24/7 security to our community events that foster meaningful connections and personal growth.
                         </p>
                     </div>
                 </div>
@@ -96,7 +96,7 @@
                 Ready to Join Our Community?
             </h2>
             <p class="text-xl text-white/90 mb-10">
-                Experience the SereneStay difference for yourself
+                Experience the Honeybees Hostel difference for yourself
             </p>
             <a href="{{ route('home') }}#locations" class="inline-flex items-center justify-center px-12 py-5 bg-white text-rose-600 text-lg font-bold rounded-full hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-white/50 transform hover:scale-105">
                 Book Your Room

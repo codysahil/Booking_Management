@@ -24,6 +24,11 @@ class Customer extends Authenticatable
 
     protected $hidden = ['password'];
 
+    protected $casts = [
+        'dob' => 'date',
+        'is_active' => 'boolean',
+    ];
+
     public function bookings()
     {
         return $this->hasMany(Booking::class);

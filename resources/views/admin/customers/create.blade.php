@@ -62,6 +62,17 @@
             class="space-y-6">
             @csrf
 
+            @if ($errors->any())
+                <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                    <h3 class="text-red-800 font-bold mb-2">Please fix the following errors:</h3>
+                    <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @if ($booking)
                 <input type="hidden" name="customer_id" value="{{ $booking->customer_id }}">
                 <input type="hidden" name="booking_id" value="{{ $booking->id }}">
@@ -169,23 +180,31 @@
                     <!-- Photo Upload -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Customer Photo *</label>
-                        <input type="file" name="photo" required accept="image/*"
+                        <input type="file" name="photo" accept="image/*" id="photo-input"
                             class="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         <p class="text-xs text-gray-500 mt-2">Upload a clear passport-size photo (Max: 2MB)</p>
                         @error('photo')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
+                        <div id="photo-preview" class="mt-4 hidden">
+                            <img src="" alt="Preview" class="w-full max-w-xs rounded-lg border-2 border-primary-200">
+                            <p class="text-xs text-primary-600 mt-2">Photo Preview</p>
+                        </div>
                     </div>
 
                     <!-- ID Proof Upload -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">ID Proof *</label>
-                        <input type="file" name="id_proof" required accept=".pdf,.jpg,.jpeg,.png"
+                        <input type="file" name="id_proof" accept=".pdf,.jpg,.jpeg,.png" id="proof-input"
                             class="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         <p class="text-xs text-gray-500 mt-2">Aadhar/PAN/Driving License (Max: 2MB)</p>
                         @error('id_proof')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
+                        <div id="proof-preview" class="mt-4 hidden">
+                            <img src="" alt="Preview" class="w-full max-w-xs rounded-lg border-2 border-primary-200">
+                            <p class="text-xs text-primary-600 mt-2">Document Preview</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -318,4 +337,38 @@
             });
         </script>
     @endif
+
+    <script>
+        // Photo preview
+        document.getElementById('photo-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('photo-preview');
+                    preview.querySelector('img').src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ID Proof preview
+        document.getElementById('proof-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('proof-preview');
+                    preview.querySelector('img').src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else if (file && file.type === 'application/pdf') {
+                const preview = document.getElementById('proof-preview');
+                preview.innerHTML = '<p class="text-sm text-gray-600">PDF file selected: ' + file.name + '</p>';
+                preview.classList.remove('hidden');
+            }
+        });
+    </script>
 @endsection

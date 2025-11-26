@@ -15,7 +15,8 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">Room-15
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <!-- Bed Selection Area -->
             <div class="lg:col-span-2">
@@ -28,25 +29,25 @@
                             @foreach($room->beds as $bed)
                                 <div class="relative">
                                     @if($bed->status === 'vacant' && (!$bed->reserved_until || $bed->reserved_until < now()))
-                                        <label class="cursor-pointer group">
+                                        <label class="cursor-pointer block">
                                             <input type="checkbox" name="bed_ids[]" value="{{ $bed->id }}" 
                                                 class="peer sr-only bed-checkbox" 
                                                 data-rent="{{ $bed->monthly_rent }}">
                                             <div class="border-2 border-gray-200 rounded-xl p-6 peer-checked:border-primary-500 peer-checked:bg-primary-50 hover:border-primary-300 transition duration-300 flex flex-col items-center relative">
-                                                <!-- Checkmark -->
-                                                <div class="absolute top-3 right-3 w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-primary-600 peer-checked:bg-primary-600 flex items-center justify-center">
-                                                    <svg class="w-4 h-4 text-white hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <!-- Checkmark Circle - Inside the card -->
+                                                <div class="absolute top-3 right-3 w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-primary-600 peer-checked:bg-primary-600 flex items-center justify-center transition">
+                                                    <svg class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                                                     </svg>
                                                 </div>
                                                 
                                                 <!-- Bed Icon -->
                                                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 peer-checked:bg-primary-100 transition">
-                                                    <svg class="w-8 h-8 text-gray-400 peer-checked:text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v6a2 2 0 002 2h14a2 2 0 002-2v-6a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
                                                     </svg>
                                                 </div>
-                                                <span class="text-lg font-bold text-gray-900 peer-checked:text-primary-700">Bed {{ $bed->bed_number }}</span>
+                                                <span class="text-lg font-bold text-gray-900">Bed {{ $bed->bed_number }}</span>
                                                 <span class="text-sm text-gray-500 mt-1">₹{{ number_format($bed->monthly_rent) }}/month</span>
                                                 <span class="mt-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                     Available
@@ -89,6 +90,7 @@
             </div>
 
             <script>
+                // Bed selection
                 document.addEventListener('DOMContentLoaded', function() {
                     const checkboxes = document.querySelectorAll('.bed-checkbox');
                     const selectedCount = document.getElementById('selected-count');

@@ -25,7 +25,9 @@ class BookingController extends Controller
     {
         $branch->load([
             'rooms' => function ($query) {
-                $query->withCount([
+                $query->with(['images' => function($q) {
+                    $q->orderBy('order');
+                }])->withCount([
                     'beds' => function ($q) {
                         $q->where('status', 'vacant')
                             ->where(function ($query) {
@@ -41,7 +43,9 @@ class BookingController extends Controller
 
     public function showRoom(Branch $branch, Room $room)
     {
-        $room->load('beds');
+        $room->load(['beds', 'images' => function($query) {
+            $query->orderBy('order');
+        }]);
         return view('public.room', compact('branch', 'room'));
     }
 
@@ -158,7 +162,7 @@ class BookingController extends Controller
                     'booking_reference' => $bookingReference,
                     'bed_id' => $bed->id,
                     'check_in_date' => $request->check_in_date,
-                    'status' => 'pending', // Changed to pending since payment not done yet
+                    'status' => 'active', // Active status for new bookings
                     'advance_paid' => 0, // Will be updated when payment is made
                 ]);
 

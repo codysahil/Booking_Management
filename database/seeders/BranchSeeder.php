@@ -11,35 +11,40 @@ class BranchSeeder extends Seeder
 {
     public function run(): void
     {
-        // Branch 1 - Downtown Haven (15 rooms)
+        // Branch 1 - Annai Indira Nagar (15 rooms)
         $branch1 = Branch::create([
-            'name' => 'Downtown Haven',
-            'address' => '123 Main Street, Downtown, City 12345',
+            'name' => 'Honeybees Hostel - Annai Indira Nagar',
+            'address' => '50, Annai Indira Nagar 1st Main Road, Thoraipakkam, Chennai - 600097 (Landmark: Tansq Jewellery)',
             'google_map_url' => 'https://maps.google.com',
         ]);
 
-        // Create 15 rooms for Branch 1 with mix of 2/3/4 sharing
+        // Create 15 rooms for Branch 1 (Hostel-1) - Total 41 beds
+        // All rooms are AC except Room-15
         $branch1Rooms = [
-            // 2 Sharing Rooms (5 rooms)
-            ['name' => 'Room 101', 'type' => 'AC', 'beds' => 2, 'price' => 1800],
-            ['name' => 'Room 102', 'type' => 'AC', 'beds' => 2, 'price' => 1800],
-            ['name' => 'Room 103', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
-            ['name' => 'Room 104', 'type' => 'AC', 'beds' => 2, 'price' => 1800],
-            ['name' => 'Room 105', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
+            // Ground Floor
+            ['name' => 'Room-1', 'floor' => 'G Floor', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            ['name' => 'Room-2', 'floor' => 'G Floor', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            ['name' => 'Room-3', 'floor' => 'G Floor', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
             
-            // 3 Sharing Rooms (5 rooms)
-            ['name' => 'Room 106', 'type' => 'Non-AC', 'beds' => 3, 'price' => 1400],
-            ['name' => 'Room 107', 'type' => 'Non-AC', 'beds' => 3, 'price' => 1400],
-            ['name' => 'Room 108', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            ['name' => 'Room 109', 'type' => 'Non-AC', 'beds' => 3, 'price' => 1400],
-            ['name' => 'Room 110', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            // 1st Floor Left Wing
+            ['name' => 'Room-4', 'floor' => '1st Floor Left', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            ['name' => 'Room-5', 'floor' => '1st Floor Left', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
+            ['name' => 'Room-6', 'floor' => '1st Floor Left', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
             
-            // 4 Sharing Rooms (5 rooms)
-            ['name' => 'Room 111', 'type' => 'Non-AC', 'beds' => 4, 'price' => 1200],
-            ['name' => 'Room 112', 'type' => 'Non-AC', 'beds' => 4, 'price' => 1200],
-            ['name' => 'Room 113', 'type' => 'Non-AC', 'beds' => 4, 'price' => 1200],
-            ['name' => 'Room 114', 'type' => 'AC', 'beds' => 4, 'price' => 1400],
-            ['name' => 'Room 115', 'type' => 'Non-AC', 'beds' => 4, 'price' => 1200],
+            // 1st Floor Right Wing
+            ['name' => 'Room-7', 'floor' => '1st Floor Right', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            ['name' => 'Room-8', 'floor' => '1st Floor Right', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
+            ['name' => 'Room-9', 'floor' => '1st Floor Right', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            
+            // 2nd Floor Left Wing
+            ['name' => 'Room-10', 'floor' => '2nd Floor Left', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            ['name' => 'Room-11', 'floor' => '2nd Floor Left', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
+            ['name' => 'Room-12', 'floor' => '2nd Floor Left', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            
+            // 2nd Floor Right Wing
+            ['name' => 'Room-13', 'floor' => '2nd Floor Right', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            ['name' => 'Room-14', 'floor' => '2nd Floor Right', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
+            ['name' => 'Room-15', 'floor' => '2nd Floor Right', 'type' => 'Non-AC', 'beds' => 4, 'price' => 1200],
         ];
 
         foreach ($branch1Rooms as $roomData) {
@@ -62,19 +67,20 @@ class BranchSeeder extends Seeder
             }
         }
 
-        // Branch 2 - Riverside Retreat (4 rooms)
+        // Branch 2 - Nethaji Cross Street (4 rooms)
         $branch2 = Branch::create([
-            'name' => 'Riverside Retreat',
-            'address' => '456 River Road, Riverside District, City 12346',
+            'name' => 'Honeybees Hostel - Nethaji Cross Street',
+            'address' => 'Nethaji 1st Cross Street, Muttukkaranchavadi, Thoraipakkam, Chennai - 600097 (Landmark: Tansq Jewellery)',
             'google_map_url' => 'https://maps.google.com',
         ]);
 
-        // Create 4 rooms for Branch 2 with mix of 2/3/4 sharing
+        // Create 4 rooms for Branch 2 (Hostel-2) - Total 11 beds
+        // All rooms are AC
         $branch2Rooms = [
-            ['name' => 'Room 201', 'type' => 'AC', 'beds' => 2, 'price' => 2100],
-            ['name' => 'Room 202', 'type' => 'AC', 'beds' => 3, 'price' => 1700],
-            ['name' => 'Room 203', 'type' => 'Non-AC', 'beds' => 4, 'price' => 1300],
-            ['name' => 'Room 204', 'type' => 'AC', 'beds' => 2, 'price' => 1900],
+            ['name' => 'Room-16', 'floor' => 'Full Building', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
+            ['name' => 'Room-17', 'floor' => 'Full Building', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            ['name' => 'Room-18', 'floor' => 'Full Building', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            ['name' => 'Room-19', 'floor' => 'Full Building', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
         ];
 
         foreach ($branch2Rooms as $roomData) {
@@ -97,8 +103,8 @@ class BranchSeeder extends Seeder
             }
         }
 
-        $this->command->info('✅ Branch 1: 15 rooms created (5x 2-sharing, 5x 3-sharing, 5x 4-sharing)');
-        $this->command->info('✅ Branch 2: 4 rooms created (2x 2-sharing, 1x 3-sharing, 1x 4-sharing)');
-        $this->command->info('✅ Total beds created: ' . Bed::count());
+        $this->command->info('✅ Hostel-1 (Annai Indira Nagar): 15 rooms created - 41 beds total');
+        $this->command->info('✅ Hostel-2 (Nethaji Cross Street): 4 rooms created - 11 beds total');
+        $this->command->info('✅ Total beds created: ' . Bed::count() . ' (52 beds)');
     }
 }

@@ -1,6 +1,10 @@
-@extends('layouts.public')
+@extends('layouts.customer')
 
 @section('content')
+    @php
+        $bookings = Auth::guard('customer')->user()->bookings()->with('bed.room.branch')->latest()->get();
+    @endphp
+    
     <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header -->
@@ -9,15 +13,6 @@
                     <h1 class="text-3xl font-display font-bold text-gray-900">Welcome, {{ Auth::guard('customer')->user()->name }}!</h1>
                     <p class="text-gray-600 mt-1">Customer ID: <span class="font-bold text-primary-600">{{ Auth::guard('customer')->user()->customer_code }}</span></p>
                 </div>
-                <form method="POST" action="{{ route('customer.logout') }}">
-                    @csrf
-                    <button type="submit" class="px-6 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:border-red-500 hover:text-red-600 transition">
-                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                        </svg>
-                        Logout
-                    </button>
-                </form>
             </div>
 
             <!-- Quick Stats -->
@@ -26,7 +21,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">Active Bookings</p>
-                            <p class="text-3xl font-bold text-primary-600">{{ Auth::guard('customer')->user()->bookings()->whereIn('status', ['pending', 'confirmed', 'checked_in'])->count() }}</p>
+                            <p class="text-3xl font-bold text-primary-600">{{ $bookings->where('status', 'active')->count() }}</p>
                         </div>
                         <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-full flex items-center justify-center">
                             <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,7 +35,25 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">Pending Dues</p>
-                            <p class="text-3xl font-bold text-amber-600">₹0</p>
+                            @php
+                                $totalDues = 0;
+                                foreach($bookings->where('status', 'active') as $booking) {
+                                    $checkInDate = \Carbon\Carbon::parse($booking->check_in_date);
+                                    $now = now();
+                                    
+                                    // Calculate months stayed (rounded up)
+                                    $monthsStayed = (int) ceil($checkInDate->diffInMonths($now, true));
+                                    if ($monthsStayed < 1) {
+                                        $monthsStayed = 1; // Minimum 1 month
+                                    }
+                                    
+                                    // Calculate total rent due (advance is separate security deposit)
+                                    $totalRentDue = ($booking->bed->monthly_rent ?? 0) * $monthsStayed;
+                                    
+                                    $totalDues += $totalRentDue;
+                                }
+                            @endphp
+                            <p class="text-3xl font-bold text-amber-600">₹{{ number_format($totalDues) }}</p>
                         </div>
                         <div class="w-14 h-14 bg-gradient-to-br from-amber-100 to-yellow-100 rounded-full flex items-center justify-center">
                             <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +67,10 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">Total Payments</p>
-                            <p class="text-3xl font-bold text-green-600">₹{{ number_format(Auth::guard('customer')->user()->payments()->where('status', 'completed')->sum('amount')) }}</p>
+                            @php
+                                $totalPayments = $bookings->sum('advance_paid');
+                            @endphp
+                            <p class="text-3xl font-bold text-green-600">₹{{ number_format($totalPayments) }}</p>
                         </div>
                         <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center">
                             <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,10 +84,6 @@
             <!-- My Bookings -->
             <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-6 mb-8">
                 <h2 class="text-2xl font-display font-bold text-gray-900 mb-6">My Bookings</h2>
-                
-                @php
-                    $bookings = Auth::guard('customer')->user()->bookings()->with('bed.room.branch')->latest()->get();
-                @endphp
 
                 @if($bookings->count() > 0)
                     <div class="space-y-4">
@@ -83,9 +95,8 @@
                                             <h3 class="text-lg font-bold text-gray-900">{{ $booking->bed->room->branch->name }}</h3>
                                             @php
                                                 $statusColors = [
-                                                    'pending' => 'bg-yellow-100 text-yellow-800',
-                                                    'confirmed' => 'bg-blue-100 text-blue-800',
-                                                    'checked_in' => 'bg-green-100 text-green-800',
+                                                    'active' => 'bg-green-100 text-green-800',
+                                                    'paid' => 'bg-blue-100 text-blue-800',
                                                     'cancelled' => 'bg-red-100 text-red-800',
                                                 ];
                                             @endphp
@@ -113,9 +124,9 @@
                                         </div>
                                     </div>
                                     <div class="flex flex-col gap-2">
-                                        <button class="px-4 py-2 bg-primary-50 text-primary-600 rounded-lg hover:bg-primary-100 transition text-sm font-medium">
+                                        <a href="{{ route('customer.bookings.show', $booking) }}" class="px-4 py-2 bg-primary-50 text-primary-600 rounded-lg hover:bg-primary-100 transition text-sm font-medium text-center">
                                             View Details
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -136,7 +147,7 @@
                 <div class="bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl p-6 text-white">
                     <h3 class="text-xl font-bold mb-2">Need to Pay Dues?</h3>
                     <p class="text-white/90 mb-4 text-sm">View and pay your pending rent, EB bills, and fines online</p>
-                    <button class="bg-white text-primary-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
+                    <button onclick="alert('Payment feature coming soon! Please contact the hostel office for now.')" class="bg-white text-primary-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
                         View Dues
                     </button>
                 </div>
@@ -144,7 +155,7 @@
                 <div class="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 text-white">
                     <h3 class="text-xl font-bold mb-2">Raise a Request</h3>
                     <p class="text-white/90 mb-4 text-sm">Room swap, vacation notice, maintenance, or refund requests</p>
-                    <button class="bg-white text-purple-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
+                    <button onclick="alert('Request feature coming soon! Please contact the hostel office for now.')" class="bg-white text-purple-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
                         New Request
                     </button>
                 </div>

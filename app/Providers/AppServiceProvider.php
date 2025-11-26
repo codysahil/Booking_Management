@@ -20,7 +20,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Force HTTPS for all URLs when using ngrok or production
-        if (config('app.env') !== 'local' || request()->header('x-forwarded-proto') === 'https') {
+        if (
+            config('app.env') !== 'local' || 
+            request()->header('x-forwarded-proto') === 'https' ||
+            str_contains(config('app.url'), 'ngrok')
+        ) {
             \URL::forceScheme('https');
         }
     }

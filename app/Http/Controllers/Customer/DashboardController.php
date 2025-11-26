@@ -26,4 +26,12 @@ class DashboardController extends Controller
 
         return view('customer.dashboard', compact('customer', 'rentDue', 'ebDue'));
     }
+
+    public function showBooking($id)
+    {
+        $customer = Auth::guard('customer')->user();
+        $booking = $customer->bookings()->with('bed.room.branch')->findOrFail($id);
+        
+        return view('customer.booking-details', compact('booking'));
+    }
 }

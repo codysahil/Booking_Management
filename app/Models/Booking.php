@@ -16,6 +16,12 @@ class Booking extends Model
         'advance_paid'
     ];
 
+    protected $casts = [
+        'check_in_date' => 'date',
+        'check_out_date' => 'date',
+        'advance_paid' => 'decimal:2',
+    ];
+
     public function customer()
     {
         return $this->belongsTo(Customer::class);

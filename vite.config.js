@@ -14,4 +14,13 @@ export default defineConfig({
             host: 'localhost',
         },
     },
+    build: {
+        manifest: true,
+        outDir: 'public/build',
+        rollupOptions: {
+            output: {
+                manualChunks: undefined,
+            },
+        },
+    },
 });

@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">
-        <form action="{{ route('admin.rooms.update', $room) }}" method="POST">
+        <form action="{{ route('admin.rooms.update', $room) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="mb-4">
@@ -55,10 +55,40 @@
                 </select>
             </div>
 
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Room Images</label>
+                
+                @if($room->images->count() > 0)
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 mb-2">Current Images:</p>
+                        <div class="grid grid-cols-3 gap-3">
+                            @foreach($room->images as $image)
+                                <div class="relative group">
+                                    <img src="{{ Storage::url($image->image_path) }}" alt="Room image" class="w-full h-24 object-cover rounded-lg border-2 border-gray-200">
+                                    <button type="button" onclick="deleteImage({{ $room->id }}, {{ $image->id }})" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+                
+                <input type="file" name="images[]" id="images" accept="image/*" multiple
+                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                <p class="text-xs text-gray-500 mt-1">Select multiple images at once (Hold Ctrl/Cmd) or add one by one. Max: 1MB per image, 5 images total</p>
+                
+                <div id="file-count" class="mt-2 text-sm text-indigo-600 font-medium hidden"></div>
+                <div id="error-message" class="mt-2 text-sm text-red-600 font-medium hidden"></div>
+                <div id="image-preview" class="mt-4 grid grid-cols-3 gap-3 hidden"></div>
+            </div>
+
             <div class="flex justify-end">
                 <a href="{{ route('admin.rooms.index') }}"
                     class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-300">Cancel</a>
-                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Update
+                <button type="submit" id="submit-btn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700" onclick="console.log('Button clicked!')">Update
                     Room</button>
             </div>
         </form>
@@ -174,4 +204,131 @@
             </table>
         </div>
     </div>
+
+    <script>
+        console.log('Script loaded');
+        
+        // Function to delete existing images
+        window.deleteImage = function(roomId, imageId) {
+            if (!confirm('Delete this image?')) return;
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/rooms/${roomId}/images/${imageId}`;
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = '{{ csrf_token() }}';
+            
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            
+            form.appendChild(csrfInput);
+            form.appendChild(methodInput);
+            document.body.appendChild(form);
+            form.submit();
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            const imageInput = document.getElementById('images');
+            const preview = document.getElementById('image-preview');
+            const fileCount = document.getElementById('file-count');
+            const errorMessage = document.getElementById('error-message');
+            let accumulatedFiles = [];
+            
+            const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
+            const MAX_FILES = 5;
+            
+            if (!imageInput) {
+                console.error('Image input not found');
+                return;
+            }
+            
+            imageInput.addEventListener('change', function(e) {
+                const newFiles = Array.from(e.target.files);
+                console.log('New files selected:', newFiles.length);
+                errorMessage.classList.add('hidden');
+                
+                // Validate files
+                for (let file of newFiles) {
+                    if (file.size > MAX_FILE_SIZE) {
+                        errorMessage.textContent = `${file.name} is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Max 1MB per image.`;
+                        errorMessage.classList.remove('hidden');
+                        return;
+                    }
+                }
+                
+                // Add new files to accumulated list (avoid duplicates)
+                newFiles.forEach(file => {
+                    if (!accumulatedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                        if (accumulatedFiles.length < MAX_FILES) {
+                            accumulatedFiles.push(file);
+                        }
+                    }
+                });
+                
+                if (accumulatedFiles.length >= MAX_FILES) {
+                    errorMessage.textContent = `Maximum ${MAX_FILES} images allowed.`;
+                    errorMessage.classList.remove('hidden');
+                }
+                
+                console.log('Total accumulated:', accumulatedFiles.length);
+                
+                // Update file input with all accumulated files
+                const dt = new DataTransfer();
+                accumulatedFiles.forEach(file => dt.items.add(file));
+                imageInput.files = dt.files;
+                
+                renderPreviews();
+            });
+            
+            function renderPreviews() {
+                preview.innerHTML = '';
+                
+                if (accumulatedFiles.length > 0) {
+                    fileCount.textContent = `${accumulatedFiles.length} new image${accumulatedFiles.length > 1 ? 's' : ''} selected`;
+                    fileCount.classList.remove('hidden');
+                    preview.classList.remove('hidden');
+                    
+                    accumulatedFiles.forEach((file, index) => {
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                const div = document.createElement('div');
+                                div.className = 'relative group';
+                                div.innerHTML = `
+                                    <img src="${event.target.result}" class="w-full h-24 object-cover rounded-lg border-2 border-indigo-300">
+                                    <span class="absolute top-1 left-1 bg-indigo-600 text-white text-xs px-2 py-0.5 rounded-full shadow">New #${index + 1}</span>
+                                    <button type="button" onclick="removeNewImage(${index})" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                    <span class="absolute bottom-1 left-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 py-0.5 rounded truncate">${file.name}</span>
+                                `;
+                                preview.appendChild(div);
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                } else {
+                    preview.classList.add('hidden');
+                    fileCount.classList.add('hidden');
+                }
+            }
+            
+            window.removeNewImage = function(index) {
+                accumulatedFiles.splice(index, 1);
+                const dt = new DataTransfer();
+                accumulatedFiles.forEach(file => dt.items.add(file));
+                imageInput.files = dt.files;
+                renderPreviews();
+            };
+        });
+    </script>
 @endsection

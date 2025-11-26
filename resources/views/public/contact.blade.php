@@ -80,7 +80,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-gray-900 mb-1">Phone</h3>
-                                <p class="text-gray-600">+1 (555) 123-4567</p>
+                                <a href="tel:+919944159321" class="text-gray-600 hover:text-rose-600 transition">+91 99441 59321</a>
                                 <p class="text-sm text-gray-500 mt-1">Mon-Sat, 9AM-8PM</p>
                             </div>
                         </div>
@@ -94,7 +94,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-gray-900 mb-1">Email</h3>
-                                <p class="text-gray-600">hello@serenestay.com</p>
+                                <a href="mailto:senthiltogether@gmail.com" class="text-gray-600 hover:text-rose-600 transition">senthiltogether@gmail.com</a>
                                 <p class="text-sm text-gray-500 mt-1">We'll respond within 24 hours</p>
                             </div>
                         </div>
@@ -108,8 +108,20 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900 mb-1">Head Office</h3>
-                                <p class="text-gray-600">123 Main Street<br>Downtown, City 12345</p>
+                                <h3 class="font-bold text-gray-900 mb-1">Locations</h3>
+                                <p class="text-gray-600 mb-3">
+                                    <strong>Branch 1:</strong><br>
+                                    50, Annai Indira Nagar 1st Main Road,<br>
+                                    Thoraipakkam, Chennai - 600097<br>
+                                    <span class="text-sm text-gray-500">(Near Tansq Jewellery)</span>
+                                </p>
+                                <p class="text-gray-600">
+                                    <strong>Branch 2:</strong><br>
+                                    Nethaji 1st Cross Street,<br>
+                                    Muttukkaranchavadi, Thoraipakkam,<br>
+                                    Chennai - 600097<br>
+                                    <span class="text-sm text-gray-500">(Near Tansq Jewellery)</span>
+                                </p>
                             </div>
                         </div>
 

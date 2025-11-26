@@ -30,12 +30,12 @@ class EmployeeController extends Controller
             'phone' => 'required|string|max:20',
             'address' => 'required|string',
             'branch_id' => 'required|exists:branches,id',
-            'photo' => 'required|image|max:2048',
-            'proof' => 'required|file|max:2048',
+            'photo' => 'nullable|image|max:2048',
+            'proof' => 'nullable|file|max:2048',
         ]);
 
-        $photoPath = $request->file('photo')->store('employees/photos', 'public');
-        $proofPath = $request->file('proof')->store('employees/proofs', 'public');
+        $photoPath = $request->hasFile('photo') ? $request->file('photo')->store('employees/photos', 'public') : null;
+        $proofPath = $request->hasFile('proof') ? $request->file('proof')->store('employees/proofs', 'public') : null;
 
         $employeeCode = 'EMP-' . date('Y') . '-' . str_pad(Employee::count() + 1, 3, '0', STR_PAD_LEFT);
 
@@ -90,6 +90,12 @@ class EmployeeController extends Controller
         $employee->update($data);
 
         return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully.');
+    }
+
+    public function show(Employee $employee)
+    {
+        $employee->load('branch');
+        return view('admin.employees.show', compact('employee'));
     }
 
     public function destroy(Employee $employee)
