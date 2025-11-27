@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Clear config cache to load new environment variables
+php artisan config:clear
+php artisan cache:clear
+
 # Create storage link (ignore if exists)
 php artisan storage:link 2>/dev/null || true
 
