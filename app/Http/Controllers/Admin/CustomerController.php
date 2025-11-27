@@ -84,8 +84,13 @@ class CustomerController extends Controller
                     \Log::info('ID proof uploaded', ['path' => $proofPath]);
                 }
             } catch (\Exception $e) {
-                \Log::error('File upload failed', ['error' => $e->getMessage()]);
-                return back()->withErrors(['error' => 'File upload failed: ' . $e->getMessage()])->withInput();
+                \Log::warning('File upload failed, continuing without files', [
+                    'error' => $e->getMessage(),
+                    'has_cloudinary' => !empty(config('filesystems.disks.cloudinary.cloud_name'))
+                ]);
+                // Continue without files instead of failing
+                $photoPath = null;
+                $proofPath = null;
             }
 
             // Update existing customer or create new

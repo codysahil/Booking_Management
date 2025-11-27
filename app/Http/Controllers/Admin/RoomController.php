@@ -39,7 +39,7 @@ class RoomController extends Controller
         // Handle multiple image uploads
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('rooms', 'public');
+                $path = $image->store('rooms'); // Uses Cloudinary in production
                 $room->images()->create([
                     'image_path' => $path,
                     'order' => $index + 1,
@@ -73,7 +73,7 @@ class RoomController extends Controller
         if ($request->hasFile('images')) {
             $order = $room->images()->max('order') ?? 0;
             foreach ($request->file('images') as $image) {
-                $path = $image->store('rooms', 'public');
+                $path = $image->store('rooms'); // Uses Cloudinary in production
                 $room->images()->create([
                     'image_path' => $path,
                     'order' => ++$order,
