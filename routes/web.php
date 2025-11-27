@@ -51,12 +51,26 @@ Route::get('/debug/db-test', function () {
 });
 
 Route::get('/debug-config', function () {
-    return response()->json([
-        'env_cloudinary_url' => env('CLOUDINARY_URL'),
-        'env_api_key' => env('CLOUDINARY_API_KEY'),
-        'config_cloudinary' => config('cloudinary'),
-        'config_filesystems_cloudinary' => config('filesystems.disks.cloudinary'),
-    ]);
+    try {
+        $disk = \Illuminate\Support\Facades\Storage::disk('cloudinary');
+        $url = $disk->url('test.jpg');
+
+        return response()->json([
+            'status' => 'success',
+            'url_generation' => $url,
+            'env_cloudinary_url' => env('CLOUDINARY_URL'),
+            'config_cloudinary' => config('cloudinary'),
+            'config_filesystems_cloudinary' => config('filesystems.disks.cloudinary'),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'env_cloudinary_url' => env('CLOUDINARY_URL'),
+            'config_dump' => config('filesystems.disks.cloudinary'),
+        ], 500);
+    }
 });
 
 // ============================================
