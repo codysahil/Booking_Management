@@ -6,9 +6,12 @@ use Illuminate\Support\Facades\Route;
 // PUBLIC ROUTES (Booking System)
 // ============================================
 Route::get('/', [App\Http\Controllers\Public\BookingController::class, 'index'])->name('home');
-Route::get('/about', function () { return view('public.about'); })->name('about');
-Route::get('/gallery', function () { return view('public.gallery'); })->name('gallery');
-Route::get('/contact', function () { return view('public.contact'); })->name('contact');
+Route::get('/about', function () {
+    return view('public.about'); })->name('about');
+Route::get('/gallery', function () {
+    return view('public.gallery'); })->name('gallery');
+Route::get('/contact', function () {
+    return view('public.contact'); })->name('contact');
 Route::get('/branch/{branch}', [App\Http\Controllers\Public\BookingController::class, 'showBranch'])->name('booking.branch');
 Route::get('/branch/{branch}/room/{room}', [App\Http\Controllers\Public\BookingController::class, 'showRoom'])->name('booking.room');
 Route::post('/booking/select-beds', [App\Http\Controllers\Public\BookingController::class, 'selectBeds'])->name('booking.select-beds');
@@ -23,7 +26,7 @@ Route::get('/debug/db-test', function () {
         $customers = \App\Models\Customer::count();
         $bookings = \App\Models\Booking::count();
         $beds = \App\Models\Bed::count();
-        
+
         return response()->json([
             'status' => 'success',
             'database' => config('database.default'),
@@ -44,6 +47,15 @@ Route::get('/debug/db-test', function () {
     }
 });
 
+Route::get('/debug-config', function () {
+    dd([
+        'env_cloudinary_url' => env('CLOUDINARY_URL'),
+        'env_api_key' => env('CLOUDINARY_API_KEY'),
+        'config_cloudinary' => config('cloudinary'),
+        'config_filesystems_cloudinary' => config('filesystems.disks.cloudinary'),
+    ]);
+});
+
 // ============================================
 // ADMIN AUTH ROUTES
 // ============================================
@@ -61,7 +73,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Protected routes (logged in)
     Route::middleware('auth')->group(function () {
         Route::post('/logout', [App\Http\Controllers\Admin\AuthController::class, 'logout'])->name('logout');
-        
+
         // Profile
         Route::get('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
@@ -86,11 +98,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Customer & Employee Management
     Route::resource('customers', App\Http\Controllers\Admin\CustomerController::class);
     Route::resource('employees', App\Http\Controllers\Admin\EmployeeController::class);
-    
+
     // Bookings Management
     Route::get('/bookings', [App\Http\Controllers\Admin\BookingController::class, 'index'])->name('bookings.index');
     Route::put('/bookings/{booking}/status', [App\Http\Controllers\Admin\BookingController::class, 'updateStatus'])->name('bookings.update-status');
-    
+
     // Monthly Charges Management
     Route::get('/charges', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'index'])->name('charges.index');
     Route::get('/charges/generate', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'generate'])->name('charges.generate');
@@ -101,7 +113,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::delete('/charges/{charge}', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'destroy'])->name('charges.destroy');
     Route::get('/customers/{customer}/charges', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'customerCharges'])->name('customers.charges');
     Route::post('/customers/{customer}/update-rent', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'updateRent'])->name('customers.update-rent');
-    
+
     // Payment History
     Route::get('/payments/history', [App\Http\Controllers\Admin\PaymentHistoryController::class, 'index'])->name('payments.history');
 });
@@ -117,7 +129,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
     Route::middleware('auth:customer')->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
         Route::get('bookings/{booking}', [App\Http\Controllers\Customer\DashboardController::class, 'showBooking'])->name('bookings.show');
-        
+
         // Payment routes
         Route::get('payments', [App\Http\Controllers\Customer\PaymentController::class, 'index'])->name('payments.index');
         Route::post('payments/create-order', [App\Http\Controllers\Customer\PaymentController::class, 'createOrder'])->name('payments.create-order');
