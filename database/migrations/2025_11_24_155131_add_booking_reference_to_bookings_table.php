@@ -6,13 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
+     * Disable transaction for this migration to avoid "current transaction is aborted" errors.
+     */
+    public $withinTransaction = false;
+
+    /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::table('bookings', function (Blueprint $table) {
-            $table->string('booking_reference')->nullable()->unique()->after('id');
-        });
+        if (Schema::hasTable('bookings') && !Schema::hasColumn('bookings', 'booking_reference')) {
+            Schema::table('bookings', function (Blueprint $table) {
+                $table->string('booking_reference')->nullable()->unique()->after('id');
+            });
+        }
     }
 
     /**

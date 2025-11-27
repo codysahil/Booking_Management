@@ -6,22 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
+     * Disable transaction for this migration to avoid "current transaction is aborted" errors.
+     */
+    public $withinTransaction = false;
+
+    /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
-            $table->id();
-            $table->string('employee_code')->unique();
-            $table->string('name');
-            $table->string('role'); // Warden, Cook, Cleaning, Other
-            $table->string('phone');
-            $table->text('address');
-            $table->string('photo_path')->nullable();
-            $table->string('proof_path')->nullable();
-            $table->foreignId('branch_id')->nullable()->constrained()->onDelete('set null');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('employees')) {
+            Schema::create('employees', function (Blueprint $table) {
+                $table->id();
+                $table->string('employee_code')->unique();
+                $table->string('name');
+                $table->string('role'); // Warden, Cook, Cleaning, Other
+                $table->string('phone');
+                $table->text('address');
+                $table->string('photo_path')->nullable();
+                $table->string('proof_path')->nullable();
+                $table->foreignId('branch_id')->nullable()->constrained()->onDelete('set null');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

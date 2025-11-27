@@ -6,26 +6,33 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
+     * Disable transaction for this migration to avoid "current transaction is aborted" errors.
+     */
+    public $withinTransaction = false;
+
+    /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
-            $table->id();
-            $table->string('customer_code')->unique();
-            $table->string('name');
-            $table->string('email')->unique()->nullable();
-            $table->string('phone');
-            $table->string('password');
-            $table->date('dob');
-            $table->text('address');
-            $table->string('guardian_phone');
-            $table->text('work_details')->nullable();
-            $table->string('photo_path')->nullable();
-            $table->string('id_proof_path')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('customers')) {
+            Schema::create('customers', function (Blueprint $table) {
+                $table->id();
+                $table->string('customer_code')->unique();
+                $table->string('name');
+                $table->string('email')->unique()->nullable();
+                $table->string('phone');
+                $table->string('password');
+                $table->date('dob');
+                $table->text('address');
+                $table->string('guardian_phone');
+                $table->text('work_details')->nullable();
+                $table->string('photo_path')->nullable();
+                $table->string('id_proof_path')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

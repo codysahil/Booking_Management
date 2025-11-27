@@ -4,13 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
+    /**
+     * Disable transaction for this migration to avoid "current transaction is aborted" errors.
+     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
-        Schema::table('rooms', function (Blueprint $table) {
-            $table->string('image_path')->nullable()->after('gender_allowed');
-        });
+        if (Schema::hasTable('rooms') && !Schema::hasColumn('rooms', 'image_path')) {
+            Schema::table('rooms', function (Blueprint $table) {
+                $table->string('image_path')->nullable()->after('gender_allowed');
+            });
+        }
     }
 
     public function down(): void

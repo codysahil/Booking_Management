@@ -6,18 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
+     * Disable transaction for this migration to avoid "current transaction is aborted" errors.
+     */
+    public $withinTransaction = false;
+
+    /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('beds', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('room_id')->constrained()->onDelete('cascade');
-            $table->string('bed_number');
-            $table->decimal('monthly_rent', 10, 2);
-            $table->enum('status', ['vacant', 'occupied', 'reserved', 'maintenance'])->default('vacant');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('beds')) {
+            Schema::create('beds', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('room_id')->constrained()->onDelete('cascade');
+                $table->string('bed_number');
+                $table->decimal('monthly_rent', 10, 2);
+                $table->enum('status', ['vacant', 'occupied', 'reserved', 'maintenance'])->default('vacant');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

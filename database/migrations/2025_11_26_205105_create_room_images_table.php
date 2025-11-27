@@ -4,17 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
+    /**
+     * Disable transaction for this migration to avoid "current transaction is aborted" errors.
+     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
-        Schema::create('room_images', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('room_id')->constrained()->onDelete('cascade');
-            $table->string('image_path');
-            $table->integer('order')->default(0);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('room_images')) {
+            Schema::create('room_images', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('room_id')->constrained()->onDelete('cascade');
+                $table->string('image_path');
+                $table->integer('order')->default(0);
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void

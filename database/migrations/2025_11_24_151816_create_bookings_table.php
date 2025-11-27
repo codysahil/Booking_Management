@@ -6,20 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
+     * Disable transaction for this migration to avoid "current transaction is aborted" errors.
+     */
+    public $withinTransaction = false;
+
+    /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('bookings', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('customer_id')->constrained()->onDelete('cascade');
-            $table->foreignId('bed_id')->constrained()->onDelete('cascade');
-            $table->date('check_in_date');
-            $table->date('check_out_date')->nullable();
-            $table->enum('status', ['active', 'completed', 'cancelled'])->default('active');
-            $table->decimal('advance_paid', 10, 2)->default(0);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('bookings')) {
+            Schema::create('bookings', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('customer_id')->constrained()->onDelete('cascade');
+                $table->foreignId('bed_id')->constrained()->onDelete('cascade');
+                $table->date('check_in_date');
+                $table->date('check_out_date')->nullable();
+                $table->enum('status', ['active', 'completed', 'cancelled'])->default('active');
+                $table->decimal('advance_paid', 10, 2)->default(0);
+                $table->timestamps();
+            });
+        }
     }
 
     /**
