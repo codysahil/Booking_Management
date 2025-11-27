@@ -9,10 +9,7 @@ cmds = [
 
 [phases.build]
 cmds = [
-    'npm run build',
-    'echo "Build completed, checking files..."',
-    'ls -la public/build/ || echo "Build directory not found"',
-    'test -f public/build/.vite/manifest.json && echo "Manifest exists" || echo "Manifest missing"'
+    'npm run build'
 ]
 
 [start]
