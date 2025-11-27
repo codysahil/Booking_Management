@@ -7,7 +7,8 @@ php artisan view:clear
 php artisan route:clear
 
 # Optimize for production (this will cache config with fresh env vars)
-php artisan config:cache
+# Optimize for production (disabled for debugging)
+# php artisan config:cache
 
 # Create storage link (ignore if exists)
 php artisan storage:link 2>/dev/null || true
