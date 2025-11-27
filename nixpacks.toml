@@ -10,12 +10,15 @@ cmds = [
 [phases.build]
 cmds = [
     'npm run build',
-    'touch storage/database.sqlite',
-    'php artisan migrate --force',
-    'php artisan db:seed --force',
     'php artisan config:cache',
     'php artisan route:cache',
     'php artisan view:cache'
+]
+
+[phases.deploy]
+cmds = [
+    'php artisan migrate --force',
+    'php artisan db:seed --force'
 ]
 
 [start]
