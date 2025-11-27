@@ -36,6 +36,11 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
+        \Log::info('=== CUSTOMER STORE METHOD CALLED ===');
+        \Log::info('Request method: ' . $request->method());
+        \Log::info('Request URL: ' . $request->fullUrl());
+        \Log::info('Request data (without files):', $request->except(['photo', 'id_proof', '_token']));
+
         \Log::info('Customer store method called', $request->all());
 
         try {
