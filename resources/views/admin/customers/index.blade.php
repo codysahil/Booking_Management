@@ -29,7 +29,7 @@
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
                                         @if($customer->photo_path)
-                                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200" src="{{ Storage::url($customer->photo_path) }}" alt="{{ $customer->name }}">
+                                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200" src="{{ $customer->safe_photo_url }}" alt="{{ $customer->name }}">
                                         @else
                                             <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold">
                                                 {{ substr($customer->name, 0, 1) }}

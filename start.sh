@@ -13,7 +13,7 @@ php artisan route:clear
 # Create storage link (ignore if exists)
 php artisan storage:link 2>/dev/null || true
 
-# Run migrations
+# Run migrations (includes monthly_charges and dues tables)
 php artisan migrate --force
 
 # Run seeders

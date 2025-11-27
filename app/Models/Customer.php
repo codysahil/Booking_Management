@@ -68,4 +68,30 @@ class Customer extends Authenticatable
     {
         return $this->getPendingChargesAmount() + $this->getPendingDuesAmount();
     }
+
+    public function getSafePhotoUrlAttribute()
+    {
+        try {
+            if (!$this->photo_path) {
+                return 'https://placehold.co/200x200?text=No+Photo';
+            }
+            return \Illuminate\Support\Facades\Storage::url($this->photo_path);
+        } catch (\Exception $e) {
+            \Log::warning("Failed to get Cloudinary URL for customer photo {$this->id}: " . $e->getMessage());
+            return 'https://placehold.co/200x200?text=Photo+Not+Found';
+        }
+    }
+
+    public function getSafeIdProofUrlAttribute()
+    {
+        try {
+            if (!$this->id_proof_path) {
+                return '#';
+            }
+            return \Illuminate\Support\Facades\Storage::url($this->id_proof_path);
+        } catch (\Exception $e) {
+            \Log::warning("Failed to get Cloudinary URL for customer proof {$this->id}: " . $e->getMessage());
+            return '#';
+        }
+    }
 }

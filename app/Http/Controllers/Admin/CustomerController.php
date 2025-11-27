@@ -24,20 +24,20 @@ class CustomerController extends Controller
                 $q->whereIn('status', ['vacant', 'reserved']);
             }
         ])->get();
-        
+
         // Check if there's a booking_id (coming from bookings page)
         $booking = null;
         if ($request->has('booking_id')) {
             $booking = \App\Models\Booking::with(['customer', 'bed.room.branch'])->find($request->booking_id);
         }
-        
+
         return view('admin.customers.create', compact('branches', 'booking'));
     }
 
     public function store(Request $request)
     {
         \Log::info('Customer store method called', $request->all());
-        
+
         try {
             $validated = $request->validate([
                 'customer_id' => 'nullable|exists:customers,id',
@@ -60,7 +60,7 @@ class CustomerController extends Controller
             \Log::error('Validation failed', ['errors' => $e->errors()]);
             return back()->withErrors($e->errors())->withInput();
         }
-        
+
         // Validate bed_id is present when not updating existing booking
         if (!$request->booking_id && !$request->bed_id) {
             return back()->withErrors(['bed_id' => 'Please select a bed'])->withInput();
@@ -69,11 +69,11 @@ class CustomerController extends Controller
         \DB::beginTransaction();
         try {
             \Log::info('Starting customer creation process');
-            
+
             // Handle File Uploads (uses Cloudinary in production)
             $photoPath = null;
             $proofPath = null;
-            
+
             try {
                 if ($request->hasFile('photo')) {
                     $photoPath = $request->file('photo')->store('customers/photos');
@@ -208,17 +208,17 @@ class CustomerController extends Controller
             if ($request->hasFile('photo')) {
                 // Delete old photo
                 if ($customer->photo_path) {
-                    Storage::disk('public')->delete($customer->photo_path);
+                    Storage::delete($customer->photo_path);
                 }
-                $validated['photo_path'] = $request->file('photo')->store('customers/photos', 'public');
+                $validated['photo_path'] = $request->file('photo')->store('customers/photos');
             }
 
             if ($request->hasFile('id_proof')) {
                 // Delete old proof
                 if ($customer->id_proof_path) {
-                    Storage::disk('public')->delete($customer->id_proof_path);
+                    Storage::delete($customer->id_proof_path);
                 }
-                $validated['id_proof_path'] = $request->file('id_proof')->store('customers/proofs', 'public');
+                $validated['id_proof_path'] = $request->file('id_proof')->store('customers/proofs');
             }
 
             $customer->update($validated);
