@@ -76,10 +76,12 @@ class CustomerController extends Controller
 
             try {
                 if ($request->hasFile('photo')) {
+                    \Log::info('Attempting photo upload');
                     $photoPath = $request->file('photo')->store('customers/photos');
                     \Log::info('Photo uploaded', ['path' => $photoPath]);
                 }
                 if ($request->hasFile('id_proof')) {
+                    \Log::info('Attempting ID proof upload');
                     $proofPath = $request->file('id_proof')->store('customers/proofs');
                     \Log::info('ID proof uploaded', ['path' => $proofPath]);
                 }
@@ -95,6 +97,7 @@ class CustomerController extends Controller
 
             // Update existing customer or create new
             if ($request->customer_id) {
+                \Log::info('Updating existing customer', ['customer_id' => $request->customer_id]);
                 // Update existing customer from online booking
                 $customer = Customer::find($request->customer_id);
                 if (!$customer) {
@@ -113,7 +116,9 @@ class CustomerController extends Controller
                     'id_proof_path' => $proofPath,
                     'password' => bcrypt($request->phone), // Update password to phone
                 ]);
+                \Log::info('Customer updated successfully', ['customer_id' => $customer->id]);
             } else {
+                \Log::info('Creating new walk-in customer');
                 // Create new walk-in customer
                 // Use max ID instead of count to avoid race conditions
                 $lastCustomer = Customer::orderBy('id', 'desc')->first();
@@ -140,9 +145,11 @@ class CustomerController extends Controller
             }
 
             // Handle booking
+            \Log::info('Starting booking creation', ['booking_id' => $request->booking_id, 'bed_id' => $request->bed_id]);
             if ($request->booking_id) {
                 // Update existing booking
                 $booking = \App\Models\Booking::find($request->booking_id);
+                \Log::info('Updating existing booking', ['booking_id' => $booking->id]);
                 $booking->update([
                     'status' => 'active',
                     'check_in_date' => $request->check_in_date,
@@ -152,6 +159,11 @@ class CustomerController extends Controller
             } else {
                 // Create new booking for walk-in
                 $bed = Bed::find($request->bed_id);
+                if (!$bed) {
+                    \Log::error('Bed not found', ['bed_id' => $request->bed_id]);
+                    throw new \Exception('Bed not found');
+                }
+                \Log::info('Creating new booking', ['bed_id' => $bed->id]);
                 $bookingReference = 'BK-' . strtoupper(\Str::random(8));
                 $booking = $customer->bookings()->create([
                     'booking_reference' => $bookingReference,
@@ -160,12 +172,15 @@ class CustomerController extends Controller
                     'status' => 'active',
                     'advance_paid' => $request->advance_amount,
                 ]);
+                \Log::info('Booking created', ['booking_id' => $booking->id]);
             }
 
             // Update bed status
+            \Log::info('Updating bed status', ['bed_id' => $bed->id]);
             $bed->update(['status' => 'occupied']);
 
             // Create payment record
+            \Log::info('Creating payment record');
             $customer->payments()->create([
                 'booking_id' => $booking->id,
                 'amount' => $request->advance_amount,
@@ -175,9 +190,10 @@ class CustomerController extends Controller
                 'status' => 'paid',
                 'paid_at' => now(),
             ]);
+            \Log::info('Payment record created');
 
             \DB::commit();
-            \Log::info('Customer created successfully', ['customer_id' => $customer->id]);
+            \Log::info('Transaction committed successfully', ['customer_id' => $customer->id]);
             return redirect()->route('admin.customers.index')->with('success', 'Customer check-in completed successfully!');
         } catch (\Illuminate\Database\QueryException $e) {
             \DB::rollBack();
