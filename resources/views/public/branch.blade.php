@@ -25,7 +25,7 @@
                     <!-- Room Image -->
                     <div class="relative h-48 bg-gray-100 overflow-hidden">
                         @if($room->images->count() > 0)
-                            <img id="main-image-{{ $room->id }}" src="{{ Storage::url($room->images->first()->image_path) }}" alt="{{ $room->room_number }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <img id="main-image-{{ $room->id }}" src="{{ $room->images->first()->safe_url }}" alt="{{ $room->room_number }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                         @else
                             <div class="w-full h-full bg-gradient-to-br from-rose-100 via-pink-100 to-purple-100 flex items-center justify-center">
                                 <div class="text-center">
@@ -49,9 +49,9 @@
                             @if($room->images->count() > 1)
                                 <div class="flex gap-2 overflow-x-auto pb-2">
                                     @foreach($room->images as $index => $image)
-                                        <button type="button" onclick="changeRoomImage({{ $room->id }}, '{{ Storage::url($image->image_path) }}', this)" 
+                                        <button type="button" onclick="changeRoomImage({{ $room->id }}, '{{ $image->safe_url }}', this)" 
                                             class="thumb-{{ $room->id }} flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 {{ $index === 0 ? 'border-primary-500' : 'border-gray-200' }} hover:border-primary-400 transition">
-                                            <img src="{{ Storage::url($image->image_path) }}" alt="View {{ $index + 1 }}" class="w-full h-full object-cover">
+                                            <img src="{{ $image->safe_url }}" alt="View {{ $index + 1 }}" class="w-full h-full object-cover">
                                         </button>
                                     @endforeach
                                 </div>

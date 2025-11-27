@@ -50,44 +50,6 @@ Route::get('/debug/db-test', function () {
     }
 });
 
-Route::get('/debug-config', function () {
-    try {
-        $disk = \Illuminate\Support\Facades\Storage::disk('cloudinary');
-
-        // We try to get the URL of a non-existent file.
-        // If we get "Resource not found", it means we successfully connected to Cloudinary!
-        // If we get "Invalid configuration" or "Unauthorized", then it's broken.
-        try {
-            $url = $disk->url('non_existent_file_' . time());
-        } catch (\Exception $e) {
-            if (str_contains($e->getMessage(), 'Resource not found')) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Connected to Cloudinary successfully! (404 on missing file confirms connection)',
-                    'config_dump' => [
-                        'cloud' => config('filesystems.disks.cloudinary.cloud'),
-                        'key' => substr(config('filesystems.disks.cloudinary.key'), 0, 5) . '...',
-                    ]
-                ]);
-            }
-            throw $e;
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Unexpectedly found the file!',
-            'url' => $url,
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ], 500);
-    }
-});
-
 // ============================================
 // ADMIN AUTH ROUTES
 // ============================================
