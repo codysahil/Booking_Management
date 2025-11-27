@@ -1,8 +1,13 @@
 #!/bin/bash
 
-# Clear config cache to load new environment variables
+# Clear all caches to load new environment variables
 php artisan config:clear
 php artisan cache:clear
+php artisan view:clear
+php artisan route:clear
+
+# Optimize for production (this will cache config with fresh env vars)
+php artisan config:cache
 
 # Create storage link (ignore if exists)
 php artisan storage:link 2>/dev/null || true
