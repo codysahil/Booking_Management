@@ -28,8 +28,8 @@ class AppServiceProvider extends ServiceProvider
             \URL::forceScheme('https');
         }
 
-        // Use build path for Vite in production
-        if (config('app.env') === 'production') {
+        // Use build path for Vite when not in dev mode
+        if (config('app.env') === 'production' || env('VITE_USE_BUILD', false)) {
             \Illuminate\Support\Facades\Vite::useBuildDirectory('build');
         }
     }
