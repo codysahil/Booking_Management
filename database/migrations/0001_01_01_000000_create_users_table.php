@@ -7,17 +7,21 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
     /**
+     * Disable transaction for this migration to avoid "current transaction is aborted" errors
+     * if a check fails in Postgres.
+     */
+    protected $withinTransaction = false;
+
+    /**
      * Run the migrations.
      */
     public function up(): void
     {
         // Force cache and session to array/file to avoid database dependency during migration
-        // This prevents "table not found" errors if the app tries to access cache/sessions
-        // before the tables are created.
         config(['cache.default' => 'array']);
         config(['session.driver' => 'array']);
 
-        if (!$this->tableExists('users')) {
+        if (!Schema::hasTable('users')) {
             Schema::create('users', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -29,7 +33,7 @@ return new class extends Migration {
             });
         }
 
-        if (!$this->tableExists('password_reset_tokens')) {
+        if (!Schema::hasTable('password_reset_tokens')) {
             Schema::create('password_reset_tokens', function (Blueprint $table) {
                 $table->string('email')->primary();
                 $table->string('token');
@@ -37,7 +41,7 @@ return new class extends Migration {
             });
         }
 
-        if (!$this->tableExists('sessions')) {
+        if (!Schema::hasTable('sessions')) {
             Schema::create('sessions', function (Blueprint $table) {
                 $table->string('id')->primary();
                 $table->foreignId('user_id')->nullable()->index();
@@ -57,21 +61,5 @@ return new class extends Migration {
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
-    }
-
-    /**
-     * Check if table exists safely using a savepoint.
-     */
-    private function tableExists(string $table): bool
-    {
-        try {
-            DB::beginTransaction();
-            $exists = Schema::hasTable($table);
-            DB::commit();
-            return $exists;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return false;
-        }
     }
 };
