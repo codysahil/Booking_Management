@@ -7,11 +7,14 @@ use Illuminate\Support\Facades\Route;
 // ============================================
 Route::get('/', [App\Http\Controllers\Public\BookingController::class, 'index'])->name('home');
 Route::get('/about', function () {
-    return view('public.about'); })->name('about');
+    return view('public.about');
+})->name('about');
 Route::get('/gallery', function () {
-    return view('public.gallery'); })->name('gallery');
+    return view('public.gallery');
+})->name('gallery');
 Route::get('/contact', function () {
-    return view('public.contact'); })->name('contact');
+    return view('public.contact');
+})->name('contact');
 Route::get('/branch/{branch}', [App\Http\Controllers\Public\BookingController::class, 'showBranch'])->name('booking.branch');
 Route::get('/branch/{branch}/room/{room}', [App\Http\Controllers\Public\BookingController::class, 'showRoom'])->name('booking.room');
 Route::post('/booking/select-beds', [App\Http\Controllers\Public\BookingController::class, 'selectBeds'])->name('booking.select-beds');
@@ -48,7 +51,7 @@ Route::get('/debug/db-test', function () {
 });
 
 Route::get('/debug-config', function () {
-    dd([
+    return response()->json([
         'env_cloudinary_url' => env('CLOUDINARY_URL'),
         'env_api_key' => env('CLOUDINARY_API_KEY'),
         'config_cloudinary' => config('cloudinary'),
