@@ -97,6 +97,10 @@ class CustomerController extends Controller
             if ($request->customer_id) {
                 // Update existing customer from online booking
                 $customer = Customer::find($request->customer_id);
+                if (!$customer) {
+                    \Log::error('Customer not found for update', ['customer_id' => $request->customer_id]);
+                    return back()->withErrors(['error' => 'Customer not found'])->withInput();
+                }
                 $customer->update([
                     'name' => $request->name,
                     'phone' => $request->phone,
@@ -111,7 +115,13 @@ class CustomerController extends Controller
                 ]);
             } else {
                 // Create new walk-in customer
-                $customerCode = 'SS-' . date('Y') . '-' . str_pad(Customer::count() + 1, 4, '0', STR_PAD_LEFT);
+                // Use max ID instead of count to avoid race conditions
+                $lastCustomer = Customer::orderBy('id', 'desc')->first();
+                $nextNumber = $lastCustomer ? ($lastCustomer->id + 1) : 1;
+                $customerCode = 'SS-' . date('Y') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+                \Log::info('Creating new customer', ['customer_code' => $customerCode]);
+
                 $customer = Customer::create([
                     'customer_code' => $customerCode,
                     'name' => $request->name,
@@ -125,6 +135,8 @@ class CustomerController extends Controller
                     'photo_path' => $photoPath,
                     'id_proof_path' => $proofPath,
                 ]);
+
+                \Log::info('Customer created', ['customer_id' => $customer->id]);
             }
 
             // Handle booking
@@ -167,11 +179,26 @@ class CustomerController extends Controller
             \DB::commit();
             \Log::info('Customer created successfully', ['customer_id' => $customer->id]);
             return redirect()->route('admin.customers.index')->with('success', 'Customer check-in completed successfully!');
+        } catch (\Illuminate\Database\QueryException $e) {
+            \DB::rollBack();
+            \Log::error('Database error during customer creation', [
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Check for specific database errors
+            if (str_contains($e->getMessage(), 'Duplicate entry') || str_contains($e->getMessage(), 'unique constraint')) {
+                return back()->withErrors(['error' => 'A customer with this phone number or email already exists.'])->withInput();
+            }
+
+            return back()->withErrors(['error' => 'Database error: ' . $e->getMessage()])->withInput();
         } catch (\Exception $e) {
             \DB::rollBack();
             \Log::error('Customer creation failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['photo', 'id_proof', 'password'])
             ]);
             return back()->withErrors(['error' => 'Failed to complete check-in: ' . $e->getMessage()])->withInput();
         }
