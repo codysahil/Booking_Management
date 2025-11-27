@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
     /**
@@ -10,7 +11,13 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        if (!Schema::hasTable('users')) {
+        // Force cache and session to array/file to avoid database dependency during migration
+        // This prevents "table not found" errors if the app tries to access cache/sessions
+        // before the tables are created.
+        config(['cache.default' => 'array']);
+        config(['session.driver' => 'array']);
+
+        if (!$this->tableExists('users')) {
             Schema::create('users', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -22,7 +29,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::hasTable('password_reset_tokens')) {
+        if (!$this->tableExists('password_reset_tokens')) {
             Schema::create('password_reset_tokens', function (Blueprint $table) {
                 $table->string('email')->primary();
                 $table->string('token');
@@ -30,7 +37,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::hasTable('sessions')) {
+        if (!$this->tableExists('sessions')) {
             Schema::create('sessions', function (Blueprint $table) {
                 $table->string('id')->primary();
                 $table->foreignId('user_id')->nullable()->index();
@@ -50,5 +57,21 @@ return new class extends Migration {
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+    }
+
+    /**
+     * Check if table exists safely using a savepoint.
+     */
+    private function tableExists(string $table): bool
+    {
+        try {
+            DB::beginTransaction();
+            $exists = Schema::hasTable($table);
+            DB::commit();
+            return $exists;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return false;
+        }
     }
 };
