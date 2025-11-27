@@ -53,22 +53,32 @@ Route::get('/debug/db-test', function () {
 Route::get('/debug-config', function () {
     try {
         $disk = \Illuminate\Support\Facades\Storage::disk('cloudinary');
-        $url = $disk->url('test.jpg');
+
+        // 1. Test Upload
+        $filename = 'debug_test_' . time() . '.txt';
+        $disk->put($filename, 'Hello Cloudinary!');
+
+        // 2. Test URL Generation
+        $url = $disk->url($filename);
+
+        // 3. Test Delete (Optional, maybe keep it to see it?)
+        // $disk->delete($filename);
 
         return response()->json([
             'status' => 'success',
-            'url_generation' => $url,
-            'env_cloudinary_url' => env('CLOUDINARY_URL'),
-            'config_cloudinary' => config('cloudinary'),
-            'config_filesystems_cloudinary' => config('filesystems.disks.cloudinary'),
+            'message' => 'Cloudinary config is working!',
+            'uploaded_file' => $filename,
+            'url' => $url,
+            'config_dump' => [
+                'cloud' => config('filesystems.disks.cloudinary.cloud'),
+                'key' => substr(config('filesystems.disks.cloudinary.key'), 0, 5) . '...',
+            ]
         ]);
     } catch (\Exception $e) {
         return response()->json([
             'status' => 'error',
             'message' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
-            'env_cloudinary_url' => env('CLOUDINARY_URL'),
-            'config_dump' => config('filesystems.disks.cloudinary'),
         ], 500);
     }
 });
