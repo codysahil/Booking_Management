@@ -11,6 +11,12 @@ class BranchSeeder extends Seeder
 {
     public function run(): void
     {
+        // Skip if branches already exist
+        if (Branch::count() > 0) {
+            $this->command->info('✅ Branches already exist, skipping seeder');
+            return;
+        }
+
         // Branch 1 - Annai Indira Nagar (15 rooms)
         $branch1 = Branch::create([
             'name' => 'Honeybees Hostel - Annai Indira Nagar',

@@ -10,13 +10,15 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'name' => 'Honeybees Admin',
-            'email' => 'admin@honeybees.com',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@honeybees.com'],
+            [
+                'name' => 'Honeybees Admin',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+            ]
+        );
 
-        $this->command->info('✅ Admin user created: admin@honeybees.com / admin123');
+        $this->command->info('✅ Admin user created/updated: admin@honeybees.com / admin123');
     }
 }

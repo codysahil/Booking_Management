@@ -14,6 +14,12 @@ class HostelSeeder extends Seeder
      */
     public function run(): void
     {
+        // Skip if branches already exist (BranchSeeder handles this)
+        if (Branch::count() > 0) {
+            $this->command->info('✅ Branches already exist, skipping HostelSeeder');
+            return;
+        }
+
         // Create Branch 1
         $branch1 = Branch::create([
             'name' => 'Branch 1',
