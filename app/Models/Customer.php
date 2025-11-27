@@ -43,4 +43,29 @@ class Customer extends Authenticatable
     {
         return $this->hasMany(Request::class);
     }
+
+    public function monthlyCharges()
+    {
+        return $this->hasMany(MonthlyCharge::class);
+    }
+
+    public function dues()
+    {
+        return $this->hasMany(Due::class);
+    }
+
+    public function getPendingChargesAmount()
+    {
+        return $this->monthlyCharges()->where('status', 'pending')->sum('total_amount');
+    }
+
+    public function getPendingDuesAmount()
+    {
+        return $this->dues()->where('status', 'pending')->sum('amount');
+    }
+
+    public function getTotalPendingAmount()
+    {
+        return $this->getPendingChargesAmount() + $this->getPendingDuesAmount();
+    }
 }

@@ -35,25 +35,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">Pending Dues</p>
-                            @php
-                                $totalDues = 0;
-                                foreach($bookings->where('status', 'active') as $booking) {
-                                    $checkInDate = \Carbon\Carbon::parse($booking->check_in_date);
-                                    $now = now();
-                                    
-                                    // Calculate months stayed (rounded up)
-                                    $monthsStayed = (int) ceil($checkInDate->diffInMonths($now, true));
-                                    if ($monthsStayed < 1) {
-                                        $monthsStayed = 1; // Minimum 1 month
-                                    }
-                                    
-                                    // Calculate total rent due (advance is separate security deposit)
-                                    $totalRentDue = ($booking->bed->monthly_rent ?? 0) * $monthsStayed;
-                                    
-                                    $totalDues += $totalRentDue;
-                                }
-                            @endphp
-                            <p class="text-3xl font-bold text-amber-600">₹{{ number_format($totalDues) }}</p>
+                            <p class="text-3xl font-bold text-amber-600">₹{{ number_format($totalPending ?? 0) }}</p>
                         </div>
                         <div class="w-14 h-14 bg-gradient-to-br from-amber-100 to-yellow-100 rounded-full flex items-center justify-center">
                             <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,10 +49,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">Total Payments</p>
-                            @php
-                                $totalPayments = $bookings->sum('advance_paid');
-                            @endphp
-                            <p class="text-3xl font-bold text-green-600">₹{{ number_format($totalPayments) }}</p>
+                            <p class="text-3xl font-bold text-green-600">₹{{ number_format($totalPayments ?? 0) }}</p>
                         </div>
                         <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center">
                             <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,6 +59,73 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Pending Charges Section -->
+            @if(isset($pendingCharges) && $pendingCharges->count() > 0)
+            <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-6 mb-8">
+                <h2 class="text-2xl font-display font-bold text-gray-900 mb-6">Pending Monthly Charges</h2>
+                <div class="space-y-3">
+                    @foreach($pendingCharges as $charge)
+                    <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-amber-200 transition">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-900">{{ \Carbon\Carbon::parse($charge->month_year)->format('F Y') }}</h3>
+                                <div class="grid grid-cols-3 gap-4 mt-2 text-sm">
+                                    <div>
+                                        <span class="text-gray-500">Rent:</span>
+                                        <span class="font-medium text-gray-900">₹{{ number_format($charge->rent_amount) }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">EB:</span>
+                                        <span class="font-medium text-gray-900">₹{{ number_format($charge->eb_amount) }}</span>
+                                    </div>
+                                    @if($charge->other_charges > 0)
+                                    <div>
+                                        <span class="text-gray-500">Other:</span>
+                                        <span class="font-medium text-gray-900">₹{{ number_format($charge->other_charges) }}</span>
+                                    </div>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Due: {{ $charge->due_date->format('d M, Y') }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-amber-600">₹{{ number_format($charge->total_amount) }}</p>
+                                <a href="{{ route('customer.payments.index') }}" class="mt-2 inline-block px-4 py-1 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600">
+                                    Pay Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Pending Dues Section -->
+            @if(isset($pendingDues) && $pendingDues->count() > 0)
+            <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-6 mb-8">
+                <h2 class="text-2xl font-display font-bold text-gray-900 mb-6">Other Pending Dues</h2>
+                <div class="space-y-3">
+                    @foreach($pendingDues as $due)
+                    <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-red-200 transition">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-900">{{ $due->title }}</h3>
+                                <p class="text-sm text-gray-600 mt-1">{{ $due->description }}</p>
+                                <p class="text-xs text-gray-500 mt-1">Type: {{ ucfirst($due->due_type) }} • Due: {{ $due->due_date->format('d M, Y') }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-red-600">₹{{ number_format($due->amount) }}</p>
+                                <a href="{{ route('customer.payments.index') }}" class="mt-2 inline-block px-4 py-1 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600">
+                                    Pay Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
 
             <!-- My Bookings -->
             <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-6 mb-8">
@@ -147,9 +193,9 @@
                 <div class="bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl p-6 text-white">
                     <h3 class="text-xl font-bold mb-2">Need to Pay Dues?</h3>
                     <p class="text-white/90 mb-4 text-sm">View and pay your pending rent, EB bills, and fines online</p>
-                    <button onclick="alert('Payment feature coming soon! Please contact the hostel office for now.')" class="bg-white text-primary-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
-                        View Dues
-                    </button>
+                    <a href="{{ route('customer.payments.index') }}" class="inline-block bg-white text-primary-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
+                        View & Pay Dues
+                    </a>
                 </div>
 
                 <div class="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 text-white">

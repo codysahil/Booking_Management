@@ -99,6 +99,54 @@
                         @endif
                     </div>
 
+                    @if($customer->bookings->isNotEmpty())
+                    <!-- Rent Increase Section -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
+                        <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Update Rent Amount
+                        </h4>
+                        <form method="POST" action="{{ route('admin.customers.update-rent', $customer) }}" class="space-y-3">
+                            @csrf
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">New Rent Amount</label>
+                                    <input type="number" name="new_rent" step="0.01" required
+                                        value="{{ $booking->bed->monthly_rent }}"
+                                        class="w-full text-sm border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Effective From (Month)</label>
+                                    <input type="month" name="effective_from" required
+                                        value="{{ now()->addMonth()->format('Y-m') }}"
+                                        class="w-full text-sm border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Reason (Optional)</label>
+                                    <input type="text" name="reason" placeholder="e.g., Annual increase"
+                                        class="w-full text-sm border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full md:w-auto px-4 py-2 bg-amber-600 text-white text-sm rounded-lg hover:bg-amber-700 transition">
+                                Update Rent
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- View Charges Link -->
+                    <div class="mb-8">
+                        <a href="{{ route('admin.customers.charges', $customer) }}" 
+                            class="inline-flex items-center px-4 py-2 bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition text-sm font-medium">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>
+                            View All Monthly Charges & Payment History
+                        </a>
+                    </div>
+                    @endif
+
                     <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Personal Information</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div>

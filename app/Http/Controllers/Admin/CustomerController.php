@@ -38,23 +38,28 @@ class CustomerController extends Controller
     {
         \Log::info('Customer store method called', $request->all());
         
-        $validated = $request->validate([
-            'customer_id' => 'nullable|exists:customers,id',
-            'booking_id' => 'nullable|exists:bookings,id',
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'nullable|email',
-            'dob' => 'required|date',
-            'address' => 'required|string',
-            'guardian_phone' => 'required|string|max:20',
-            'work_details' => 'nullable|string',
-            'photo' => 'nullable|image|max:2048',
-            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'bed_id' => 'nullable|exists:beds,id',
-            'check_in_date' => 'required|date',
-            'stay_type' => 'required|in:permanent,day_basis',
-            'advance_amount' => 'required|numeric|min:0',
-        ]);
+        try {
+            $validated = $request->validate([
+                'customer_id' => 'nullable|exists:customers,id',
+                'booking_id' => 'nullable|exists:bookings,id',
+                'name' => 'required|string|max:255',
+                'phone' => 'required|string|max:20',
+                'email' => 'nullable|email',
+                'dob' => 'required|date',
+                'address' => 'required|string',
+                'guardian_phone' => 'required|string|max:20',
+                'work_details' => 'nullable|string',
+                'photo' => 'nullable|image|max:10240', // Increased to 10MB
+                'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240', // Increased to 10MB
+                'bed_id' => 'nullable|exists:beds,id',
+                'check_in_date' => 'required|date',
+                'stay_type' => 'required|in:permanent,day_basis',
+                'advance_amount' => 'required|numeric|min:0',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed', ['errors' => $e->errors()]);
+            return back()->withErrors($e->errors())->withInput();
+        }
         
         // Validate bed_id is present when not updating existing booking
         if (!$request->booking_id && !$request->bed_id) {
@@ -65,11 +70,23 @@ class CustomerController extends Controller
         try {
             \Log::info('Starting customer creation process');
             
-            // Handle File Uploads
-            $photoPath = $request->hasFile('photo') ? $request->file('photo')->store('customers/photos', 'public') : null;
-            $proofPath = $request->hasFile('id_proof') ? $request->file('id_proof')->store('customers/proofs', 'public') : null;
+            // Handle File Uploads (uses Cloudinary in production)
+            $photoPath = null;
+            $proofPath = null;
             
-            \Log::info('Files uploaded', ['photo' => $photoPath, 'proof' => $proofPath]);
+            try {
+                if ($request->hasFile('photo')) {
+                    $photoPath = $request->file('photo')->store('customers/photos');
+                    \Log::info('Photo uploaded', ['path' => $photoPath]);
+                }
+                if ($request->hasFile('id_proof')) {
+                    $proofPath = $request->file('id_proof')->store('customers/proofs');
+                    \Log::info('ID proof uploaded', ['path' => $proofPath]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('File upload failed', ['error' => $e->getMessage()]);
+                return back()->withErrors(['error' => 'File upload failed: ' . $e->getMessage()])->withInput();
+            }
 
             // Update existing customer or create new
             if ($request->customer_id) {

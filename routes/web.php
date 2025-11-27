@@ -90,6 +90,20 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Bookings Management
     Route::get('/bookings', [App\Http\Controllers\Admin\BookingController::class, 'index'])->name('bookings.index');
     Route::put('/bookings/{booking}/status', [App\Http\Controllers\Admin\BookingController::class, 'updateStatus'])->name('bookings.update-status');
+    
+    // Monthly Charges Management
+    Route::get('/charges', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'index'])->name('charges.index');
+    Route::get('/charges/generate', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'generate'])->name('charges.generate');
+    Route::post('/charges/generate', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'generate']);
+    Route::get('/charges/{charge}/edit', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'edit'])->name('charges.edit');
+    Route::put('/charges/{charge}', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'update'])->name('charges.update');
+    Route::patch('/charges/{charge}/mark-paid', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'markPaid'])->name('charges.mark-paid');
+    Route::delete('/charges/{charge}', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'destroy'])->name('charges.destroy');
+    Route::get('/customers/{customer}/charges', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'customerCharges'])->name('customers.charges');
+    Route::post('/customers/{customer}/update-rent', [App\Http\Controllers\Admin\MonthlyChargeController::class, 'updateRent'])->name('customers.update-rent');
+    
+    // Payment History
+    Route::get('/payments/history', [App\Http\Controllers\Admin\PaymentHistoryController::class, 'index'])->name('payments.history');
 });
 
 // ============================================
@@ -103,6 +117,14 @@ Route::prefix('customer')->name('customer.')->group(function () {
     Route::middleware('auth:customer')->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
         Route::get('bookings/{booking}', [App\Http\Controllers\Customer\DashboardController::class, 'showBooking'])->name('bookings.show');
+        
+        // Payment routes
+        Route::get('payments', [App\Http\Controllers\Customer\PaymentController::class, 'index'])->name('payments.index');
+        Route::post('payments/create-order', [App\Http\Controllers\Customer\PaymentController::class, 'createOrder'])->name('payments.create-order');
+        Route::post('payments/verify', [App\Http\Controllers\Customer\PaymentController::class, 'verifyPayment'])->name('payments.verify');
+        Route::get('payments/success', [App\Http\Controllers\Customer\PaymentController::class, 'success'])->name('payments.success');
+        Route::get('payments/failed', [App\Http\Controllers\Customer\PaymentController::class, 'failed'])->name('payments.failed');
+        Route::get('payments/history', [App\Http\Controllers\Customer\PaymentController::class, 'history'])->name('payments.history');
     });
 });
 

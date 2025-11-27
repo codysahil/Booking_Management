@@ -13,18 +13,44 @@ class DashboardController extends Controller
         $customer = Auth::guard('customer')->user();
         $customer->load(['bookings.bed.room.branch', 'payments', 'requests']);
 
-        // Calculate Dues (Mock Logic for now)
-        $rentDue = 0;
-        $ebDue = 0;
-
-        if ($customer->bookings->isNotEmpty()) {
-            $booking = $customer->bookings->first();
-            if ($booking->status === 'active') {
-                $rentDue = $booking->bed->monthly_rent;
-            }
+        // Get pending monthly charges (Rent + EB)
+        $pendingCharges = $customer->monthlyCharges()
+            ->where('status', 'pending')
+            ->orderBy('month_year', 'desc')
+            ->get();
+        
+        // Get pending dues (custom charges)
+        $pendingDues = $customer->dues()
+            ->where('status', 'pending')
+            ->orderBy('due_date', 'asc')
+            ->get();
+        
+        // Calculate totals
+        $totalPendingCharges = $pendingCharges->sum('total_amount');
+        $totalPendingDues = $pendingDues->sum('amount');
+        $totalPending = $totalPendingCharges + $totalPendingDues;
+        
+        // Get active booking
+        $activeBooking = $customer->bookings()->where('status', 'active')->first();
+        
+        // Calculate months stayed
+        $totalMonthsStayed = 0;
+        if ($activeBooking) {
+            $checkInDate = \Carbon\Carbon::parse($activeBooking->check_in_date);
+            $totalMonthsStayed = $checkInDate->diffInMonths(now());
         }
+        
+        $totalPayments = $customer->payments()->where('status', 'paid')->sum('amount');
 
-        return view('customer.dashboard', compact('customer', 'rentDue', 'ebDue'));
+        return view('customer.dashboard', compact(
+            'customer', 
+            'pendingCharges', 
+            'pendingDues',
+            'totalPending',
+            'activeBooking',
+            'totalMonthsStayed',
+            'totalPayments'
+        ));
     }
 
     public function showBooking($id)

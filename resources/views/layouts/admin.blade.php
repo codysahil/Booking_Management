@@ -77,6 +77,20 @@
                     </svg>
                     <span>Customers</span>
                 </a>
+                <a href="{{ route('admin.charges.index') }}"
+                    class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 hover:text-rose-600 transition-all duration-200 {{ request()->routeIs('admin.charges.*') ? 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-600 font-semibold' : '' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Monthly Charges</span>
+                </a>
+                <a href="{{ route('admin.payments.history') }}"
+                    class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 hover:text-rose-600 transition-all duration-200 {{ request()->routeIs('admin.payments.*') ? 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-600 font-semibold' : '' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    </svg>
+                    <span>Payment History</span>
+                </a>
                 <a href="{{ route('admin.employees.index') }}"
                     class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 hover:text-rose-600 transition-all duration-200 {{ request()->routeIs('admin.employees.*') ? 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-600 font-semibold' : '' }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
