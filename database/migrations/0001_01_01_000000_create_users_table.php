@@ -10,7 +10,7 @@ return new class extends Migration {
      * Disable transaction for this migration to avoid "current transaction is aborted" errors
      * if a check fails in Postgres.
      */
-    protected $withinTransaction = false;
+    public $withinTransaction = false;
 
     /**
      * Run the migrations.
