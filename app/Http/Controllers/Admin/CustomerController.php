@@ -49,7 +49,7 @@ class CustomerController extends Controller
                 'booking_id' => 'nullable|exists:bookings,id',
                 'name' => 'required|string|max:255',
                 'phone' => 'required|string|max:20',
-                'email' => 'nullable|email',
+                'email' => 'nullable|string|email|max:255',
                 'dob' => 'required|date',
                 'address' => 'required|string',
                 'guardian_phone' => 'required|string|max:20',
