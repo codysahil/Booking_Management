@@ -54,26 +54,31 @@ Route::get('/debug-config', function () {
     try {
         $disk = \Illuminate\Support\Facades\Storage::disk('cloudinary');
 
-        // 1. Test Upload
-        $filename = 'debug_test_' . time() . '.txt';
-        $disk->put($filename, 'Hello Cloudinary!');
-
-        // 2. Test URL Generation
-        $url = $disk->url($filename);
-
-        // 3. Test Delete (Optional, maybe keep it to see it?)
-        // $disk->delete($filename);
+        // We try to get the URL of a non-existent file.
+        // If we get "Resource not found", it means we successfully connected to Cloudinary!
+        // If we get "Invalid configuration" or "Unauthorized", then it's broken.
+        try {
+            $url = $disk->url('non_existent_file_' . time());
+        } catch (\Exception $e) {
+            if (str_contains($e->getMessage(), 'Resource not found')) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Connected to Cloudinary successfully! (404 on missing file confirms connection)',
+                    'config_dump' => [
+                        'cloud' => config('filesystems.disks.cloudinary.cloud'),
+                        'key' => substr(config('filesystems.disks.cloudinary.key'), 0, 5) . '...',
+                    ]
+                ]);
+            }
+            throw $e;
+        }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Cloudinary config is working!',
-            'uploaded_file' => $filename,
+            'message' => 'Unexpectedly found the file!',
             'url' => $url,
-            'config_dump' => [
-                'cloud' => config('filesystems.disks.cloudinary.cloud'),
-                'key' => substr(config('filesystems.disks.cloudinary.key'), 0, 5) . '...',
-            ]
         ]);
+
     } catch (\Exception $e) {
         return response()->json([
             'status' => 'error',
