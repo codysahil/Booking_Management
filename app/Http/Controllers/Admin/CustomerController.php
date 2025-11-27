@@ -51,10 +51,12 @@ class CustomerController extends Controller
                 'work_details' => 'nullable|string',
                 'photo' => 'nullable|image|max:10240', // Increased to 10MB
                 'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240', // Increased to 10MB
+                'branch_id' => 'nullable|exists:branches,id', // Added for walk-in customers
                 'bed_id' => 'nullable|exists:beds,id',
                 'check_in_date' => 'required|date',
                 'stay_type' => 'required|in:permanent,day_basis',
                 'advance_amount' => 'required|numeric|min:0',
+                'payment_method' => 'nullable|string', // Added payment_method
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Validation failed', ['errors' => $e->errors()]);
