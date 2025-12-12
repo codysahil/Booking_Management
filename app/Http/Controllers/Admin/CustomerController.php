@@ -118,10 +118,8 @@ class CustomerController extends Controller
             \Log::info('Generated customer code', ['customer_code' => $customerCode]);
         }
 
-        // Reconnect to ensure clean transaction state (PostgreSQL fix)
-        \DB::reconnect();
-        
-        \DB::beginTransaction();
+        // Note: Removed transaction due to Neon PostgreSQL serverless connection pooling issues
+        // Each operation will be atomic on its own
         try {
             \Log::info('Starting customer creation process');
 
@@ -132,7 +130,6 @@ class CustomerController extends Controller
                 $customer = Customer::find($request->customer_id);
                 if (!$customer) {
                     \Log::error('Customer not found for update', ['customer_id' => $request->customer_id]);
-                    \DB::rollBack();
                     return back()->withErrors(['error' => 'Customer not found'])->withInput();
                 }
                 $customer->update([
@@ -216,11 +213,9 @@ class CustomerController extends Controller
             ]);
             \Log::info('Payment record created');
 
-            \DB::commit();
-            \Log::info('Transaction committed successfully', ['customer_id' => $customer->id]);
+            \Log::info('Customer creation completed successfully', ['customer_id' => $customer->id]);
             return redirect()->route('admin.customers.index')->with('success', 'Customer check-in completed successfully!');
         } catch (\Illuminate\Database\QueryException $e) {
-            \DB::rollBack();
             \Log::error('Database error during customer creation', [
                 'error' => $e->getMessage(),
                 'code' => $e->getCode(),
@@ -238,7 +233,6 @@ class CustomerController extends Controller
             }
             return back()->withErrors(['error' => $errorMsg])->withInput();
         } catch (\Exception $e) {
-            \DB::rollBack();
             \Log::error('Customer creation failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
