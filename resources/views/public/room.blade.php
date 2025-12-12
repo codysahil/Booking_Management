@@ -201,36 +201,41 @@
                         
                         <!-- Booking Summary Card -->
                         <div class="bg-white rounded-3xl shadow-xl overflow-hidden" style="border: 1px solid rgba(0,0,0,0.05);">
-                            <div class="px-6 py-4" style="background: linear-gradient(135deg, #be185d 0%, #ec4899 100%);">
+                            <div class="px-5 py-4" style="background: linear-gradient(135deg, #be185d 0%, #ec4899 100%);">
                                 <h3 class="font-bold text-white text-lg">Booking Summary</h3>
                             </div>
-                            <div class="p-6 space-y-4">
-                                <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                                    <span class="text-gray-500 flex items-center">
-                                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="p-5 space-y-4">
+                                <!-- Branch - Stacked layout for long names -->
+                                <div class="py-3 border-b border-gray-100">
+                                    <div class="flex items-center text-gray-500 text-sm mb-1">
+                                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                         </svg>
                                         Branch
-                                    </span>
-                                    <span class="font-semibold text-gray-900">{{ $branch->name }}</span>
+                                    </div>
+                                    <div class="font-semibold text-gray-900 pl-6">{{ $branch->name }}</div>
                                 </div>
-                                <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                                    <span class="text-gray-500 flex items-center">
-                                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                        </svg>
-                                        Room Type
-                                    </span>
-                                    <span class="font-semibold text-gray-900">{{ $room->type }}</span>
-                                </div>
-                                <div class="flex items-center justify-between py-3">
-                                    <span class="text-gray-500 flex items-center">
-                                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
-                                        Capacity
-                                    </span>
-                                    <span class="font-semibold text-gray-900">{{ $room->capacity }} Persons</span>
+                                
+                                <!-- Room Type & Capacity - Side by side -->
+                                <div class="grid grid-cols-2 gap-4 py-2">
+                                    <div>
+                                        <div class="flex items-center text-gray-500 text-sm mb-1">
+                                            <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                            </svg>
+                                            Type
+                                        </div>
+                                        <div class="font-semibold text-gray-900 pl-6">{{ $room->type }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center text-gray-500 text-sm mb-1">
+                                            <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                            Sharing
+                                        </div>
+                                        <div class="font-semibold text-gray-900 pl-6">{{ $room->capacity }} Persons</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
