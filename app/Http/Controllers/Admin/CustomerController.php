@@ -111,6 +111,16 @@ class CustomerController extends Controller
             $proofPath = null;
         }
 
+        // Generate customer code BEFORE transaction (involves DB query)
+        $customerCode = null;
+        if (!$request->customer_id) {
+            $customerCode = $this->generateUniqueCustomerCode();
+            \Log::info('Generated customer code', ['customer_code' => $customerCode]);
+        }
+
+        // Reconnect to ensure clean transaction state (PostgreSQL fix)
+        \DB::reconnect();
+        
         \DB::beginTransaction();
         try {
             \Log::info('Starting customer creation process');
@@ -122,6 +132,7 @@ class CustomerController extends Controller
                 $customer = Customer::find($request->customer_id);
                 if (!$customer) {
                     \Log::error('Customer not found for update', ['customer_id' => $request->customer_id]);
+                    \DB::rollBack();
                     return back()->withErrors(['error' => 'Customer not found'])->withInput();
                 }
                 $customer->update([
@@ -139,10 +150,6 @@ class CustomerController extends Controller
                 \Log::info('Customer updated successfully', ['customer_id' => $customer->id]);
             } else {
                 \Log::info('Creating new walk-in customer');
-                // Create new walk-in customer with random unique code
-                $customerCode = $this->generateUniqueCustomerCode();
-
-                \Log::info('Creating new customer', ['customer_code' => $customerCode]);
 
                 $customer = Customer::create([
                     'customer_code' => $customerCode,
