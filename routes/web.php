@@ -3,6 +3,13 @@
 use Illuminate\Support\Facades\Route;
 
 // ============================================
+// WEBHOOK ROUTES (No CSRF)
+// ============================================
+Route::post('/webhook/razorpay', [App\Http\Controllers\Webhook\RazorpayWebhookController::class, 'handle'])
+    ->name('webhook.razorpay')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+// ============================================
 // PUBLIC ROUTES (Booking System)
 // ============================================
 Route::get('/', [App\Http\Controllers\Public\BookingController::class, 'index'])->name('home');
@@ -89,8 +96,17 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::put('/beds/{bed}/status', [App\Http\Controllers\Admin\BedController::class, 'updateStatus'])->name('beds.update-status');
     Route::delete('/rooms/{room}/images/{image}', [App\Http\Controllers\Admin\RoomController::class, 'destroyImage'])->name('rooms.images.destroy');
 
+    // Hero Slider Management
+    Route::resource('sliders', App\Http\Controllers\Admin\HeroSliderController::class);
+    Route::patch('/sliders/{slider}/toggle', [App\Http\Controllers\Admin\HeroSliderController::class, 'toggleStatus'])->name('sliders.toggle');
+
+    // Reports & Analytics
+    Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export', [App\Http\Controllers\Admin\ReportController::class, 'export'])->name('reports.export');
+
     // Customer & Employee Management
     Route::resource('customers', App\Http\Controllers\Admin\CustomerController::class);
+    Route::patch('/customers/{customer}/deactivate', [App\Http\Controllers\Admin\CustomerController::class, 'deactivate'])->name('customers.deactivate');
     Route::resource('employees', App\Http\Controllers\Admin\EmployeeController::class);
 
     // Bookings Management

@@ -155,6 +155,9 @@ class PaymentController extends Controller
             $order = $api->order->fetch($validated['razorpay_order_id']);
             $payment = $api->payment->fetch($validated['razorpay_payment_id']);
 
+            // Get detailed payment method from Razorpay
+            $paymentMethod = $this->getPaymentMethodDetails($payment);
+
             // Get items from order notes
             $items = json_decode($order->notes->items, true);
             $customer = Auth::guard('customer')->user();
@@ -169,7 +172,7 @@ class PaymentController extends Controller
                             $charge->update([
                                 'status' => 'paid',
                                 'paid_date' => now(),
-                                'payment_method' => 'razorpay',
+                                'payment_method' => $paymentMethod,
                                 'transaction_id' => $validated['razorpay_payment_id'],
                             ]);
                         }
@@ -179,7 +182,7 @@ class PaymentController extends Controller
                             $due->update([
                                 'status' => 'paid',
                                 'paid_date' => now(),
-                                'payment_method' => 'razorpay',
+                                'payment_method' => $paymentMethod,
                                 'transaction_id' => $validated['razorpay_payment_id'],
                             ]);
                         }
@@ -190,7 +193,7 @@ class PaymentController extends Controller
                 $customer->payments()->create([
                     'amount' => $order->amount / 100,
                     'payment_type' => 'Monthly Charges',
-                    'payment_method' => 'razorpay',
+                    'payment_method' => $paymentMethod,
                     'transaction_ref' => $validated['razorpay_payment_id'],
                     'status' => 'paid',
                     'paid_at' => now(),
@@ -254,5 +257,57 @@ class PaymentController extends Controller
             ->paginate(20);
         
         return view('customer.payments.history', compact('paidCharges'));
+    }
+
+    /**
+     * Extract detailed payment method from Razorpay payment object
+     */
+    private function getPaymentMethodDetails($payment)
+    {
+        $method = $payment->method ?? 'razorpay';
+        
+        switch ($method) {
+            case 'upi':
+                // Check for specific UPI app
+                $vpa = $payment->vpa ?? '';
+                if (str_contains($vpa, '@okaxis') || str_contains($vpa, '@okhdfcbank')) {
+                    return 'GPay';
+                } elseif (str_contains($vpa, '@paytm')) {
+                    return 'Paytm';
+                } elseif (str_contains($vpa, '@ybl') || str_contains($vpa, '@ibl')) {
+                    return 'PhonePe';
+                } elseif (str_contains($vpa, '@apl')) {
+                    return 'Amazon Pay';
+                }
+                return 'UPI';
+                
+            case 'card':
+                $cardType = $payment->card->type ?? 'card';
+                $network = $payment->card->network ?? '';
+                if ($cardType === 'credit') {
+                    return 'Credit Card' . ($network ? " ($network)" : '');
+                } elseif ($cardType === 'debit') {
+                    return 'Debit Card' . ($network ? " ($network)" : '');
+                }
+                return 'Card';
+                
+            case 'netbanking':
+                $bank = $payment->bank ?? '';
+                return 'Net Banking' . ($bank ? " ($bank)" : '');
+                
+            case 'wallet':
+                $wallet = $payment->wallet ?? '';
+                $walletNames = [
+                    'paytm' => 'Paytm Wallet',
+                    'phonepe' => 'PhonePe Wallet',
+                    'amazonpay' => 'Amazon Pay',
+                    'freecharge' => 'Freecharge',
+                    'mobikwik' => 'MobiKwik',
+                ];
+                return $walletNames[$wallet] ?? 'Wallet';
+                
+            default:
+                return ucfirst($method);
+        }
     }
 }

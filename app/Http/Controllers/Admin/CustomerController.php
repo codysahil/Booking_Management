@@ -126,11 +126,8 @@ class CustomerController extends Controller
                 \Log::info('Customer updated successfully', ['customer_id' => $customer->id]);
             } else {
                 \Log::info('Creating new walk-in customer');
-                // Create new walk-in customer
-                // Use max ID instead of count to avoid race conditions
-                $lastCustomer = Customer::orderBy('id', 'desc')->first();
-                $nextNumber = $lastCustomer ? ($lastCustomer->id + 1) : 1;
-                $customerCode = 'SS-' . date('Y') . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+                // Create new walk-in customer with random unique code
+                $customerCode = $this->generateUniqueCustomerCode();
 
                 \Log::info('Creating new customer', ['customer_code' => $customerCode]);
 
@@ -277,5 +274,66 @@ class CustomerController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Failed to update customer: ' . $e->getMessage()])->withInput();
         }
+    }
+
+    /**
+     * Deactivate/Vacate a customer
+     */
+    public function deactivate(Customer $customer)
+    {
+        \DB::beginTransaction();
+        try {
+            // Get active booking and free up the bed
+            $activeBooking = $customer->bookings()->where('status', 'active')->first();
+            
+            if ($activeBooking) {
+                // Update booking status to completed
+                $activeBooking->update([
+                    'status' => 'completed',
+                    'check_out_date' => now(),
+                ]);
+                
+                // Free up the bed
+                $activeBooking->bed->update(['status' => 'vacant']);
+            }
+            
+            // Deactivate customer (keeps the record but prevents login)
+            $customer->update([
+                'is_active' => false,
+            ]);
+            
+            \DB::commit();
+            
+            \Log::info('Customer vacated', [
+                'customer_id' => $customer->id,
+                'customer_code' => $customer->customer_code,
+                'booking_id' => $activeBooking?->id,
+            ]);
+            
+            return redirect()->route('admin.customers.index')
+                ->with('success', "Customer {$customer->name} ({$customer->customer_code}) has been vacated successfully. The bed is now available.");
+                
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('Customer deactivation failed', [
+                'customer_id' => $customer->id,
+                'error' => $e->getMessage(),
+            ]);
+            return back()->withErrors(['error' => 'Failed to vacate customer: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Generate a unique random customer code
+     * Format: SS-XXXX-XXXX (where X is alphanumeric)
+     */
+    private function generateUniqueCustomerCode(): string
+    {
+        do {
+            // Generate random alphanumeric code: SS-XXXX-XXXX
+            $code = 'SS-' . strtoupper(\Str::random(4)) . '-' . strtoupper(\Str::random(4));
+        } while (Customer::where('customer_code', $code)->exists());
+
+        return $code;
     }
 }

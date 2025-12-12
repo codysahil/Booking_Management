@@ -12,15 +12,42 @@
                 </svg>
                 Back to Customers
             </a>
-            <a href="{{ route('admin.customers.edit', $customer) }}"
-                class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                    </path>
-                </svg>
-                Edit Customer
-            </a>
+            <div class="flex gap-3">
+                <a href="{{ route('admin.customers.edit', $customer) }}"
+                    class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        </path>
+                    </svg>
+                    Edit Customer
+                </a>
+                @if($customer->is_active)
+                <form method="POST" action="{{ route('admin.customers.deactivate', $customer) }}" 
+                    onsubmit="return confirm('Are you sure you want to deactivate this customer? This will:\n- Mark customer as vacated\n- Free up their bed\n- Disable their login\n\nThis action cannot be undone.')">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit"
+                        class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                            </path>
+                        </svg>
+                        Vacate Customer
+                    </button>
+                </form>
+                @else
+                <span class="inline-flex items-center px-4 py-2 bg-gray-400 text-white rounded-lg">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636">
+                        </path>
+                    </svg>
+                    Deactivated
+                </span>
+                @endif
+            </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-8">

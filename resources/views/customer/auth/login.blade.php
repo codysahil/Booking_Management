@@ -49,7 +49,7 @@
                             </div>
                             <input type="text" name="customer_code" id="customer_code" required
                                 value="{{ old('customer_code') }}"
-                                placeholder="e.g., SS-2025-0001"
+                                placeholder="e.g., SS-AB12-XY34"
                                 class="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg">
                         </div>
                         <p class="mt-2 text-xs text-gray-500">Enter your Customer ID from the booking confirmation</p>

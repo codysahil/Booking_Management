@@ -39,6 +39,10 @@
 document.getElementById('rzp-button').onclick = function(e) {
     e.preventDefault();
     
+    var button = this;
+    button.disabled = true;
+    button.innerHTML = 'Processing...';
+    
     var options = {
         "key": "{{ $razorpayKey }}",
         "amount": "{{ $order['amount'] }}",
@@ -47,6 +51,9 @@ document.getElementById('rzp-button').onclick = function(e) {
         "description": "Monthly Charges Payment",
         "order_id": "{{ $order['id'] }}",
         "handler": function (response) {
+            // Show processing message
+            button.innerHTML = 'Verifying Payment...';
+            
             // Create form and submit
             var form = document.createElement('form');
             form.method = 'POST';
@@ -89,13 +96,43 @@ document.getElementById('rzp-button').onclick = function(e) {
         },
         "modal": {
             "ondismiss": function() {
-                window.location.href = '{{ route('customer.payments.index') }}';
-            }
+                button.disabled = false;
+                button.innerHTML = 'Pay ₹{{ number_format($totalAmount) }}';
+            },
+            "escape": false,
+            "backdropclose": false
+        },
+        "retry": {
+            "enabled": true,
+            "max_count": 3
         }
     };
     
     var rzp = new Razorpay(options);
+    
+    // Handle payment failure
+    rzp.on('payment.failed', function (response) {
+        console.error('Payment failed:', response.error);
+        
+        // Log the error details
+        var errorMessage = response.error.description || 'Payment failed. Please try again.';
+        var errorCode = response.error.code || 'UNKNOWN';
+        
+        // Redirect to failed page with error info
+        window.location.href = '{{ route('customer.payments.failed') }}?error=' + encodeURIComponent(errorMessage) + '&code=' + errorCode;
+    });
+    
     rzp.open();
 };
+
+// Handle page unload during payment
+window.addEventListener('beforeunload', function(e) {
+    var button = document.getElementById('rzp-button');
+    if (button && button.disabled) {
+        e.preventDefault();
+        e.returnValue = 'Payment is in progress. Are you sure you want to leave?';
+        return e.returnValue;
+    }
+});
 </script>
 @endsection

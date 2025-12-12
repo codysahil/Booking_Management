@@ -26,7 +26,8 @@
                         @forelse($paidCharges as $charge)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $charge->paid_date->format('d M, Y') }}
+                                <div>{{ $charge->updated_at->format('d M, Y') }}</div>
+                                <div class="text-xs text-gray-500">{{ $charge->updated_at->format('h:i A') }}</div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900">
                                 <div class="font-medium">{{ \Carbon\Carbon::parse($charge->month_year)->format('F Y') }} - Monthly Charges</div>
@@ -42,8 +43,26 @@
                                 <span class="text-lg font-bold text-green-600">₹{{ number_format($charge->total_amount) }}</span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                                    {{ ucfirst($charge->payment_method) }}
+                                @php
+                                    $method = $charge->payment_method ?? 'razorpay';
+                                    $methodColors = [
+                                        'GPay' => 'bg-blue-100 text-blue-800',
+                                        'PhonePe' => 'bg-purple-100 text-purple-800',
+                                        'Paytm' => 'bg-sky-100 text-sky-800',
+                                        'UPI' => 'bg-green-100 text-green-800',
+                                        'Credit Card' => 'bg-amber-100 text-amber-800',
+                                        'Debit Card' => 'bg-orange-100 text-orange-800',
+                                        'Net Banking' => 'bg-indigo-100 text-indigo-800',
+                                        'default' => 'bg-gray-100 text-gray-800',
+                                    ];
+                                    $colorClass = $methodColors[$method] ?? $methodColors['default'];
+                                    // Check for partial matches
+                                    if (str_contains($method, 'Credit Card')) $colorClass = $methodColors['Credit Card'];
+                                    elseif (str_contains($method, 'Debit Card')) $colorClass = $methodColors['Debit Card'];
+                                    elseif (str_contains($method, 'Net Banking')) $colorClass = $methodColors['Net Banking'];
+                                @endphp
+                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $colorClass }}">
+                                    {{ $method }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 font-mono">

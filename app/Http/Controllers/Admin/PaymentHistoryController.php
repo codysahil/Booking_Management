@@ -30,7 +30,7 @@ class PaymentHistoryController extends Controller
                     return [
                         'type' => 'charge',
                         'id' => $charge->id,
-                        'date' => $charge->paid_date,
+                        'date' => $charge->updated_at,
                         'customer' => $charge->customer,
                         'description' => \Carbon\Carbon::parse($charge->month_year)->format('F Y') . ' - Monthly Charges',
                         'details' => "Rent: ₹" . number_format($charge->rent_amount) . " • EB: ₹" . number_format($charge->eb_amount),
@@ -57,7 +57,7 @@ class PaymentHistoryController extends Controller
                     return [
                         'type' => 'due',
                         'id' => $due->id,
-                        'date' => $due->paid_date,
+                        'date' => $due->updated_at,
                         'customer' => $due->customer,
                         'description' => $due->title,
                         'details' => $due->description,

@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminSeeder::class,
             BranchSeeder::class,
-            // HostelSeeder is for dummy data - not needed with BranchSeeder
+            HeroSliderSeeder::class,
         ]);
     }
 }

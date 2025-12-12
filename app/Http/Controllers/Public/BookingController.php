@@ -18,7 +18,10 @@ class BookingController extends Controller
     public function index()
     {
         $branches = Branch::withCount(['rooms', 'employees'])->get();
-        return view('public.home', compact('branches'));
+        $sliders = \App\Models\HeroSlider::where('is_active', true)
+            ->orderBy('order')
+            ->get();
+        return view('public.home', compact('branches', 'sliders'));
     }
 
     public function showBranch(Branch $branch)
@@ -142,8 +145,8 @@ class BookingController extends Controller
 
         DB::beginTransaction();
         try {
-            // Create customer with minimal info
-            $customerCode = 'SS-' . date('Y') . '-' . str_pad(Customer::count() + 1, 4, '0', STR_PAD_LEFT);
+            // Create customer with minimal info and random unique code
+            $customerCode = $this->generateUniqueCustomerCode();
             $customer = Customer::create([
                 'customer_code' => $customerCode,
                 'name' => $request->name ?: 'Customer ' . $customerCode,
@@ -221,5 +224,18 @@ class BookingController extends Controller
         ]);
 
         return view('public.confirmation', compact('booking', 'relatedBookings'));
+    }
+
+    /**
+     * Generate a unique random customer code
+     * Format: SS-XXXX-XXXX (where X is alphanumeric)
+     */
+    private function generateUniqueCustomerCode(): string
+    {
+        do {
+            $code = 'SS-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4));
+        } while (Customer::where('customer_code', $code)->exists());
+
+        return $code;
     }
 }

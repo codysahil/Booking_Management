@@ -1,6 +1,187 @@
 @extends('layouts.public')
 
 @section('content')
+    <!-- Hero Slider Section - Compact & Beautiful with Ken Burns Effect -->
+    <style>
+        @keyframes kenburns-1 {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.05) translate(-1%, 0); }
+        }
+        @keyframes kenburns-2 {
+            0% { transform: scale(1.03) translate(0, 0); }
+            100% { transform: scale(1) translate(1%, 0); }
+        }
+        @keyframes kenburns-3 {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.04) translate(0, -1%); }
+        }
+        @keyframes fadeSlideUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeSlideRight {
+            0% { opacity: 0; transform: translateX(-30px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        .slider-item.active .kenburns-img { animation: kenburns-1 8s ease-out forwards; }
+        .slider-item[data-slide="1"].active .kenburns-img { animation: kenburns-2 8s ease-out forwards; }
+        .slider-item[data-slide="2"].active .kenburns-img { animation: kenburns-3 8s ease-out forwards; }
+        .slider-item.active .slide-title { animation: fadeSlideUp 0.8s ease-out 0.2s forwards; opacity: 0; }
+        .slider-item.active .slide-desc { animation: fadeSlideRight 0.8s ease-out 0.4s forwards; opacity: 0; }
+    </style>
+    
+    @if(isset($sliders) && $sliders->count() > 0)
+    <div class="px-4 md:px-8 lg:px-16 py-4 md:py-6 bg-gradient-to-b from-rose-50 to-white">
+        <div class="relative w-full aspect-[4/3] sm:aspect-[16/9] md:aspect-[21/9] max-h-[500px] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl ring-1 ring-black/5">
+        <div class="slider-container relative w-full h-full">
+            @foreach($sliders as $index => $slider)
+            <div class="slider-item absolute inset-0 transition-opacity duration-1000 ease-in-out {{ $index === 0 ? 'opacity-100 active' : 'opacity-0' }}" data-slide="{{ $index }}">
+                <div class="absolute inset-0 overflow-hidden">
+                    <img src="{{ Storage::url($slider->image_path) }}" alt="{{ $slider->title }}" class="kenburns-img w-full h-full object-cover object-center will-change-transform">
+                </div>
+                <!-- Elegant Gradient Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+                
+                @if($slider->title || $slider->description)
+                <div class="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-8">
+                    <div class="max-w-4xl">
+                        @if($slider->title)
+                        <h2 class="slide-title text-base sm:text-xl md:text-3xl font-bold text-white mb-1 drop-shadow-lg line-clamp-2">
+                            {{ $slider->title }}
+                        </h2>
+                        @endif
+                        @if($slider->description)
+                        <p class="slide-desc text-xs sm:text-sm md:text-base text-white/90 max-w-md md:max-w-xl drop-shadow-md line-clamp-2 hidden sm:block">
+                            {{ $slider->description }}
+                        </p>
+                        @endif
+                    </div>
+                </div>
+                @endif
+            </div>
+            @endforeach
+        </div>
+
+        <!-- Elegant Navigation Arrows -->
+        @if($sliders->count() > 1)
+        <button onclick="prevSlide()" class="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white p-2 md:p-3 rounded-full transition-all duration-300 hover:scale-110 z-10 group">
+            <svg class="w-5 h-5 md:w-6 md:h-6 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </button>
+        <button onclick="nextSlide()" class="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white p-2 md:p-3 rounded-full transition-all duration-300 hover:scale-110 z-10 group">
+            <svg class="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </button>
+
+        <!-- Modern Dot Indicators -->
+        <div class="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+            @foreach($sliders as $index => $slider)
+            <button onclick="goToSlide({{ $index }})" class="slider-dot transition-all duration-300 {{ $index === 0 ? 'w-8 bg-white' : 'w-2 bg-white/50 hover:bg-white/70' }} h-2 rounded-full" data-dot="{{ $index }}"></button>
+            @endforeach
+        </div>
+        @endif
+
+        <!-- Progress Bar -->
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-white/20 rounded-b-3xl overflow-hidden">
+            <div id="slider-progress" class="h-full bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-100" style="width: 0%"></div>
+        </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = {{ $sliders->count() }};
+        let slideInterval;
+        let progressInterval;
+        let progress = 0;
+        const slideDuration = 5000;
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.slider-item');
+            const dots = document.querySelectorAll('.slider-dot');
+            
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.remove('opacity-0');
+                    slide.classList.add('opacity-100', 'active');
+                } else {
+                    slide.classList.remove('opacity-100', 'active');
+                    slide.classList.add('opacity-0');
+                }
+            });
+            
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.remove('w-2', 'bg-white/50');
+                    dot.classList.add('w-8', 'bg-white');
+                } else {
+                    dot.classList.remove('w-8', 'bg-white');
+                    dot.classList.add('w-2', 'bg-white/50');
+                }
+            });
+            
+            currentSlide = index;
+            resetProgress();
+        }
+
+        function resetProgress() {
+            progress = 0;
+            const progressBar = document.getElementById('slider-progress');
+            if (progressBar) progressBar.style.width = '0%';
+        }
+
+        function updateProgress() {
+            progress += 100 / (slideDuration / 50);
+            const progressBar = document.getElementById('slider-progress');
+            if (progressBar) progressBar.style.width = Math.min(progress, 100) + '%';
+        }
+
+        function nextSlide() {
+            showSlide((currentSlide + 1) % totalSlides);
+            resetInterval();
+        }
+
+        function prevSlide() {
+            showSlide((currentSlide - 1 + totalSlides) % totalSlides);
+            resetInterval();
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+            resetInterval();
+        }
+
+        function resetInterval() {
+            clearInterval(slideInterval);
+            clearInterval(progressInterval);
+            resetProgress();
+            slideInterval = setInterval(nextSlide, slideDuration);
+            progressInterval = setInterval(updateProgress, 50);
+        }
+
+        // Auto-advance slides
+        if (totalSlides > 1) {
+            slideInterval = setInterval(nextSlide, slideDuration);
+            progressInterval = setInterval(updateProgress, 50);
+        }
+
+        // Pause on hover
+        const sliderContainer = document.querySelector('.slider-container');
+        if (sliderContainer) {
+            sliderContainer.parentElement.addEventListener('mouseenter', () => {
+                clearInterval(slideInterval);
+                clearInterval(progressInterval);
+            });
+            sliderContainer.parentElement.addEventListener('mouseleave', () => {
+                resetInterval();
+            });
+        }
+    </script>
+    @endif
+
     <!-- Hero Section - Feminine & Elegant Design -->
     <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
         <!-- Decorative Floral Elements -->
@@ -19,7 +200,7 @@
                         <svg class="w-4 h-4 sm:w-5 sm:h-5 text-rose-500 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
                         </svg>
-                        <span class="text-xs sm:text-sm font-semibold text-gray-700">Your Safe Haven Awaits</span>
+                        <span class="text-xs sm:text-sm font-semibold text-gray-700">Women's Hostel in Chennai</span>
                     </div>
 
                     <!-- Main Heading -->

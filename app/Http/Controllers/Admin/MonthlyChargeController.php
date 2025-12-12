@@ -115,8 +115,44 @@ class MonthlyChargeController extends Controller
             'due_date' => 'required|date',
         ]);
 
-        $validated['total_amount'] = $validated['rent_amount'] + $validated['eb_amount'] + ($validated['other_charges'] ?? 0);
+        $newTotal = $validated['rent_amount'] + $validated['eb_amount'] + ($validated['other_charges'] ?? 0);
+        $oldTotal = $charge->total_amount;
 
+        // If charge is already paid and new total is higher, create a due for the difference
+        if ($charge->status === 'paid' && $newTotal > $oldTotal) {
+            $difference = $newTotal - $oldTotal;
+            
+            // Create a due for the additional amount
+            \App\Models\Due::create([
+                'customer_id' => $charge->customer_id,
+                'due_type' => 'other',
+                'title' => 'Additional Charge - ' . Carbon::parse($charge->month_year)->format('F Y'),
+                'description' => 'Adjustment after payment: ' . ($validated['other_charges_description'] ?? 'Additional charges added'),
+                'amount' => $difference,
+                'due_date' => now()->addDays(7),
+                'status' => 'pending',
+            ]);
+
+            // Update the charge record but keep it as paid
+            $validated['total_amount'] = $newTotal;
+            $charge->update($validated);
+
+            return redirect()->route('admin.charges.index', ['month' => $charge->month_year])
+                ->with('success', "Charge updated! A due of ₹{$difference} has been created for the additional amount.");
+        }
+
+        // If charge is already paid and new total is lower, just update (refund scenario - manual handling)
+        if ($charge->status === 'paid' && $newTotal < $oldTotal) {
+            $validated['total_amount'] = $newTotal;
+            $charge->update($validated);
+
+            $refundAmount = $oldTotal - $newTotal;
+            return redirect()->route('admin.charges.index', ['month' => $charge->month_year])
+                ->with('warning', "Charge reduced by ₹{$refundAmount}. Please process refund manually if needed.");
+        }
+
+        // Normal update for pending charges
+        $validated['total_amount'] = $newTotal;
         $charge->update($validated);
 
         return redirect()->route('admin.charges.index', ['month' => $charge->month_year])

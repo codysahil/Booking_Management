@@ -11,13 +11,26 @@
             </div>
             
             <h1 class="text-2xl font-bold text-gray-900 mb-2">Payment Failed</h1>
-            <p class="text-gray-600 mb-6">
+            <p class="text-gray-600 mb-4">
                 @if(session('error'))
                     {{ session('error') }}
+                @elseif(request('error'))
+                    {{ request('error') }}
                 @else
                     Your payment could not be processed. Please try again.
                 @endif
             </p>
+            
+            @if(request('code'))
+            <p class="text-xs text-gray-400 mb-6">Error Code: {{ request('code') }}</p>
+            @endif
+            
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-left">
+                <p class="text-sm text-amber-800">
+                    <strong>Note:</strong> If money was deducted from your account, it will be automatically refunded within 5-7 business days. 
+                    If the payment was successful but you see this page, please check your payment history or contact support.
+                </p>
+            </div>
             
             <div class="space-y-3">
                 <a href="{{ route('customer.payments.index') }}" 
