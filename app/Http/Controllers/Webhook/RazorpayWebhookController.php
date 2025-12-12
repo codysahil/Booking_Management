@@ -109,59 +109,51 @@ class RazorpayWebhookController extends Controller
             // Get payment method details
             $paymentMethod = $this->getPaymentMethodDetails($paymentData);
             
-            \DB::beginTransaction();
-            try {
-                // Update charges and dues
-                foreach ($items as $item) {
-                    if ($item['type'] === 'charge') {
-                        $charge = MonthlyCharge::find($item['id']);
-                        if ($charge && $charge->customer_id == $customerId && $charge->status === 'pending') {
-                            $charge->update([
-                                'status' => 'paid',
-                                'paid_date' => now(),
-                                'payment_method' => $paymentMethod,
-                                'transaction_id' => $paymentId,
-                            ]);
-                        }
-                    } elseif ($item['type'] === 'due') {
-                        $due = Due::find($item['id']);
-                        if ($due && $due->customer_id == $customerId && $due->status === 'pending') {
-                            $due->update([
-                                'status' => 'paid',
-                                'paid_date' => now(),
-                                'payment_method' => $paymentMethod,
-                                'transaction_id' => $paymentId,
-                            ]);
-                        }
+            // Note: Removed DB transaction due to Neon PostgreSQL serverless connection pooling issues
+            // Update charges and dues
+            foreach ($items as $item) {
+                if ($item['type'] === 'charge') {
+                    $charge = MonthlyCharge::find($item['id']);
+                    if ($charge && $charge->customer_id == $customerId && $charge->status === 'pending') {
+                        $charge->update([
+                            'status' => 'paid',
+                            'paid_date' => now(),
+                            'payment_method' => $paymentMethod,
+                            'transaction_id' => $paymentId,
+                        ]);
+                    }
+                } elseif ($item['type'] === 'due') {
+                    $due = Due::find($item['id']);
+                    if ($due && $due->customer_id == $customerId && $due->status === 'pending') {
+                        $due->update([
+                            'status' => 'paid',
+                            'paid_date' => now(),
+                            'payment_method' => $paymentMethod,
+                            'transaction_id' => $paymentId,
+                        ]);
                     }
                 }
-                
-                // Create payment record
-                $customer->payments()->create([
-                    'amount' => $paymentData['amount'] / 100,
-                    'payment_type' => 'Monthly Charges',
-                    'payment_method' => $paymentMethod,
-                    'razorpay_payment_id' => $paymentId,
-                    'razorpay_order_id' => $orderId,
-                    'transaction_ref' => $paymentId,
-                    'status' => 'paid',
-                    'paid_at' => now(),
-                ]);
-                
-                \DB::commit();
-                
-                Log::info('Webhook: Payment processed successfully', [
-                    'customer_id' => $customerId,
-                    'payment_id' => $paymentId,
-                    'amount' => $paymentData['amount'] / 100,
-                ]);
-                
-                return response()->json(['status' => 'success']);
-                
-            } catch (\Exception $e) {
-                \DB::rollBack();
-                throw $e;
             }
+            
+            // Create payment record
+            $customer->payments()->create([
+                'amount' => $paymentData['amount'] / 100,
+                'payment_type' => 'Monthly Charges',
+                'payment_method' => $paymentMethod,
+                'razorpay_payment_id' => $paymentId,
+                'razorpay_order_id' => $orderId,
+                'transaction_ref' => $paymentId,
+                'status' => 'paid',
+                'paid_at' => now(),
+            ]);
+            
+            Log::info('Webhook: Payment processed successfully', [
+                'customer_id' => $customerId,
+                'payment_id' => $paymentId,
+                'amount' => $paymentData['amount'] / 100,
+            ]);
+            
+            return response()->json(['status' => 'success']);
             
         } catch (\Exception $e) {
             Log::error('Webhook payment processing failed', [

@@ -290,7 +290,7 @@ class CustomerController extends Controller
      */
     public function deactivate(Customer $customer)
     {
-        \DB::beginTransaction();
+        // Note: Removed DB transaction due to Neon PostgreSQL serverless connection pooling issues
         try {
             // Get active booking and free up the bed
             $activeBooking = $customer->bookings()->where('status', 'active')->first();
@@ -311,8 +311,6 @@ class CustomerController extends Controller
                 'is_active' => false,
             ]);
             
-            \DB::commit();
-            
             \Log::info('Customer vacated', [
                 'customer_id' => $customer->id,
                 'customer_code' => $customer->customer_code,
@@ -323,7 +321,6 @@ class CustomerController extends Controller
                 ->with('success', "Customer {$customer->name} ({$customer->customer_code}) has been vacated successfully. The bed is now available.");
                 
         } catch (\Exception $e) {
-            \DB::rollBack();
             \Log::error('Customer deactivation failed', [
                 'customer_id' => $customer->id,
                 'error' => $e->getMessage(),

@@ -170,54 +170,49 @@ class PaymentController extends Controller
             $items = json_decode($order->notes->items, true);
             $customer = Auth::guard('customer')->user();
 
-            // Note: Removed transaction due to Neon PostgreSQL serverless issues
-            try {
-                // Update charges and dues
-                foreach ($items as $item) {
-                    if ($item['type'] === 'charge') {
-                        $charge = MonthlyCharge::find($item['id']);
-                        if ($charge && $charge->customer_id === $customer->id) {
-                            $charge->update([
-                                'status' => 'paid',
-                                'paid_date' => now(),
-                                'payment_method' => $paymentMethod,
-                                'transaction_id' => $validated['razorpay_payment_id'],
-                            ]);
-                        }
-                    } elseif ($item['type'] === 'due') {
-                        $due = Due::find($item['id']);
-                        if ($due && $due->customer_id === $customer->id) {
-                            $due->update([
-                                'status' => 'paid',
-                                'paid_date' => now(),
-                                'payment_method' => $paymentMethod,
-                                'transaction_id' => $validated['razorpay_payment_id'],
-                            ]);
-                        }
+            // Note: Removed DB transaction due to Neon PostgreSQL serverless connection pooling issues
+            // Update charges and dues
+            foreach ($items as $item) {
+                if ($item['type'] === 'charge') {
+                    $charge = MonthlyCharge::find($item['id']);
+                    if ($charge && $charge->customer_id === $customer->id) {
+                        $charge->update([
+                            'status' => 'paid',
+                            'paid_date' => now(),
+                            'payment_method' => $paymentMethod,
+                            'transaction_id' => $validated['razorpay_payment_id'],
+                        ]);
+                    }
+                } elseif ($item['type'] === 'due') {
+                    $due = Due::find($item['id']);
+                    if ($due && $due->customer_id === $customer->id) {
+                        $due->update([
+                            'status' => 'paid',
+                            'paid_date' => now(),
+                            'payment_method' => $paymentMethod,
+                            'transaction_id' => $validated['razorpay_payment_id'],
+                        ]);
                     }
                 }
-
-                // Create payment record
-                $customer->payments()->create([
-                    'amount' => $order->amount / 100,
-                    'payment_type' => 'Monthly Charges',
-                    'payment_method' => $paymentMethod,
-                    'transaction_ref' => $validated['razorpay_payment_id'],
-                    'status' => 'paid',
-                    'paid_at' => now(),
-                ]);
-
-                Log::info('Payment successful', [
-                    'customer_id' => $customer->id,
-                    'payment_id' => $validated['razorpay_payment_id'],
-                    'amount' => $order->amount / 100,
-                ]);
-
-                return redirect()->route('customer.payments.success', ['payment_id' => $validated['razorpay_payment_id']]);
-
-            } catch (\Exception $e) {
-                throw $e;
             }
+
+            // Create payment record
+            $customer->payments()->create([
+                'amount' => $order->amount / 100,
+                'payment_type' => 'Monthly Charges',
+                'payment_method' => $paymentMethod,
+                'transaction_ref' => $validated['razorpay_payment_id'],
+                'status' => 'paid',
+                'paid_at' => now(),
+            ]);
+
+            Log::info('Payment successful', [
+                'customer_id' => $customer->id,
+                'payment_id' => $validated['razorpay_payment_id'],
+                'amount' => $order->amount / 100,
+            ]);
+
+            return redirect()->route('customer.payments.success', ['payment_id' => $validated['razorpay_payment_id']]);
 
         } catch (\Razorpay\Api\Errors\SignatureVerificationError $e) {
             Log::error('Payment signature verification failed', [
