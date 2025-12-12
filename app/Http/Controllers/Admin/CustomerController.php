@@ -41,6 +41,15 @@ class CustomerController extends Controller
         \Log::info('Request URL: ' . $request->fullUrl());
         \Log::info('Request data (without files):', $request->except(['photo', 'id_proof', '_token']));
 
+        // Debug: Return JSON with request data to see what's being received
+        if ($request->has('debug_mode')) {
+            return response()->json([
+                'received' => $request->except(['photo', 'id_proof', '_token']),
+                'has_photo' => $request->hasFile('photo'),
+                'has_proof' => $request->hasFile('id_proof'),
+            ]);
+        }
+
         \Log::info('Customer store method called', $request->all());
 
         try {
@@ -65,6 +74,10 @@ class CustomerController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Validation failed', ['errors' => $e->errors()]);
+            // Temporary: Return JSON to see errors on Railway
+            if (app()->environment('production')) {
+                return response()->json(['validation_errors' => $e->errors()], 422);
+            }
             return back()->withErrors($e->errors())->withInput();
         }
 
