@@ -10,7 +10,6 @@ use App\Models\Booking;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class BookingController extends Controller
@@ -150,7 +149,7 @@ class BookingController extends Controller
         $totalRent = $beds->sum('monthly_rent');
         $advance = max($totalRent, 3000);
 
-        DB::beginTransaction();
+        // Note: Removed DB transaction due to Neon PostgreSQL serverless connection pooling issues
         try {
             // Create customer with minimal info and random unique code
             $customerCode = $this->generateUniqueCustomerCode();
@@ -194,8 +193,6 @@ class BookingController extends Controller
                 'paid_at' => null,
             ]);
 
-            DB::commit();
-
             // Clear session
             session()->forget(['selected_bed_ids', 'reservation_key', 'reservation_expires_at']);
 
@@ -207,7 +204,6 @@ class BookingController extends Controller
 
             return redirect()->route('booking.confirmation', $booking)->with('success', 'Booking confirmed!');
         } catch (\Exception $e) {
-            DB::rollBack();
             \Log::error('Booking failed: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
             \Log::error('Request data: ', $request->all());

@@ -37,7 +37,15 @@
             @foreach($sliders as $index => $slider)
             <div class="slider-item absolute inset-0 transition-opacity duration-1000 ease-in-out {{ $index === 0 ? 'opacity-100 active' : 'opacity-0' }}" data-slide="{{ $index }}">
                 <!-- Background Image -->
-                <div class="kenburns-img" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background-image: url('{{ $slider->image_url }}'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
+                <div class="absolute inset-0 overflow-hidden">
+                    <img 
+                        src="{{ $slider->image_url }}" 
+                        alt="{{ $slider->title ?? 'Slider Image' }}" 
+                        class="kenburns-img w-full h-full object-cover object-center"
+                        loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                        onerror="this.src='https://placehold.co/1920x600?text=Image+Not+Found'"
+                    >
+                </div>
                 <!-- Elegant Gradient Overlay -->
                 <div class="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20"></div>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
