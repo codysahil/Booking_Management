@@ -86,34 +86,34 @@ class CustomerController extends Controller
             return back()->withErrors(['bed_id' => 'Please select a bed'])->withInput();
         }
 
+        // Handle File Uploads BEFORE transaction (Cloudinary errors shouldn't abort DB transaction)
+        $photoPath = null;
+        $proofPath = null;
+
+        try {
+            if ($request->hasFile('photo')) {
+                \Log::info('Attempting photo upload');
+                $photoPath = $request->file('photo')->store('customers/photos');
+                \Log::info('Photo uploaded', ['path' => $photoPath]);
+            }
+            if ($request->hasFile('id_proof')) {
+                \Log::info('Attempting ID proof upload');
+                $proofPath = $request->file('id_proof')->store('customers/proofs');
+                \Log::info('ID proof uploaded', ['path' => $proofPath]);
+            }
+        } catch (\Exception $e) {
+            \Log::warning('File upload failed, continuing without files', [
+                'error' => $e->getMessage(),
+                'has_cloudinary' => !empty(config('filesystems.disks.cloudinary.cloud_name'))
+            ]);
+            // Continue without files instead of failing
+            $photoPath = null;
+            $proofPath = null;
+        }
+
         \DB::beginTransaction();
         try {
             \Log::info('Starting customer creation process');
-
-            // Handle File Uploads (uses Cloudinary in production)
-            $photoPath = null;
-            $proofPath = null;
-
-            try {
-                if ($request->hasFile('photo')) {
-                    \Log::info('Attempting photo upload');
-                    $photoPath = $request->file('photo')->store('customers/photos');
-                    \Log::info('Photo uploaded', ['path' => $photoPath]);
-                }
-                if ($request->hasFile('id_proof')) {
-                    \Log::info('Attempting ID proof upload');
-                    $proofPath = $request->file('id_proof')->store('customers/proofs');
-                    \Log::info('ID proof uploaded', ['path' => $proofPath]);
-                }
-            } catch (\Exception $e) {
-                \Log::warning('File upload failed, continuing without files', [
-                    'error' => $e->getMessage(),
-                    'has_cloudinary' => !empty(config('filesystems.disks.cloudinary.cloud_name'))
-                ]);
-                // Continue without files instead of failing
-                $photoPath = null;
-                $proofPath = null;
-            }
 
             // Update existing customer or create new
             if ($request->customer_id) {
