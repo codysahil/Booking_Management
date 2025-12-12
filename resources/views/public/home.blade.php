@@ -36,12 +36,11 @@
         <div class="slider-container relative w-full h-full">
             @foreach($sliders as $index => $slider)
             <div class="slider-item absolute inset-0 transition-opacity duration-1000 ease-in-out {{ $index === 0 ? 'opacity-100 active' : 'opacity-0' }}" data-slide="{{ $index }}">
-                <div class="absolute inset-0 overflow-hidden z-0">
-                    <img src="{{ $slider->image_url }}" alt="{{ $slider->title }}" class="kenburns-img w-full h-full object-cover object-center will-change-transform" style="min-width: 100%; min-height: 100%;" onerror="this.src='https://placehold.co/1920x600?text=Image+Error'">
-                </div>
+                <!-- Background Image -->
+                <div class="absolute inset-0 bg-cover bg-center kenburns-img" style="background-image: url('{{ $slider->image_url }}');"></div>
                 <!-- Elegant Gradient Overlay -->
-                <div class="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20 z-10"></div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent z-10"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
                 
                 @if($slider->title || $slider->description)
                 <div class="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-8">
