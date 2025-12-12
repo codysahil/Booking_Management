@@ -18,9 +18,16 @@ class BookingController extends Controller
     public function index()
     {
         $branches = Branch::withCount(['rooms', 'employees'])->get();
-        $sliders = \App\Models\HeroSlider::where('is_active', true)
-            ->orderBy('order')
-            ->get();
+        
+        // Gracefully handle missing hero_sliders table
+        try {
+            $sliders = \App\Models\HeroSlider::where('is_active', true)
+                ->orderBy('order')
+                ->get();
+        } catch (\Exception $e) {
+            $sliders = collect(); // Empty collection if table doesn't exist
+        }
+        
         return view('public.home', compact('branches', 'sliders'));
     }
 
