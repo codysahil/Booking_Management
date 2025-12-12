@@ -37,7 +37,7 @@
             @foreach($sliders as $index => $slider)
             <div class="slider-item absolute inset-0 transition-opacity duration-1000 ease-in-out {{ $index === 0 ? 'opacity-100 active' : 'opacity-0' }}" data-slide="{{ $index }}">
                 <!-- Background Image -->
-                <div class="absolute inset-0 bg-cover bg-center kenburns-img" style="background-image: url('{{ $slider->image_url }}');"></div>
+                <div class="absolute inset-0 kenburns-img" style="background-image: url('{{ $slider->image_url }}'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
                 <!-- Elegant Gradient Overlay -->
                 <div class="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20"></div>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
