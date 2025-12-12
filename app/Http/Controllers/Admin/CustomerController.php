@@ -74,10 +74,6 @@ class CustomerController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Validation failed', ['errors' => $e->errors()]);
-            // Temporary: Return JSON to see errors on Railway
-            if (app()->environment('production')) {
-                return response()->json(['validation_errors' => $e->errors()], 422);
-            }
             return back()->withErrors($e->errors())->withInput();
         }
 
@@ -222,14 +218,9 @@ class CustomerController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            $errorMsg = 'Database error: ' . $e->getMessage();
+            $errorMsg = 'Database error. Please try again.';
             if (str_contains($e->getMessage(), 'Duplicate entry') || str_contains($e->getMessage(), 'unique constraint')) {
                 $errorMsg = 'A customer with this phone number or email already exists.';
-            }
-
-            // Temporary: Return JSON to see errors on Railway
-            if (app()->environment('production')) {
-                return response()->json(['database_error' => $errorMsg], 500);
             }
             return back()->withErrors(['error' => $errorMsg])->withInput();
         } catch (\Exception $e) {
@@ -238,12 +229,7 @@ class CustomerController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['photo', 'id_proof', 'password'])
             ]);
-            
-            // Temporary: Return JSON to see errors on Railway
-            if (app()->environment('production')) {
-                return response()->json(['exception_error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
-            }
-            return back()->withErrors(['error' => 'Failed to complete check-in: ' . $e->getMessage()])->withInput();
+            return back()->withErrors(['error' => 'Failed to complete check-in. Please try again.'])->withInput();
         }
     }
 

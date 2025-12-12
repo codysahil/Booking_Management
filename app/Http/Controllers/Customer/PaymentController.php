@@ -120,10 +120,18 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             Log::error('Razorpay order creation failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'customer_id' => $customer->id,
+                'amount' => $totalAmount ?? 0,
             ]);
             
-            return back()->withErrors(['error' => 'Failed to create payment order. Please try again.']);
+            // Show actual error in production for debugging
+            $errorMsg = 'Failed to create payment order. Please try again.';
+            if (app()->environment('production') && config('app.debug')) {
+                $errorMsg .= ' Error: ' . $e->getMessage();
+            }
+            
+            return back()->withErrors(['error' => $errorMsg]);
         }
     }
 
@@ -162,7 +170,7 @@ class PaymentController extends Controller
             $items = json_decode($order->notes->items, true);
             $customer = Auth::guard('customer')->user();
 
-            \DB::beginTransaction();
+            // Note: Removed transaction due to Neon PostgreSQL serverless issues
             try {
                 // Update charges and dues
                 foreach ($items as $item) {
@@ -199,8 +207,6 @@ class PaymentController extends Controller
                     'paid_at' => now(),
                 ]);
 
-                \DB::commit();
-
                 Log::info('Payment successful', [
                     'customer_id' => $customer->id,
                     'payment_id' => $validated['razorpay_payment_id'],
@@ -210,7 +216,6 @@ class PaymentController extends Controller
                 return redirect()->route('customer.payments.success', ['payment_id' => $validated['razorpay_payment_id']]);
 
             } catch (\Exception $e) {
-                \DB::rollBack();
                 throw $e;
             }
 
