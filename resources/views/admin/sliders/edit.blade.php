@@ -17,7 +17,7 @@
 
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Current Image</label>
-                    <img src="{{ Storage::url($slider->image_path) }}" alt="{{ $slider->title }}" class="w-full h-64 object-cover rounded-lg border-2 border-gray-200 mb-2">
+                    <img src="{{ $slider->image_url }}" alt="{{ $slider->title }}" class="w-full h-64 object-cover rounded-lg border-2 border-gray-200 mb-2">
                 </div>
 
                 <div class="mb-4">

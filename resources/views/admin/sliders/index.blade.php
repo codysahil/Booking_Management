@@ -30,7 +30,7 @@
                 @forelse($sliders as $slider)
                     <tr>
                         <td class="px-6 py-4">
-                            <img src="{{ Storage::url($slider->image_path) }}" alt="{{ $slider->title }}" class="h-20 w-32 object-cover rounded">
+                            <img src="{{ $slider->image_url }}" alt="{{ $slider->title }}" class="h-20 w-32 object-cover rounded">
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm font-medium text-gray-900">{{ $slider->title ?? 'No title' }}</div>
