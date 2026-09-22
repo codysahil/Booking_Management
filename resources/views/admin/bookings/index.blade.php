@@ -25,6 +25,8 @@
                     <select name="status"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         <option value="">All Status</option>
+                        <option value="pending_payment" {{ request('status') == 'pending_payment' ? 'selected' : '' }}>
+                            Awaiting Payment</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed
                         </option>
@@ -113,6 +115,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
                                         $statusColors = [
+                                            'pending_payment' => 'bg-amber-100 text-amber-800',
                                             'active' => 'bg-green-100 text-green-800',
                                             'completed' => 'bg-blue-100 text-blue-800',
                                             'cancelled' => 'bg-red-100 text-red-800',
@@ -120,7 +123,7 @@
                                     @endphp
                                     <span
                                         class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                        {{ ucfirst($booking->status) }}
+                                        {{ $booking->status_label }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -128,9 +131,10 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
-                                        @if($booking->status == 'active' && $booking->bed->status !== 'occupied')
+                                        @if(in_array($booking->status, ['active', 'pending_payment']) && $booking->bed->status !== 'occupied')
                                             <a href="{{ route('admin.customers.create', ['booking_id' => $booking->id]) }}"
-                                                class="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-200 transition font-medium">
+                                                class="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-200 transition font-medium"
+                                                @if($booking->status == 'pending_payment') title="Hasn't paid online yet — check in to settle in cash instead" @endif>
                                                 Check-In
                                             </a>
                                         @endif
@@ -142,6 +146,9 @@
                                             @method('PUT')
                                             <select name="status" onchange="this.form.submit()"
                                                 class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-primary-500">
+                                                @if($booking->status == 'pending_payment')
+                                                    <option value="pending_payment" selected>Awaiting Payment</option>
+                                                @endif
                                                 <option value="active" {{ $booking->status == 'active' ? 'selected' : '' }}>
                                                     Active</option>
                                                 <option value="completed"

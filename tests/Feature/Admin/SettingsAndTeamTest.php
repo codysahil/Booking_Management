@@ -22,6 +22,7 @@ class SettingsAndTeamTest extends TestCase
             'rent_due_day' => 5,
             'late_fee' => 100,
             'notice_period_days' => 30,
+            'online_payment_hold_minutes' => 30,
         ]);
 
         $response->assertRedirect();

@@ -164,6 +164,51 @@ on its own — add a separate cron/worker process on your host, or run the
 two commands directly on your own schedule if you'd rather not run the
 scheduler at all.
 
+## How money and occupancy actually flow
+
+This app is built around how a PG/hostel actually runs day to day, not like a
+hotel booking engine:
+
+- **Billing is monthly, not nightly.** Residents don't get a per-night rate —
+  `charges:generate` creates one `MonthlyCharge` per resident per calendar
+  month (on the 1st), and `charges:mark-overdue` flags unpaid ones daily. A
+  booking's `check_in_date` just starts the stay; nothing bills per night.
+
+- **Only staff can start or end a stay.** Moving a resident in (`Admin\CustomerController@store`,
+  which sets the bed to `occupied`) or out (`@deactivate`, sets it back to
+  `vacant`) requires a signed-in staff account behind the `admin` middleware.
+  There is no self-service check-in or move-out anywhere in the resident
+  portal — a resident paying online never flips a bed to occupied themselves,
+  a staff member always does that in person against their ID.
+
+- **Cash and online payments land in the same place, instantly — there is no
+  separate "sync".** `app/Services/PaymentRecorder.php` is the only code path
+  that writes to the `payments` table, whether it's a cash rent payment a
+  staff member marks paid at the desk, a walk-in advance, or an online
+  Razorpay payment (browser callback or webhook). The dashboard, Payment
+  History, receipts and P&L report all read that one table live — recording
+  a cash payment updates every one of those screens the same instant a
+  staff member clicks "Mark Paid", the same as an online payment does.
+
+- **An online booking has to actually be paid for; a walk-in doesn't.** A
+  stranger booking on the public website (`Public\BookingController@processPayment`)
+  isn't the same trust level as someone standing at the desk. Once Razorpay
+  is configured, an online booking starts as `pending_payment` and holds its
+  bed for a configurable window (Admin → Settings → Billing Rules, default 30
+  minutes) — if payment never completes, `bookings:release-expired` (runs
+  every 5 minutes) cancels it and frees the bed automatically. Paying (from
+  the confirmation page, browser callback or the webhook backstop if the
+  browser never returns) flips the booking to `active`. A walk-in a staff
+  member creates directly is trusted immediately and can be settled in cash,
+  online, or marked to pay later — staff judgment, not a payment gate.
+  *(If Razorpay isn't configured yet, online bookings fall back to "pay at
+  check-in" exactly as before, so the site still works before payments are
+  set up.)*
+  If someone books online, never pays, and then simply walks in — the
+  existing "Check-In" action in Admin → Bookings handles that too: it settles
+  whatever payment method the resident actually pays with instead of leaving
+  a duplicate pending charge behind.
+
 ## Project structure notes
 
 - `app/Services/PaymentRecorder.php` is the single place that writes to the
@@ -175,3 +220,7 @@ scheduler at all.
 - `app/Http/Middleware/EnsureUserIsStaff.php` (aliased `admin`) gates the
   whole `/admin` area to active staff accounts, and can be scoped to the
   owner only with `admin:admin` (used for Settings and Team).
+- `App\Models\Booking::STATUSES` (`pending_payment`/`active`/`completed`/`cancelled`)
+  is a plain validated string, not a DB enum, the same pattern used for
+  `Due::TYPES` and `Request::TYPES` — adding a status later never needs
+  another schema migration.

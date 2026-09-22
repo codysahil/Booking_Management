@@ -28,6 +28,9 @@ return [
         'rent_due_day' => 5,
         'late_fee' => 0,
         'notice_period_days' => 30,
+        // How long an online booking's bed hold lasts before it's released unpaid.
+        // Only applies once Razorpay is configured — see Public\BookingController@processPayment.
+        'online_payment_hold_minutes' => 30,
 
         // Receipts
         'gstin' => null,
