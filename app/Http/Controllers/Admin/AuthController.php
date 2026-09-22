@@ -24,11 +24,11 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
-            
-            // Check if user is admin
-            if (Auth::user()->role !== 'admin') {
+
+            // Any active staff account (owner/admin or manager) may sign in.
+            if (! Auth::user()->isStaff()) {
                 Auth::logout();
-                return back()->withErrors(['email' => 'Unauthorized access.']);
+                return back()->withErrors(['email' => 'Your account does not have access to the admin panel.']);
             }
 
             return redirect()->intended(route('admin.dashboard'));

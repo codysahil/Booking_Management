@@ -27,35 +27,9 @@ Route::get('/branch/{branch}/room/{room}', [App\Http\Controllers\Public\BookingC
 Route::post('/booking/select-beds', [App\Http\Controllers\Public\BookingController::class, 'selectBeds'])->name('booking.select-beds');
 Route::get('/booking/checkout', [App\Http\Controllers\Public\BookingController::class, 'checkout'])->name('booking.checkout');
 Route::post('/booking/process-payment', [App\Http\Controllers\Public\BookingController::class, 'processPayment'])->name('booking.process-payment');
-Route::get('/booking/confirmation/{booking}', [App\Http\Controllers\Public\BookingController::class, 'confirmation'])->name('booking.confirmation');
-
-// Debug route for Railway testing
-Route::get('/debug/db-test', function () {
-    try {
-        $branches = \App\Models\Branch::count();
-        $customers = \App\Models\Customer::count();
-        $bookings = \App\Models\Booking::count();
-        $beds = \App\Models\Bed::count();
-
-        return response()->json([
-            'status' => 'success',
-            'database' => config('database.default'),
-            'counts' => [
-                'branches' => $branches,
-                'customers' => $customers,
-                'bookings' => $bookings,
-                'beds' => $beds,
-            ],
-            'latest_booking' => \App\Models\Booking::with('customer')->latest()->first(),
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ], 500);
-    }
-});
+Route::get('/booking/confirmation/{booking}', [App\Http\Controllers\Public\BookingController::class, 'confirmation'])
+    ->name('booking.confirmation')
+    ->middleware('signed');
 
 // ============================================
 // ADMIN AUTH ROUTES
@@ -64,15 +38,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Guest routes (not logged in)
     Route::middleware('guest')->group(function () {
         Route::get('/login', [App\Http\Controllers\Admin\AuthController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [App\Http\Controllers\Admin\AuthController::class, 'login']);
+        Route::post('/login', [App\Http\Controllers\Admin\AuthController::class, 'login'])->middleware('throttle:5,1');
         Route::get('/forgot-password', [App\Http\Controllers\Admin\AuthController::class, 'showForgotPasswordForm'])->name('password.request');
         Route::post('/forgot-password', [App\Http\Controllers\Admin\AuthController::class, 'sendResetLink'])->name('password.email');
         Route::get('/reset-password/{token}', [App\Http\Controllers\Admin\AuthController::class, 'showResetPasswordForm'])->name('password.reset');
         Route::post('/reset-password', [App\Http\Controllers\Admin\AuthController::class, 'resetPassword'])->name('password.update');
     });
 
-    // Protected routes (logged in)
-    Route::middleware('auth')->group(function () {
+    // Protected routes (any active staff account)
+    Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/logout', [App\Http\Controllers\Admin\AuthController::class, 'logout'])->name('logout');
 
         // Profile
@@ -85,7 +59,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // ============================================
 // ADMIN ROUTES (Protected)
 // ============================================
-Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     // Branch & Room Management
@@ -133,7 +107,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 // ============================================
 Route::prefix('customer')->name('customer.')->group(function () {
     Route::get('login', [App\Http\Controllers\Customer\AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [App\Http\Controllers\Customer\AuthController::class, 'login']);
+    Route::post('login', [App\Http\Controllers\Customer\AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::post('logout', [App\Http\Controllers\Customer\AuthController::class, 'logout'])->name('logout');
 
     Route::middleware('auth:customer')->group(function () {

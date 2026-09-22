@@ -25,10 +25,8 @@
                     <select name="status"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         <option value="">All Status</option>
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed
-                        </option>
-                        <option value="checked_in" {{ request('status') == 'checked_in' ? 'selected' : '' }}>Checked In
+                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed
                         </option>
                         <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
                         </option>
@@ -115,9 +113,8 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
                                         $statusColors = [
-                                            'pending' => 'bg-yellow-100 text-yellow-800',
-                                            'confirmed' => 'bg-blue-100 text-blue-800',
-                                            'checked_in' => 'bg-green-100 text-green-800',
+                                            'active' => 'bg-green-100 text-green-800',
+                                            'completed' => 'bg-blue-100 text-blue-800',
                                             'cancelled' => 'bg-red-100 text-red-800',
                                         ];
                                     @endphp
@@ -131,13 +128,13 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
-                                        @if($booking->status == 'pending' || $booking->status == 'confirmed')
+                                        @if($booking->status == 'active' && $booking->bed->status !== 'occupied')
                                             <a href="{{ route('admin.customers.create', ['booking_id' => $booking->id]) }}"
                                                 class="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-200 transition font-medium">
                                                 Check-In
                                             </a>
                                         @endif
-                                        
+
                                         <!-- Status Update Dropdown -->
                                         <form action="{{ route('admin.bookings.update-status', $booking) }}" method="POST"
                                             class="inline">
@@ -145,13 +142,10 @@
                                             @method('PUT')
                                             <select name="status" onchange="this.form.submit()"
                                                 class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-primary-500">
-                                                <option value="pending" {{ $booking->status == 'pending' ? 'selected' : '' }}>
-                                                    Pending</option>
-                                                <option value="confirmed"
-                                                    {{ $booking->status == 'confirmed' ? 'selected' : '' }}>Confirmed
-                                                </option>
-                                                <option value="checked_in"
-                                                    {{ $booking->status == 'checked_in' ? 'selected' : '' }}>Checked In
+                                                <option value="active" {{ $booking->status == 'active' ? 'selected' : '' }}>
+                                                    Active</option>
+                                                <option value="completed"
+                                                    {{ $booking->status == 'completed' ? 'selected' : '' }}>Completed
                                                 </option>
                                                 <option value="cancelled"
                                                     {{ $booking->status == 'cancelled' ? 'selected' : '' }}>Cancelled

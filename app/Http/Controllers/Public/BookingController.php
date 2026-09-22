@@ -140,14 +140,44 @@ class BookingController extends Controller
         ]);
 
         $beds = Bed::whereIn('id', $bedIds)->get();
-        
-        if ($beds->isEmpty()) {
+
+        if ($beds->isEmpty() || $beds->count() !== count($bedIds)) {
             return redirect()->route('home')->withErrors(['error' => 'No beds found. Please try again.']);
         }
 
         // Calculate advance
         $totalRent = $beds->sum('monthly_rent');
         $advance = max($totalRent, 3000);
+
+        // Atomically re-claim each bed so two customers can't check out with the same bed.
+        // A bed is still claimable if it's vacant and either unreserved, its reservation
+        // expired, or it was this browser session that reserved it.
+        $now = now();
+        $sessionBedIds = collect(session('selected_bed_ids', []))->map(fn ($id) => (int) $id)->all();
+        $claimedIds = [];
+
+        foreach ($bedIds as $bedId) {
+            $claimed = Bed::where('id', $bedId)
+                ->where('status', 'vacant')
+                ->where(function ($query) use ($now, $sessionBedIds) {
+                    $query->whereNull('reserved_until')
+                        ->orWhere('reserved_until', '<', $now)
+                        ->orWhereIn('id', $sessionBedIds);
+                })
+                ->update(['status' => 'reserved', 'reserved_until' => null]);
+
+            if ($claimed) {
+                $claimedIds[] = $bedId;
+            } else {
+                if (!empty($claimedIds)) {
+                    Bed::whereIn('id', $claimedIds)->update(['status' => 'vacant']);
+                }
+
+                \Log::warning('Booking failed: bed no longer available', ['bed_id' => $bedId]);
+
+                return redirect()->route('home')->withErrors(['error' => 'Sorry, one or more selected beds were just booked by someone else. Please select beds again.']);
+            }
+        }
 
         // Note: Removed DB transaction due to Neon PostgreSQL serverless connection pooling issues
         try {
@@ -202,7 +232,9 @@ class BookingController extends Controller
                 'customer_code' => $customerCode,
             ]);
 
-            return redirect()->route('booking.confirmation', $booking)->with('success', 'Booking confirmed!');
+            $confirmationUrl = \Illuminate\Support\Facades\URL::signedRoute('booking.confirmation', ['booking' => $booking]);
+
+            return redirect($confirmationUrl)->with('success', 'Booking confirmed!');
         } catch (\Exception $e) {
             \Log::error('Booking failed: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());

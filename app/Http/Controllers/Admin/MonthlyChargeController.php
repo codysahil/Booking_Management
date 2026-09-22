@@ -6,11 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\MonthlyCharge;
 use App\Models\Customer;
 use App\Models\Booking;
+use App\Services\PaymentRecorder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class MonthlyChargeController extends Controller
 {
+    public function __construct(private PaymentRecorder $recorder)
+    {
+    }
+
+
     // List all monthly charges
     public function index(Request $request)
     {
@@ -206,7 +213,7 @@ class MonthlyChargeController extends Controller
         return back()->with('success', "Rent updated from ₹{$oldRent} to ₹{$validated['new_rent']} effective from {$validated['effective_from']}");
     }
 
-    // Mark charge as paid (manual payment)
+    // Mark charge as paid (manual payment) — writes a ledger row via PaymentRecorder.
     public function markPaid(Request $request, MonthlyCharge $charge)
     {
         $validated = $request->validate([
@@ -214,12 +221,14 @@ class MonthlyChargeController extends Controller
             'transaction_id' => 'nullable|string',
         ]);
 
-        $charge->update([
-            'status' => 'paid',
-            'paid_date' => now(),
-            'payment_method' => $validated['payment_method'],
-            'transaction_id' => $validated['transaction_id'],
-        ]);
+        $this->recorder->settle(
+            $charge->customer,
+            collect([$charge]),
+            collect(),
+            $validated['payment_method'],
+            $validated['transaction_id'] ?? null,
+            ['recorded_by' => Auth::id()],
+        );
 
         return back()->with('success', 'Charge marked as paid!');
     }

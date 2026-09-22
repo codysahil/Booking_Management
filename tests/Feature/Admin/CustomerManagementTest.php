@@ -9,12 +9,20 @@ use App\Models\Branch;
 use App\Models\Room;
 use App\Models\Bed;
 use App\Models\Customer;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class CustomerManagementTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]));
+    }
 
     public function test_admin_can_view_create_customer_page()
     {
@@ -52,7 +60,10 @@ class CustomerManagementTest extends TestCase
             'photo' => $photo,
             'id_proof' => $idProof,
             'bed_id' => $bed->id,
-            'joining_date' => '2023-11-01',
+            'check_in_date' => '2023-11-01',
+            'stay_type' => 'permanent',
+            'advance_amount' => 5000,
+            'payment_method' => 'cash',
         ]);
 
         $response->assertRedirect(route('admin.customers.index'));

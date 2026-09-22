@@ -17,7 +17,7 @@ class BookingFlowTest extends TestCase
     {
         $response = $this->get(route('home'));
         $response->assertStatus(200);
-        $response->assertSee('SereneStay');
+        $response->assertSee('Honeybees');
     }
 
     public function test_public_can_view_branch_details()
@@ -59,8 +59,10 @@ class BookingFlowTest extends TestCase
             'status' => 'vacant',
         ]);
 
-        $response = $this->post(route('booking.hold', $bed));
-        $response->assertRedirect(route('home'));
-        $response->assertSessionHas('success');
+        $response = $this->post(route('booking.select-beds'), ['bed_ids' => [$bed->id]]);
+
+        $response->assertRedirect(route('booking.checkout'));
+        $this->assertDatabaseHas('beds', ['id' => $bed->id, 'status' => 'vacant']);
+        $this->assertNotNull($bed->fresh()->reserved_until);
     }
 }

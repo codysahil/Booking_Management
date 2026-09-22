@@ -41,17 +41,6 @@ class CustomerController extends Controller
         \Log::info('Request URL: ' . $request->fullUrl());
         \Log::info('Request data (without files):', $request->except(['photo', 'id_proof', '_token']));
 
-        // Debug: Return JSON with request data to see what's being received
-        if ($request->has('debug_mode')) {
-            return response()->json([
-                'received' => $request->except(['photo', 'id_proof', '_token']),
-                'has_photo' => $request->hasFile('photo'),
-                'has_proof' => $request->hasFile('id_proof'),
-            ]);
-        }
-
-        \Log::info('Customer store method called', $request->all());
-
         try {
             $validated = $request->validate([
                 'customer_id' => 'nullable|exists:customers,id',
@@ -89,12 +78,12 @@ class CustomerController extends Controller
         try {
             if ($request->hasFile('photo')) {
                 \Log::info('Attempting photo upload');
-                $photoPath = $request->file('photo')->store('customers/photos');
+                $photoPath = $request->file('photo')->store('customers/photos', 'public');
                 \Log::info('Photo uploaded', ['path' => $photoPath]);
             }
             if ($request->hasFile('id_proof')) {
                 \Log::info('Attempting ID proof upload');
-                $proofPath = $request->file('id_proof')->store('customers/proofs');
+                $proofPath = $request->file('id_proof')->store('customers/proofs', 'public');
                 \Log::info('ID proof uploaded', ['path' => $proofPath]);
             }
         } catch (\Exception $e) {
@@ -194,19 +183,38 @@ class CustomerController extends Controller
 
             // Update bed status
             \Log::info('Updating bed status', ['bed_id' => $bed->id]);
-            $bed->update(['status' => 'occupied']);
+            $bed->update(['status' => 'occupied', 'reserved_until' => null]);
 
-            // Create payment record
-            \Log::info('Creating payment record');
-            $customer->payments()->create([
-                'booking_id' => $booking->id,
-                'amount' => $request->advance_amount,
-                'payment_type' => 'Advance',
-                'payment_method' => $request->payment_method ?? 'cash',
-                'transaction_ref' => 'ADV-' . strtoupper(\Str::random(12)),
-                'status' => 'paid',
-                'paid_at' => now(),
-            ]);
+            // The online booking flow already created a pending "Advance" payment row
+            // for this booking — settle that one instead of creating a duplicate.
+            $pendingAdvance = $booking->payments()
+                ->where('payment_type', 'Advance')
+                ->where('status', 'pending')
+                ->first();
+
+            if ($pendingAdvance) {
+                \Log::info('Marking existing pending advance payment as paid', ['payment_id' => $pendingAdvance->id]);
+                $pendingAdvance->update([
+                    'amount' => $request->advance_amount,
+                    'payment_method' => $request->payment_method ?? 'cash',
+                    'transaction_ref' => 'ADV-' . strtoupper(\Str::random(12)),
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'recorded_by' => auth()->id(),
+                ]);
+            } else {
+                \Log::info('Creating payment record');
+                $customer->payments()->create([
+                    'booking_id' => $booking->id,
+                    'amount' => $request->advance_amount,
+                    'payment_type' => 'Advance',
+                    'payment_method' => $request->payment_method ?? 'cash',
+                    'transaction_ref' => 'ADV-' . strtoupper(\Str::random(12)),
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'recorded_by' => auth()->id(),
+                ]);
+            }
             \Log::info('Payment record created');
 
             \Log::info('Customer creation completed successfully', ['customer_id' => $customer->id]);
@@ -266,7 +274,7 @@ class CustomerController extends Controller
                 if ($customer->photo_path) {
                     Storage::delete($customer->photo_path);
                 }
-                $validated['photo_path'] = $request->file('photo')->store('customers/photos');
+                $validated['photo_path'] = $request->file('photo')->store('customers/photos', 'public');
             }
 
             if ($request->hasFile('id_proof')) {
@@ -274,7 +282,7 @@ class CustomerController extends Controller
                 if ($customer->id_proof_path) {
                     Storage::delete($customer->id_proof_path);
                 }
-                $validated['id_proof_path'] = $request->file('id_proof')->store('customers/proofs');
+                $validated['id_proof_path'] = $request->file('id_proof')->store('customers/proofs', 'public');
             }
 
             $customer->update($validated);

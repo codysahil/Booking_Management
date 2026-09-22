@@ -46,16 +46,17 @@ class BookingController extends Controller
     public function updateStatus(Request $request, Booking $booking)
     {
         $request->validate([
-            'status' => 'required|in:pending,confirmed,checked_in,cancelled',
+            'status' => 'required|in:active,completed,cancelled',
         ]);
 
         $booking->update(['status' => $request->status]);
 
         // Update bed status based on booking status
-        if ($request->status === 'confirmed' || $request->status === 'checked_in') {
-            $booking->bed->update(['status' => 'occupied']);
+        if ($request->status === 'completed') {
+            $booking->update(['check_out_date' => $booking->check_out_date ?? now()]);
+            $booking->bed->update(['status' => 'vacant', 'reserved_until' => null]);
         } elseif ($request->status === 'cancelled') {
-            $booking->bed->update(['status' => 'vacant']);
+            $booking->bed->update(['status' => 'vacant', 'reserved_until' => null]);
         }
 
         return back()->with('success', 'Booking status updated successfully!');
