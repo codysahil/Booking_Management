@@ -3,7 +3,6 @@
 namespace Tests\Feature\Public;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Branch;
 use App\Models\Room;
@@ -43,7 +42,7 @@ class EnhancedBookingFlowTest extends TestCase
         // Step 1: View room and bed selection page
         $response = $this->get(route('booking.room', ['branch' => $branch->id, 'room' => $room->id]));
         $response->assertStatus(200);
-        $response->assertSee('Select Your Beds');
+        $response->assertSee('Choose Your Bed');
 
         // Step 2: Select multiple beds
         $response = $this->post(route('booking.select-beds'), [
@@ -52,7 +51,7 @@ class EnhancedBookingFlowTest extends TestCase
         $response->assertRedirect(route('booking.checkout'));
         $this->assertNotNull(session('selected_bed_ids'));
 
-        // Verify beds are reserved
+        // Verify beds are reserved (still vacant, but held for this session)
         $bed1->refresh();
         $bed2->refresh();
         $this->assertNotNull($bed1->reserved_until);
@@ -65,12 +64,14 @@ class EnhancedBookingFlowTest extends TestCase
 
         // Step 4: Process payment and create booking
         $response = $this->post(route('booking.process-payment'), [
+            'bed_ids' => [$bed1->id, $bed2->id],
             'name' => 'Jane Doe',
             'phone' => '9876543210',
             'email' => 'jane@example.com',
             'address' => '123 Main St',
             'check_in_date' => now()->addDays(1)->format('Y-m-d'),
             'payment_method' => 'upi',
+            'accept_terms' => '1',
         ]);
 
         // Verify customer created
@@ -81,40 +82,44 @@ class EnhancedBookingFlowTest extends TestCase
 
         $customer = Customer::where('phone', '9876543210')->first();
         $this->assertNotNull($customer);
-        $this->assertStringStartsWith('CUST-', $customer->customer_code);
+        $this->assertStringStartsWith('SS-', $customer->customer_code);
 
         // Verify bookings created
         $this->assertDatabaseHas('bookings', [
             'customer_id' => $customer->id,
             'bed_id' => $bed1->id,
-            'status' => 'confirmed',
+            'status' => 'active',
         ]);
 
         $this->assertDatabaseHas('bookings', [
             'customer_id' => $customer->id,
             'bed_id' => $bed2->id,
-            'status' => 'confirmed',
+            'status' => 'active',
         ]);
 
-        // Verify payment record
+        // Verify a pending advance payment was recorded (settled later, at check-in or online)
         $this->assertDatabaseHas('payments', [
             'customer_id' => $customer->id,
             'amount' => 10000, // 2 beds * 5000
             'payment_type' => 'Advance',
-            'status' => 'completed',
+            'status' => 'pending',
         ]);
 
-        // Verify beds marked as occupied
+        // Verify beds held (reserved) for this booking pending physical check-in
         $bed1->refresh();
         $bed2->refresh();
-        $this->assertEquals('occupied', $bed1->status);
-        $this->assertEquals('occupied', $bed2->status);
+        $this->assertEquals('reserved', $bed1->status);
+        $this->assertEquals('reserved', $bed2->status);
         $this->assertNull($bed1->reserved_until);
         $this->assertNull($bed2->reserved_until);
 
-        // Verify redirect to confirmation
-        $booking = $customer->bookings->first();
-        $response->assertRedirect(route('booking.confirmation', $booking));
+        // Verify redirect to the (signed) confirmation page for the last-created booking
+        $booking = $customer->bookings()->latest('id')->first();
+        $response->assertRedirect();
+        $this->assertStringContainsString(
+            route('booking.confirmation', ['booking' => $booking], false),
+            $response->headers->get('Location'),
+        );
     }
 
     public function test_advance_calculation_minimum_3000()
@@ -137,12 +142,14 @@ class EnhancedBookingFlowTest extends TestCase
 
         $this->post(route('booking.select-beds'), ['bed_ids' => [$bed->id]]);
 
-        $response = $this->post(route('booking.process-payment'), [
+        $this->post(route('booking.process-payment'), [
+            'bed_ids' => [$bed->id],
             'name' => 'Test User',
             'phone' => '1234567890',
             'address' => 'Test Address',
             'check_in_date' => now()->addDays(1)->format('Y-m-d'),
             'payment_method' => 'upi',
+            'accept_terms' => '1',
         ]);
 
         // Verify minimum advance of 3000 is charged

@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Branch;
 use App\Models\Room;
+use App\Models\Expense;
 use App\Models\MonthlyCharge;
 use App\Models\Payment;
 use Illuminate\Http\Request;
@@ -15,6 +16,37 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
+    /** Income (successful payments) vs expenses (by category), for a month/branch. */
+    public function profitLoss(Request $request)
+    {
+        $month = $request->get('month', now()->format('Y-m'));
+        $branchId = $request->get('branch_id');
+
+        $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
+
+        $income = Payment::successful()
+            ->receivedBetween($startDate, $endDate)
+            ->forBranch($branchId)
+            ->sum('amount');
+
+        $expensesByCategory = Expense::whereBetween('date', [$startDate, $endDate])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->selectRaw('category, SUM(amount) as total')
+            ->groupBy('category')
+            ->orderByDesc('total')
+            ->get();
+
+        $totalExpenses = $expensesByCategory->sum('total');
+        $net = $income - $totalExpenses;
+
+        $branches = Branch::all();
+
+        return view('admin.reports.profit-loss', compact(
+            'income', 'expensesByCategory', 'totalExpenses', 'net', 'month', 'branchId', 'branches'
+        ));
+    }
+
     public function index(Request $request)
     {
         $period = $request->get('period', 'month');

@@ -107,6 +107,17 @@
                                 </div>
                             </div>
 
+                            <label class="flex items-start space-x-2">
+                                <input type="checkbox" name="accept_terms" value="1" required
+                                    class="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="text-sm text-gray-600">
+                                    I agree to the <a href="{{ route('terms') }}" target="_blank" class="text-primary-600 hover:underline font-medium">Terms & Conditions</a>
+                                </span>
+                            </label>
+                            @error('accept_terms')
+                                <p class="text-red-600 text-xs">{{ $message }}</p>
+                            @enderror
+
                             <button type="submit"
                                 class="w-full bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 transition shadow-lg">
                                 Confirm Booking

@@ -13,7 +13,25 @@
                     <h1 class="text-3xl font-display font-bold text-gray-900">Welcome, {{ Auth::guard('customer')->user()->name }}!</h1>
                     <p class="text-gray-600 mt-1">Customer ID: <span class="font-bold text-primary-600">{{ Auth::guard('customer')->user()->customer_code }}</span></p>
                 </div>
+                <a href="{{ route('customer.requests.create') }}"
+                    class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition shadow-lg">
+                    New Request
+                </a>
             </div>
+
+            @if($announcements->isNotEmpty())
+                <div class="space-y-3 mb-8">
+                    @foreach ($announcements as $announcement)
+                        <div class="bg-white rounded-xl shadow border-l-4 {{ $announcement->is_pinned ? 'border-amber-400' : 'border-primary-400' }} p-4">
+                            <p class="font-bold text-gray-900 text-sm">
+                                @if($announcement->is_pinned) 📌 @endif
+                                {{ $announcement->title }}
+                            </p>
+                            <p class="text-sm text-gray-600">{{ $announcement->body }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
 
             <!-- Quick Stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

@@ -237,5 +237,90 @@
                 </div>
             </div>
         </div>
+
+        <!-- Dues (fines, EB, damage, other) -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Dues</h3>
+
+            <form method="POST" action="{{ route('admin.dues.store', $customer) }}" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6 items-end">
+                @csrf
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                    <select name="due_type" required class="w-full text-sm border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                        @foreach (\App\Models\Due::TYPES as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Title</label>
+                    <input type="text" name="title" required placeholder="e.g. May EB bill"
+                        class="w-full text-sm border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Amount (₹)</label>
+                    <input type="number" step="0.01" min="0.01" name="amount" required
+                        class="w-full text-sm border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Due Date</label>
+                    <input type="date" name="due_date" required value="{{ now()->addDays(7)->format('Y-m-d') }}"
+                        class="w-full text-sm border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                <button type="submit" class="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition">
+                    Add Due
+                </button>
+            </form>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Title</th>
+                            <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Type</th>
+                            <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Due Date</th>
+                            <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Amount</th>
+                            <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
+                            <th class="px-4 py-2 text-right text-xs font-bold text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($customer->dues as $due)
+                            <tr>
+                                <td class="px-4 py-3 text-sm text-gray-900">{{ $due->title }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ $due->type_label }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ $due->due_date->format('d M, Y') }}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-gray-900">₹{{ number_format($due->amount, 2) }}</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $due->isPaid() ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                        {{ ucfirst($due->status) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-right text-sm space-x-2">
+                                    @if($due->isPending())
+                                        <form action="{{ route('admin.dues.mark-paid', $due) }}" method="POST" class="inline-flex items-center gap-2">
+                                            @csrf @method('PATCH')
+                                            <select name="payment_method" class="text-xs border-gray-300 rounded-lg">
+                                                <option value="cash">Cash</option>
+                                                <option value="upi">UPI</option>
+                                                <option value="bank_transfer">Bank transfer</option>
+                                                <option value="card">Card</option>
+                                            </select>
+                                            <button type="submit" class="text-green-600 hover:text-green-800 font-medium">Mark Paid</button>
+                                        </form>
+                                    @endif
+                                    <form action="{{ route('admin.dues.destroy', $due) }}" method="POST" class="inline" onsubmit="return confirm('Delete this due?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="6" class="px-4 py-6 text-center text-gray-500 text-sm">No dues on this account.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 @endsection

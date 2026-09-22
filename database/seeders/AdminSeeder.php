@@ -10,15 +10,23 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'admin@honeybees.com'],
+        $email = env('ADMIN_EMAIL', 'admin@honeybees.com');
+        $password = env('ADMIN_PASSWORD', 'admin123');
+
+        $user = User::firstOrCreate(
+            ['email' => $email],
             [
                 'name' => 'Honeybees Admin',
-                'password' => Hash::make('admin123'),
-                'role' => 'admin',
+                'password' => Hash::make($password),
+                'role' => User::ROLE_ADMIN,
+                'is_active' => true,
             ]
         );
 
-        $this->command->info('✅ Admin user created/updated: admin@honeybees.com / admin123');
+        if ($user->wasRecentlyCreated) {
+            $this->command->info("✅ Admin user created: {$email}");
+        } else {
+            $this->command->info("ℹ️ Admin user already exists: {$email} (password unchanged)");
+        }
     }
 }

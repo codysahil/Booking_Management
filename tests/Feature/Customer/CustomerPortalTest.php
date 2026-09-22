@@ -31,7 +31,7 @@ class CustomerPortalTest extends TestCase
         ]);
 
         $response = $this->post(route('customer.login'), [
-            'email' => 'test@example.com',
+            'customer_code' => 'CUST-001',
             'password' => 'password',
         ]);
 

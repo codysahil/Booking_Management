@@ -8,10 +8,18 @@ use Tests\TestCase;
 use App\Models\Branch;
 use App\Models\Room;
 use App\Models\Bed;
+use App\Models\User;
 
 class RoomManagementTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]));
+    }
 
     public function test_admin_can_create_branch()
     {

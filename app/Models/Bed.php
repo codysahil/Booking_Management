@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bed extends Model
 {
-    protected $fillable = ['room_id', 'bed_number', 'monthly_rent', 'status'];
+    protected $fillable = ['room_id', 'bed_number', 'monthly_rent', 'status', 'reserved_until'];
+
+    protected $casts = [
+        'reserved_until' => 'datetime',
+    ];
 
     public function room()
     {

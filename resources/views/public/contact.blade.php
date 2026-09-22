@@ -80,7 +80,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-gray-900 mb-1">Phone</h3>
-                                <a href="tel:+919944159321" class="text-gray-600 hover:text-rose-600 transition">+91 99441 59321</a>
+                                <a href="tel:{{ setting('contact_phone', '+919944159321') }}" class="text-gray-600 hover:text-rose-600 transition">{{ setting('contact_phone', '+91 99441 59321') }}</a>
                                 <p class="text-sm text-gray-500 mt-1">Mon-Sat, 9AM-8PM</p>
                             </div>
                         </div>
@@ -94,7 +94,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-gray-900 mb-1">Email</h3>
-                                <a href="mailto:senthiltogether@gmail.com" class="text-gray-600 hover:text-rose-600 transition">senthiltogether@gmail.com</a>
+                                <a href="mailto:{{ setting('contact_email', 'senthiltogether@gmail.com') }}" class="text-gray-600 hover:text-rose-600 transition">{{ setting('contact_email', 'senthiltogether@gmail.com') }}</a>
                                 <p class="text-sm text-gray-500 mt-1">We'll respond within 24 hours</p>
                             </div>
                         </div>

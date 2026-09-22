@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Due extends Model
 {
+    public const TYPES = [
+        'fine' => 'Fine',
+        'eb' => 'Electricity (EB)',
+        'late_fee' => 'Late fee',
+        'damage' => 'Damage',
+        'maintenance' => 'Maintenance',
+        'other' => 'Other',
+    ];
+
     protected $fillable = [
         'customer_id',
         'due_type',
@@ -28,6 +37,11 @@ class Due extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return self::TYPES[$this->due_type] ?? ucfirst(str_replace('_', ' ', (string) $this->due_type));
     }
 
     public function isPending()

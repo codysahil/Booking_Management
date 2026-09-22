@@ -7,6 +7,8 @@ use Illuminate\Notifications\Notifiable;
 
 class Customer extends Authenticatable
 {
+    use Notifiable;
+
     protected $fillable = [
         'customer_code',
         'name',
@@ -54,9 +56,14 @@ class Customer extends Authenticatable
         return $this->hasMany(Due::class);
     }
 
+    public function activeBooking()
+    {
+        return $this->hasOne(Booking::class)->where('status', 'active')->latestOfMany();
+    }
+
     public function getPendingChargesAmount()
     {
-        return $this->monthlyCharges()->where('status', 'pending')->sum('total_amount');
+        return $this->monthlyCharges()->whereIn('status', ['pending', 'overdue'])->sum('total_amount');
     }
 
     public function getPendingDuesAmount()

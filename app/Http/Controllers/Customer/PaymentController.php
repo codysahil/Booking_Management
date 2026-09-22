@@ -3,111 +3,94 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
-use App\Models\MonthlyCharge;
 use App\Models\Due;
+use App\Models\MonthlyCharge;
+use App\Models\Payment;
+use App\Services\PaymentRecorder;
+use App\Services\Razorpay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
+    public function __construct(private PaymentRecorder $recorder, private Razorpay $razorpay)
+    {
+    }
+
     // Show payment page
     public function index()
     {
         $customer = Auth::guard('customer')->user();
-        
-        // Get all pending charges
+
         $pendingCharges = $customer->monthlyCharges()
-            ->where('status', 'pending')
+            ->unpaid()
             ->orderBy('month_year', 'asc')
             ->get();
-        
-        // Get all pending dues
+
         $pendingDues = $customer->dues()
             ->where('status', 'pending')
             ->orderBy('due_date', 'asc')
             ->get();
-        
-        return view('customer.payments.index', compact('pendingCharges', 'pendingDues'));
+
+        $onlinePaymentsEnabled = $this->razorpay->isConfigured();
+
+        return view('customer.payments.index', compact('pendingCharges', 'pendingDues', 'onlinePaymentsEnabled'));
     }
 
     // Create Razorpay order
     public function createOrder(Request $request)
     {
-        \Log::info('Payment order creation started', $request->all());
-        
         $validated = $request->validate([
             'charge_ids' => 'nullable|array',
-            'charge_ids.*' => 'exists:monthly_charges,id',
+            'charge_ids.*' => 'integer',
             'due_ids' => 'nullable|array',
-            'due_ids.*' => 'exists:dues,id',
+            'due_ids.*' => 'integer',
         ]);
 
         $customer = Auth::guard('customer')->user();
-        $totalAmount = 0;
-        $items = [];
-        
-        \Log::info('Validated data', $validated);
 
-        // Calculate total from selected charges
-        if (!empty($validated['charge_ids'])) {
-            $charges = MonthlyCharge::whereIn('id', $validated['charge_ids'])
-                ->where('customer_id', $customer->id)
-                ->where('status', 'pending')
-                ->get();
-            
-            foreach ($charges as $charge) {
-                $totalAmount += $charge->total_amount;
-                $items[] = [
-                    'type' => 'charge',
-                    'id' => $charge->id,
-                    'description' => 'Rent for ' . \Carbon\Carbon::parse($charge->month_year)->format('F Y'),
-                    'amount' => $charge->total_amount,
-                ];
-            }
+        if (! $this->razorpay->isConfigured()) {
+            return back()->withErrors(['error' => 'Online payments are not available right now. Please pay at the office.']);
         }
 
-        // Calculate total from selected dues
-        if (!empty($validated['due_ids'])) {
-            $dues = Due::whereIn('id', $validated['due_ids'])
-                ->where('customer_id', $customer->id)
-                ->where('status', 'pending')
-                ->get();
-            
-            foreach ($dues as $due) {
-                $totalAmount += $due->amount;
-                $items[] = [
-                    'type' => 'due',
-                    'id' => $due->id,
-                    'description' => $due->title,
-                    'amount' => $due->amount,
-                ];
-            }
-        }
+        // Only this resident's unpaid items count, whatever ids were posted.
+        $charges = MonthlyCharge::whereIn('id', $validated['charge_ids'] ?? [])
+            ->where('customer_id', $customer->id)
+            ->unpaid()
+            ->get();
+
+        $dues = Due::whereIn('id', $validated['due_ids'] ?? [])
+            ->where('customer_id', $customer->id)
+            ->where('status', 'pending')
+            ->get();
+
+        $items = $charges->map(fn ($c) => [
+            'type' => 'charge',
+            'id' => $c->id,
+            'description' => 'Rent for ' . $c->period_label,
+            'amount' => (float) $c->total_amount,
+        ])->concat($dues->map(fn ($d) => [
+            'type' => 'due',
+            'id' => $d->id,
+            'description' => $d->title,
+            'amount' => (float) $d->amount,
+        ]))->values()->all();
+
+        $totalAmount = round(collect($items)->sum('amount'), 2);
 
         if ($totalAmount <= 0) {
             return back()->withErrors(['error' => 'Please select at least one item to pay.']);
         }
 
-        // Create Razorpay order
         try {
-            $api = new \Razorpay\Api\Api(
-                config('services.razorpay.key'),
-                config('services.razorpay.secret')
-            );
-
-            $orderData = [
-                'receipt' => 'rcpt_' . time(),
-                'amount' => $totalAmount * 100, // Amount in paise
-                'currency' => 'INR',
-                'notes' => [
-                    'customer_id' => $customer->id,
-                    'customer_code' => $customer->customer_code,
-                    'items' => json_encode($items),
-                ]
-            ];
-
-            $razorpayOrder = $api->order->create($orderData);
+            $razorpayOrder = $this->razorpay->createOrder($totalAmount, 'rcpt_' . $customer->id . '_' . time(), [
+                'purpose' => 'dues',
+                'customer_id' => $customer->id,
+                'customer_code' => $customer->customer_code,
+                // Razorpay notes are limited to 256 chars each, so keep only type/id pairs.
+                'items' => json_encode(array_map(fn ($i) => ['type' => $i['type'], 'id' => $i['id']], $items)),
+            ]);
 
             return view('customer.payments.checkout', [
                 'order' => $razorpayOrder,
@@ -116,22 +99,14 @@ class PaymentController extends Controller
                 'items' => $items,
                 'razorpayKey' => config('services.razorpay.key'),
             ]);
-
         } catch (\Exception $e) {
             Log::error('Razorpay order creation failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
                 'customer_id' => $customer->id,
-                'amount' => $totalAmount ?? 0,
+                'amount' => $totalAmount,
             ]);
-            
-            // Show actual error in production for debugging
-            $errorMsg = 'Failed to create payment order. Please try again.';
-            if (app()->environment('production') && config('app.debug')) {
-                $errorMsg .= ' Error: ' . $e->getMessage();
-            }
-            
-            return back()->withErrors(['error' => $errorMsg]);
+
+            return back()->withErrors(['error' => 'Failed to create payment order. Please try again.']);
         }
     }
 
@@ -144,67 +119,31 @@ class PaymentController extends Controller
             'razorpay_signature' => 'required|string',
         ]);
 
+        $customer = Auth::guard('customer')->user();
+
         try {
-            $api = new \Razorpay\Api\Api(
-                config('services.razorpay.key'),
-                config('services.razorpay.secret')
-            );
+            $this->razorpay->verifySignature($validated);
 
-            // Verify signature
-            $attributes = [
-                'razorpay_order_id' => $validated['razorpay_order_id'],
-                'razorpay_payment_id' => $validated['razorpay_payment_id'],
-                'razorpay_signature' => $validated['razorpay_signature'],
-            ];
+            $order = $this->razorpay->fetchOrder($validated['razorpay_order_id']);
+            $paymentData = $this->razorpay->fetchPayment($validated['razorpay_payment_id']);
 
-            $api->utility->verifyPaymentSignature($attributes);
-
-            // Fetch order details
-            $order = $api->order->fetch($validated['razorpay_order_id']);
-            $payment = $api->payment->fetch($validated['razorpay_payment_id']);
-
-            // Get detailed payment method from Razorpay
-            $paymentMethod = $this->getPaymentMethodDetails($payment);
-
-            // Get items from order notes
-            $items = json_decode($order->notes->items, true);
-            $customer = Auth::guard('customer')->user();
-
-            // Note: Removed DB transaction due to Neon PostgreSQL serverless connection pooling issues
-            // Update charges and dues
-            foreach ($items as $item) {
-                if ($item['type'] === 'charge') {
-                    $charge = MonthlyCharge::find($item['id']);
-                    if ($charge && $charge->customer_id === $customer->id) {
-                        $charge->update([
-                            'status' => 'paid',
-                            'paid_date' => now(),
-                            'payment_method' => $paymentMethod,
-                            'transaction_id' => $validated['razorpay_payment_id'],
-                        ]);
-                    }
-                } elseif ($item['type'] === 'due') {
-                    $due = Due::find($item['id']);
-                    if ($due && $due->customer_id === $customer->id) {
-                        $due->update([
-                            'status' => 'paid',
-                            'paid_date' => now(),
-                            'payment_method' => $paymentMethod,
-                            'transaction_id' => $validated['razorpay_payment_id'],
-                        ]);
-                    }
-                }
+            if ((int) ($order->notes->customer_id ?? 0) !== $customer->id) {
+                throw new \RuntimeException('Order does not belong to this customer.');
             }
 
-            // Create payment record
-            $customer->payments()->create([
-                'amount' => $order->amount / 100,
-                'payment_type' => 'Monthly Charges',
-                'payment_method' => $paymentMethod,
-                'transaction_ref' => $validated['razorpay_payment_id'],
-                'status' => 'paid',
-                'paid_at' => now(),
-            ]);
+            $items = json_decode($order->notes->items ?? '[]', true) ?: [];
+
+            $payment = $this->recorder->settle(
+                $customer,
+                MonthlyCharge::whereIn('id', collect($items)->where('type', 'charge')->pluck('id'))->get(),
+                Due::whereIn('id', collect($items)->where('type', 'due')->pluck('id'))->get(),
+                Razorpay::describeMethod($paymentData->toArray()),
+                $validated['razorpay_payment_id'],
+                [
+                    'razorpay_payment_id' => $validated['razorpay_payment_id'],
+                    'razorpay_order_id' => $validated['razorpay_order_id'],
+                ],
+            );
 
             Log::info('Payment successful', [
                 'customer_id' => $customer->id,
@@ -212,24 +151,23 @@ class PaymentController extends Controller
                 'amount' => $order->amount / 100,
             ]);
 
-            return redirect()->route('customer.payments.success', ['payment_id' => $validated['razorpay_payment_id']]);
-
+            return redirect()->route('customer.payments.success', [
+                'payment_id' => $validated['razorpay_payment_id'],
+                'receipt' => $payment?->id,
+            ]);
         } catch (\Razorpay\Api\Errors\SignatureVerificationError $e) {
             Log::error('Payment signature verification failed', [
                 'error' => $e->getMessage(),
                 'payment_id' => $validated['razorpay_payment_id'] ?? null,
             ]);
-            
+
             return redirect()->route('customer.payments.failed')
                 ->with('error', 'Payment verification failed. Please contact support.');
         } catch (\Exception $e) {
-            Log::error('Payment verification error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            
+            Log::error('Payment verification error', ['error' => $e->getMessage()]);
+
             return redirect()->route('customer.payments.failed')
-                ->with('error', 'Payment processing failed. Please contact support.');
+                ->with('error', 'Payment processing failed. If money was deducted, it will be updated automatically within a few minutes.');
         }
     }
 
@@ -237,7 +175,12 @@ class PaymentController extends Controller
     public function success(Request $request)
     {
         $paymentId = $request->get('payment_id');
-        return view('customer.payments.success', compact('paymentId'));
+        $customer = Auth::guard('customer')->user();
+        $payment = $request->filled('receipt')
+            ? $customer->payments()->find($request->get('receipt'))
+            : null;
+
+        return view('customer.payments.success', compact('paymentId', 'payment'));
     }
 
     // Payment failed page
@@ -246,68 +189,30 @@ class PaymentController extends Controller
         return view('customer.payments.failed');
     }
 
-    // Payment history
+    // Payment history (ledger rows with downloadable receipts)
     public function history()
     {
         $customer = Auth::guard('customer')->user();
-        
-        $paidCharges = $customer->monthlyCharges()
-            ->where('status', 'paid')
-            ->orderBy('paid_date', 'desc')
+
+        $payments = $customer->payments()
+            ->successful()
+            ->latest('paid_at')
+            ->latest('id')
             ->paginate(20);
-        
-        return view('customer.payments.history', compact('paidCharges'));
+
+        return view('customer.payments.history', compact('payments'));
     }
 
-    /**
-     * Extract detailed payment method from Razorpay payment object
-     */
-    private function getPaymentMethodDetails($payment)
+    public function receipt(Payment $payment)
     {
-        $method = $payment->method ?? 'razorpay';
-        
-        switch ($method) {
-            case 'upi':
-                // Check for specific UPI app
-                $vpa = $payment->vpa ?? '';
-                if (str_contains($vpa, '@okaxis') || str_contains($vpa, '@okhdfcbank')) {
-                    return 'GPay';
-                } elseif (str_contains($vpa, '@paytm')) {
-                    return 'Paytm';
-                } elseif (str_contains($vpa, '@ybl') || str_contains($vpa, '@ibl')) {
-                    return 'PhonePe';
-                } elseif (str_contains($vpa, '@apl')) {
-                    return 'Amazon Pay';
-                }
-                return 'UPI';
-                
-            case 'card':
-                $cardType = $payment->card->type ?? 'card';
-                $network = $payment->card->network ?? '';
-                if ($cardType === 'credit') {
-                    return 'Credit Card' . ($network ? " ($network)" : '');
-                } elseif ($cardType === 'debit') {
-                    return 'Debit Card' . ($network ? " ($network)" : '');
-                }
-                return 'Card';
-                
-            case 'netbanking':
-                $bank = $payment->bank ?? '';
-                return 'Net Banking' . ($bank ? " ($bank)" : '');
-                
-            case 'wallet':
-                $wallet = $payment->wallet ?? '';
-                $walletNames = [
-                    'paytm' => 'Paytm Wallet',
-                    'phonepe' => 'PhonePe Wallet',
-                    'amazonpay' => 'Amazon Pay',
-                    'freecharge' => 'Freecharge',
-                    'mobikwik' => 'MobiKwik',
-                ];
-                return $walletNames[$wallet] ?? 'Wallet';
-                
-            default:
-                return ucfirst($method);
-        }
+        $customer = Auth::guard('customer')->user();
+        abort_unless($payment->customer_id === $customer->id && $payment->isPaid(), 404);
+
+        $payment->load(['customer', 'booking.bed.room.branch']);
+
+        return view('receipts.payment', [
+            'payment' => $payment,
+            'backUrl' => route('customer.payments.history'),
+        ]);
     }
 }

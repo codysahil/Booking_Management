@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Hostel Management') }} - Admin</title>
+    <title>{{ setting('hostel_name') }} - Admin</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,7 +35,7 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="text-base font-display font-bold text-gray-800">Honeybees Hostel</div>
+                        <div class="text-base font-display font-bold text-gray-800">{{ setting('hostel_name') }}</div>
                         <div class="text-xs text-gray-500">Admin Panel</div>
                     </div>
                 </a>
@@ -98,6 +98,27 @@
                     </svg>
                     <span>Payment History</span>
                 </a>
+                <a href="{{ route('admin.expenses.index') }}"
+                    class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 hover:text-rose-600 transition-all duration-200 {{ request()->routeIs('admin.expenses.*') ? 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-600 font-semibold' : '' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3v-6m-3 6v-9m-2 9h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>Expenses</span>
+                </a>
+                <a href="{{ route('admin.requests.index') }}"
+                    class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 hover:text-rose-600 transition-all duration-200 {{ request()->routeIs('admin.requests.*') ? 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-600 font-semibold' : '' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-6l-4 4v-4z"></path>
+                    </svg>
+                    <span>Resident Requests</span>
+                </a>
+                <a href="{{ route('admin.announcements.index') }}"
+                    class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 hover:text-rose-600 transition-all duration-200 {{ request()->routeIs('admin.announcements.*') ? 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-600 font-semibold' : '' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
+                    </svg>
+                    <span>Announcements</span>
+                </a>
                 <a href="{{ route('admin.employees.index') }}"
                     class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 hover:text-rose-600 transition-all duration-200 {{ request()->routeIs('admin.employees.*') ? 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-600 font-semibold' : '' }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,6 +133,26 @@
                     </svg>
                     <span>Reports</span>
                 </a>
+                @if(auth()->user()->isAdmin())
+                    <div class="pt-3 mt-3 border-t border-rose-100">
+                        <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Owner</p>
+                        <a href="{{ route('admin.team.index') }}"
+                            class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 hover:text-rose-600 transition-all duration-200 {{ request()->routeIs('admin.team.*') ? 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-600 font-semibold' : '' }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            <span>Team</span>
+                        </a>
+                        <a href="{{ route('admin.settings.edit') }}"
+                            class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 hover:text-rose-600 transition-all duration-200 {{ request()->routeIs('admin.settings.*') ? 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-600 font-semibold' : '' }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>Settings</span>
+                        </a>
+                    </div>
+                @endif
             </nav>
         </aside>
 
@@ -135,7 +176,20 @@
                             </svg>
                             <span class="hidden md:inline">View Site</span>
                         </a>
-                        
+
+                        <!-- Notification Bell -->
+                        <a href="{{ route('admin.notifications.index') }}" class="relative p-2 rounded-full hover:bg-rose-50 transition">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                            @php $unreadCount = auth()->user()->unreadNotifications()->count(); @endphp
+                            @if($unreadCount > 0)
+                                <span class="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-rose-500 rounded-full">
+                                    {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                                </span>
+                            @endif
+                        </a>
+
                         <!-- Profile Dropdown -->
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center space-x-2 px-2 lg:px-3 py-1.5 bg-gradient-to-r from-rose-50 to-pink-50 rounded-full hover:from-rose-100 hover:to-pink-100 transition">
@@ -232,6 +286,8 @@
             }
         });
     </script>
+
+    @stack('scripts')
 </body>
 
 </html>
