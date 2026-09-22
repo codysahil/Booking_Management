@@ -30,6 +30,7 @@ class SettingsController extends Controller
             'rent_due_day' => 'required|integer|min:1|max:28',
             'late_fee' => 'required|numeric|min:0',
             'notice_period_days' => 'required|integer|min:0',
+            'online_payment_hold_minutes' => 'required|integer|min:5|max:180',
             'gstin' => 'nullable|string|max:20',
             'receipt_footer' => 'nullable|string',
             'terms' => 'nullable|string',

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Due;
 use App\Models\MonthlyCharge;
@@ -117,6 +118,43 @@ class PaymentRecorder
             'paid_at' => now(),
             'items' => [['type' => strtolower($type), 'description' => $type, 'amount' => $amount]],
         ], $attributes));
+
+        $this->notifyStaff($payment);
+
+        return $payment;
+    }
+
+    /**
+     * Settle a pending online advance payment (the deposit on a not-yet-active online
+     * booking) and activate the booking it belongs to. Shared by the browser callback
+     * (Public\BookingController@verifyAdvancePayment) and the Razorpay webhook so the
+     * two paths can't record the same payment differently — whichever arrives first
+     * does the work; the other sees it's already paid and no-ops.
+     *
+     * @param  array{razorpay_payment_id?: string, razorpay_order_id?: string}  $razorpayIds
+     */
+    public function settleAdvance(Payment $payment, string $method, array $razorpayIds = []): Payment
+    {
+        if ($payment->isPaid()) {
+            return $payment;
+        }
+
+        $payment->update(array_merge([
+            'payment_method' => $method,
+            'status' => Payment::STATUS_PAID,
+            'paid_at' => now(),
+        ], $razorpayIds));
+
+        $booking = $payment->booking;
+
+        if ($booking) {
+            $booking->update([
+                'status' => Booking::STATUS_ACTIVE,
+                'advance_paid' => $payment->amount,
+            ]);
+
+            $booking->bed?->update(['reserved_until' => null]);
+        }
 
         $this->notifyStaff($payment);
 

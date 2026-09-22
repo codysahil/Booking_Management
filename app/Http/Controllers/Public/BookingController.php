@@ -8,6 +8,7 @@ use App\Models\Room;
 use App\Models\Bed;
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Services\PaymentRecorder;
 use App\Services\Razorpay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -187,6 +188,14 @@ class BookingController extends Controller
             }
         }
 
+        // Online bookings only get to be a real, active stay once they're actually paid for —
+        // a stranger on the internet is not the same trust level as a walk-in an admin has
+        // verified in person. If this deployment hasn't configured Razorpay yet, there's no
+        // way to collect that payment, so fall back to the original "pay at check-in" flow.
+        $paymentRequired = $this->razorpay->isConfigured();
+        $bookingStatus = $paymentRequired ? Booking::STATUS_PENDING_PAYMENT : Booking::STATUS_ACTIVE;
+        $holdMinutes = (int) setting('online_payment_hold_minutes', 30);
+
         // Note: Removed DB transaction due to Neon PostgreSQL serverless connection pooling issues
         try {
             // Create customer with minimal info and random unique code
@@ -209,14 +218,15 @@ class BookingController extends Controller
                     'booking_reference' => $bookingReference,
                     'bed_id' => $bed->id,
                     'check_in_date' => $request->check_in_date,
-                    'status' => 'active', // Active status for new bookings
+                    'status' => $bookingStatus,
                     'advance_paid' => 0, // Will be updated when payment is made
                 ]);
 
-                // Update bed status to reserved (not occupied yet)
+                // Hold the bed for this booking. If payment is required, the hold expires
+                // (freed by the bookings:release-expired command) instead of being held forever.
                 $bed->update([
                     'status' => 'reserved',
-                    'reserved_until' => null,
+                    'reserved_until' => $paymentRequired ? now()->addMinutes($holdMinutes) : null,
                 ]);
             }
 
@@ -276,13 +286,18 @@ class BookingController extends Controller
 
         $onlinePaymentsEnabled = $this->razorpay->isConfigured();
 
+        // Only meaningful while the booking is awaiting payment: when the hold on the bed expires.
+        $holdExpiresAt = $booking->status === Booking::STATUS_PENDING_PAYMENT
+            ? $booking->bed->reserved_until
+            : null;
+
         \Log::info('Confirmation page loaded', [
             'booking_id' => $booking->id,
             'booking_reference' => $booking->booking_reference,
             'customer_code' => $booking->customer->customer_code,
         ]);
 
-        return view('public.confirmation', compact('booking', 'relatedBookings', 'pendingAdvance', 'onlinePaymentsEnabled'));
+        return view('public.confirmation', compact('booking', 'relatedBookings', 'pendingAdvance', 'onlinePaymentsEnabled', 'holdExpiresAt'));
     }
 
     /** Create a Razorpay order to (optionally) pay the pending advance online, from the confirmation page. */
@@ -310,7 +325,7 @@ class BookingController extends Controller
     }
 
     /** Verify the Razorpay callback and settle the pending advance payment. */
-    public function verifyAdvancePayment(Request $request, Booking $booking)
+    public function verifyAdvancePayment(Request $request, Booking $booking, PaymentRecorder $recorder)
     {
         $validated = $request->validate([
             'razorpay_order_id' => 'required|string',
@@ -320,22 +335,23 @@ class BookingController extends Controller
 
         $payment = $booking->customer->payments()
             ->where('payment_type', 'Advance')
-            ->where('status', 'pending')
+            ->latest()
             ->firstOrFail();
+
+        // The webhook backstop may have already settled this (dropped connection, slow
+        // browser) — treat that as success rather than erroring on a re-submitted form.
+        if ($payment->isPaid()) {
+            return response()->json(['success' => true]);
+        }
 
         try {
             $this->razorpay->verifySignature($validated);
             $paymentData = $this->razorpay->fetchPayment($validated['razorpay_payment_id']);
 
-            $payment->update([
-                'payment_method' => Razorpay::describeMethod($paymentData->toArray()),
+            $recorder->settleAdvance($payment, Razorpay::describeMethod($paymentData->toArray()), [
                 'razorpay_payment_id' => $validated['razorpay_payment_id'],
                 'razorpay_order_id' => $validated['razorpay_order_id'],
-                'status' => 'paid',
-                'paid_at' => now(),
             ]);
-
-            $booking->update(['advance_paid' => $payment->amount]);
 
             return response()->json(['success' => true]);
         } catch (\Throwable $e) {

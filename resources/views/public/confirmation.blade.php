@@ -1,32 +1,84 @@
 @extends('layouts.public')
 
-@section('content')
-    <div class="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 py-16 text-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <!-- Success Icon -->
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full mb-6 animate-bounce">
-                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-            </div>
-            
-            <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">Booking Confirmed!</h1>
-            <p class="text-xl text-white/90 mb-2">Your reservation has been successfully confirmed</p>
-            <p class="text-white/80">Booking Reference: <span class="font-bold">{{ $booking->booking_reference }}</span></p>
-        </div>
-    </div>
+@php
+    $isAwaitingPayment = $booking->status === 'pending_payment';
+    $isCancelled = $booking->status === 'cancelled';
+@endphp
 
+@section('content')
+    @if($isAwaitingPayment)
+        <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 py-16 text-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full mb-6">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+
+                <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">Almost There!</h1>
+                <p class="text-xl text-white/90 mb-2">Pay the advance now to confirm your bed — it's on hold for you</p>
+                <p class="text-white/80">Booking Reference: <span class="font-bold">{{ $booking->booking_reference }}</span></p>
+            </div>
+        </div>
+    @elseif($isCancelled)
+        <div class="bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 py-16 text-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full mb-6">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+
+                <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">This Hold Has Expired</h1>
+                <p class="text-xl text-white/90 mb-2">The payment window closed before it was completed, so the bed was released.</p>
+                <p class="text-white/80">Booking Reference: <span class="font-bold">{{ $booking->booking_reference }}</span></p>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+            <a href="{{ route('home') }}#locations"
+                class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition">
+                Book Again
+            </a>
+        </div>
+    @else
+        <div class="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 py-16 text-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <!-- Success Icon -->
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full mb-6 animate-bounce">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+
+                <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">Booking Confirmed!</h1>
+                <p class="text-xl text-white/90 mb-2">Your reservation has been successfully confirmed</p>
+                <p class="text-white/80">Booking Reference: <span class="font-bold">{{ $booking->booking_reference }}</span></p>
+            </div>
+        </div>
+    @endif
+
+    @unless($isCancelled)
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <!-- Customer Details Card -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-display font-bold text-gray-900">Booking Details</h2>
-                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800">
-                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
-                    Confirmed
-                </span>
+                @if($isAwaitingPayment)
+                    <span id="hold-countdown" class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-amber-100 text-amber-800">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Awaiting Payment
+                    </span>
+                @else
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        Confirmed
+                    </span>
+                @endif
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -108,10 +160,13 @@
                     </span>
                 </div>
 
-                @if($pendingAdvance && $onlinePaymentsEnabled)
-                    <div class="mt-4 bg-primary-50 border border-primary-100 rounded-xl p-4">
+                @if($pendingAdvance && $onlinePaymentsEnabled && $isAwaitingPayment)
+                    <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <p class="text-sm text-amber-900 font-semibold mb-1">
+                            Payment is required to confirm this bed.
+                        </p>
                         <p class="text-sm text-gray-700 mb-3">
-                            You can pay the advance online now, or pay in cash at check-in.
+                            Your bed is held for <span id="hold-countdown-text" class="font-bold text-amber-700">a few more minutes</span> — pay now to lock it in.
                         </p>
                         <button id="pay-advance-btn"
                             class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition shadow-lg">
@@ -119,6 +174,8 @@
                         </button>
                         <p id="pay-advance-status" class="text-sm mt-2"></p>
                     </div>
+                @elseif($pendingAdvance)
+                    <p class="mt-4 text-sm text-gray-500">Pay this at check-in — cash, UPI or card at the branch.</p>
                 @endif
             </div>
         </div>
@@ -181,8 +238,49 @@
             </a>
         </div>
     </div>
+    @endunless
 
-    @if($pendingAdvance && $onlinePaymentsEnabled)
+    @if($isAwaitingPayment && $holdExpiresAt)
+        <script>
+            (function () {
+                var deadline = new Date('{{ $holdExpiresAt->toIso8601String() }}').getTime();
+                var textEl = document.getElementById('hold-countdown-text');
+                var badgeEl = document.getElementById('hold-countdown');
+                var payBtn = document.getElementById('pay-advance-btn');
+
+                function tick() {
+                    var msLeft = deadline - Date.now();
+
+                    if (msLeft <= 0) {
+                        if (textEl) textEl.textContent = 'expired';
+                        if (badgeEl) {
+                            badgeEl.textContent = 'Hold Expired';
+                            badgeEl.classList.remove('bg-amber-100', 'text-amber-800');
+                            badgeEl.classList.add('bg-red-100', 'text-red-800');
+                        }
+                        if (payBtn) {
+                            payBtn.disabled = true;
+                            payBtn.textContent = 'Hold expired — refresh the page';
+                        }
+                        clearInterval(interval);
+                        return;
+                    }
+
+                    var minutes = Math.floor(msLeft / 60000);
+                    var seconds = Math.floor((msLeft % 60000) / 1000);
+                    var label = minutes + 'm ' + (seconds < 10 ? '0' : '') + seconds + 's';
+
+                    if (textEl) textEl.textContent = label;
+                    if (badgeEl) badgeEl.lastChild.textContent = ' Awaiting Payment (' + label + ')';
+                }
+
+                tick();
+                var interval = setInterval(tick, 1000);
+            })();
+        </script>
+    @endif
+
+    @if($pendingAdvance && $onlinePaymentsEnabled && $isAwaitingPayment)
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <script>
             document.getElementById('pay-advance-btn').addEventListener('click', function () {

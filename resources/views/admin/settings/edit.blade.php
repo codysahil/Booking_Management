@@ -80,6 +80,12 @@
                         <input type="number" min="0" name="notice_period_days" required value="{{ old('notice_period_days', $settings['notice_period_days']) }}"
                             class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
                     </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Online Booking Payment Window (minutes) *</label>
+                        <input type="number" min="5" max="180" name="online_payment_hold_minutes" required value="{{ old('online_payment_hold_minutes', $settings['online_payment_hold_minutes']) }}"
+                            class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
+                        <p class="text-xs text-gray-500 mt-1">How long a bed is held for an online booking before payment is required. Only applies once Razorpay is configured.</p>
+                    </div>
                 </div>
             </div>
 
