@@ -12,6 +12,17 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    /** Full access, including settings and team management. */
+    public const ROLE_ADMIN = 'admin';
+
+    /** Day-to-day operations; cannot change settings, team or delete financial records. */
+    public const ROLE_MANAGER = 'manager';
+
+    public const ROLES = [
+        self::ROLE_ADMIN => 'Owner / Admin',
+        self::ROLE_MANAGER => 'Manager',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,6 +32,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'is_active',
     ];
 
     /**
@@ -43,6 +56,22 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->is_active !== false && array_key_exists($this->role, self::ROLES);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->isStaff() && $this->role === self::ROLE_ADMIN;
+    }
+
+    public function getRoleLabelAttribute(): string
+    {
+        return self::ROLES[$this->role] ?? ucfirst((string) $this->role);
     }
 }

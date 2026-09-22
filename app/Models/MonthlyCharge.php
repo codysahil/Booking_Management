@@ -41,6 +41,16 @@ class MonthlyCharge extends Model
         return $this->belongsTo(Booking::class);
     }
 
+    public function scopeUnpaid($query)
+    {
+        return $query->whereIn('status', ['pending', 'overdue']);
+    }
+
+    public function getPeriodLabelAttribute(): string
+    {
+        return \Carbon\Carbon::parse($this->month_year . '-01')->format('F Y');
+    }
+
     public function isPending()
     {
         return $this->status === 'pending';
@@ -53,6 +63,7 @@ class MonthlyCharge extends Model
 
     public function isOverdue()
     {
-        return $this->status === 'overdue' || ($this->status === 'pending' && $this->due_date->isPast());
+        return $this->status === 'overdue'
+            || ($this->status === 'pending' && $this->due_date && $this->due_date->endOfDay()->isPast());
     }
 }
