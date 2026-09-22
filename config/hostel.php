@@ -13,7 +13,7 @@
 return [
     'defaults' => [
         // Branding
-        'hostel_name' => env('HOSTEL_NAME', 'Hostel Manager'),
+        'hostel_name' => env('HOSTEL_NAME', 'Honeybees Hostel'),
         'tagline' => env('HOSTEL_TAGLINE', 'Safe, comfortable stays'),
         'logo_path' => null,
 

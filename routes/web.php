@@ -22,6 +22,9 @@ Route::get('/gallery', function () {
 Route::get('/contact', function () {
     return view('public.contact');
 })->name('contact');
+Route::get('/terms', function () {
+    return view('public.terms');
+})->name('terms');
 Route::get('/branch/{branch}', [App\Http\Controllers\Public\BookingController::class, 'showBranch'])->name('booking.branch');
 Route::get('/branch/{branch}/room/{room}', [App\Http\Controllers\Public\BookingController::class, 'showRoom'])->name('booking.room');
 Route::post('/booking/select-beds', [App\Http\Controllers\Public\BookingController::class, 'selectBeds'])->name('booking.select-beds');
@@ -100,6 +103,41 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     // Payment History
     Route::get('/payments/history', [App\Http\Controllers\Admin\PaymentHistoryController::class, 'index'])->name('payments.history');
+    Route::get('/payments/{payment}/receipt', [App\Http\Controllers\Admin\PaymentHistoryController::class, 'receipt'])->name('payments.receipt');
+
+    // Expenses
+    Route::get('/expenses/export', [App\Http\Controllers\Admin\ExpenseController::class, 'export'])->name('expenses.export');
+    Route::resource('expenses', App\Http\Controllers\Admin\ExpenseController::class)->except(['show']);
+
+    // Dues
+    Route::post('/customers/{customer}/dues', [App\Http\Controllers\Admin\DueController::class, 'store'])->name('dues.store');
+    Route::patch('/dues/{due}/mark-paid', [App\Http\Controllers\Admin\DueController::class, 'markPaid'])->name('dues.mark-paid');
+    Route::delete('/dues/{due}', [App\Http\Controllers\Admin\DueController::class, 'destroy'])->name('dues.destroy');
+
+    // Profit & Loss report
+    Route::get('/reports/profit-loss', [App\Http\Controllers\Admin\ReportController::class, 'profitLoss'])->name('reports.profit-loss');
+
+    // Resident requests
+    Route::get('/requests', [App\Http\Controllers\Admin\RequestController::class, 'index'])->name('requests.index');
+    Route::get('/requests/{request}', [App\Http\Controllers\Admin\RequestController::class, 'show'])->name('requests.show');
+    Route::put('/requests/{request}', [App\Http\Controllers\Admin\RequestController::class, 'update'])->name('requests.update');
+
+    // Announcements
+    Route::resource('announcements', App\Http\Controllers\Admin\AnnouncementController::class)->except(['show']);
+
+    // Notification centre
+    Route::get('/notifications', [App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{notification}/read', [App\Http\Controllers\Admin\NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::patch('/notifications/read-all', [App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+    // Settings (owner only)
+    Route::middleware('admin:admin')->group(function () {
+        Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
+
+        // Team (manager accounts)
+        Route::resource('team', App\Http\Controllers\Admin\TeamController::class)->except(['show']);
+    });
 });
 
 // ============================================
@@ -121,6 +159,14 @@ Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('payments/success', [App\Http\Controllers\Customer\PaymentController::class, 'success'])->name('payments.success');
         Route::get('payments/failed', [App\Http\Controllers\Customer\PaymentController::class, 'failed'])->name('payments.failed');
         Route::get('payments/history', [App\Http\Controllers\Customer\PaymentController::class, 'history'])->name('payments.history');
+        Route::get('payments/{payment}/receipt', [App\Http\Controllers\Customer\PaymentController::class, 'receipt'])->name('payments.receipt');
+
+        // Announcements & resident requests
+        Route::get('announcements', [App\Http\Controllers\Customer\DashboardController::class, 'announcements'])->name('announcements.index');
+        Route::get('requests', [App\Http\Controllers\Customer\RequestController::class, 'index'])->name('requests.index');
+        Route::get('requests/create', [App\Http\Controllers\Customer\RequestController::class, 'create'])->name('requests.create');
+        Route::post('requests', [App\Http\Controllers\Customer\RequestController::class, 'store'])->name('requests.store');
+        Route::get('requests/{request}', [App\Http\Controllers\Customer\RequestController::class, 'show'])->name('requests.show');
     });
 });
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Honeybees Hostel</title>
+    <title>Admin Login - {{ setting('hostel_name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 min-h-screen flex items-center justify-center p-4">
@@ -17,7 +17,7 @@
                     </svg>
                 </div>
                 <h1 class="text-2xl font-display font-bold text-gray-900">Admin Login</h1>
-                <p class="text-gray-500 mt-2">Honeybees Hostel Management</p>
+                <p class="text-gray-500 mt-2">{{ setting('hostel_name') }} Admin</p>
             </div>
 
             <!-- Error Messages -->
@@ -48,7 +48,7 @@
                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
                     <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:ring-0 transition-colors"
-                        placeholder="admin@honeybees.com">
+                        placeholder="you@example.com">
                 </div>
 
                 <!-- Password -->
@@ -87,7 +87,7 @@
 
         <!-- Footer -->
         <p class="text-center text-gray-500 text-sm mt-6">
-            © {{ date('Y') }} Honeybees Hostel. All rights reserved.
+            © {{ date('Y') }} {{ setting('hostel_name') }}. All rights reserved.
         </p>
     </div>
 </body>

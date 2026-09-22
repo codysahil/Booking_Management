@@ -71,6 +71,7 @@ class EnhancedBookingFlowTest extends TestCase
             'address' => '123 Main St',
             'check_in_date' => now()->addDays(1)->format('Y-m-d'),
             'payment_method' => 'upi',
+            'accept_terms' => '1',
         ]);
 
         // Verify customer created
@@ -148,6 +149,7 @@ class EnhancedBookingFlowTest extends TestCase
             'address' => 'Test Address',
             'check_in_date' => now()->addDays(1)->format('Y-m-d'),
             'payment_method' => 'upi',
+            'accept_terms' => '1',
         ]);
 
         // Verify minimum advance of 3000 is charged

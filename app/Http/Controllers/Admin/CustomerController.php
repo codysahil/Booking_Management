@@ -243,7 +243,9 @@ class CustomerController extends Controller
 
     public function show(Customer $customer)
     {
-        $customer->load(['bookings.bed.room.branch', 'payments', 'requests']);
+        $customer->load(['bookings.bed.room.branch', 'payments', 'requests', 'dues' => function ($q) {
+            $q->latest('due_date');
+        }]);
         return view('admin.customers.show', compact('customer'));
     }
 

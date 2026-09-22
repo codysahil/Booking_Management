@@ -127,6 +127,9 @@ class BookingController extends Controller
             'check_in_date' => 'required|date|after_or_equal:today',
             'bed_ids' => 'required|array|min:1', // Add bed_ids to request
             'bed_ids.*' => 'exists:beds,id',
+            'accept_terms' => 'accepted',
+        ], [
+            'accept_terms.accepted' => 'Please accept the Terms & Conditions to continue.',
         ]);
 
         // Use bed_ids from request instead of session (more reliable)
@@ -225,6 +228,15 @@ class BookingController extends Controller
 
             // Clear session
             session()->forget(['selected_bed_ids', 'reservation_key', 'reservation_expires_at']);
+
+            try {
+                \Illuminate\Support\Facades\Notification::send(
+                    \App\Models\User::query()->where('is_active', true)->get(),
+                    new \App\Notifications\NewBookingReceived($booking, $beds->count())
+                );
+            } catch (\Throwable $e) {
+                \Log::warning('Could not notify staff of new booking', ['error' => $e->getMessage()]);
+            }
 
             \Log::info('Booking created successfully', [
                 'booking_id' => $booking->id,

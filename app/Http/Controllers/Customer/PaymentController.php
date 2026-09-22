@@ -200,13 +200,7 @@ class PaymentController extends Controller
             ->latest('id')
             ->paginate(20);
 
-        // Kept for the current history view until it is switched to ledger rows.
-        $paidCharges = $customer->monthlyCharges()
-            ->where('status', 'paid')
-            ->orderBy('paid_date', 'desc')
-            ->paginate(20);
-
-        return view('customer.payments.history', compact('payments', 'paidCharges'));
+        return view('customer.payments.history', compact('payments'));
     }
 
     public function receipt(Payment $payment)

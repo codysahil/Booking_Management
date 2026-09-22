@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Hostel Management') }}</title>
+    <title>{{ setting('hostel_name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="font-display font-bold text-xl sm:text-2xl text-primary-600">
-                        Honeybees<span class="text-gray-800"> Hostel</span>
+                        {{ setting('hostel_name') }}
                     </a>
                 </div>
                 <div class="hidden md:flex items-center gap-8">
@@ -58,8 +58,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-display font-bold text-white">Honeybees</h2>
-                        <p class="text-white/80 text-xs">Your Safe Haven Awaits</p>
+                        <h2 class="text-xl font-display font-bold text-white">{{ setting('hostel_name') }}</h2>
+                        <p class="text-white/80 text-xs">{{ setting('tagline') }}</p>
                     </div>
                 </div>
             </div>
@@ -203,11 +203,19 @@
         <div class="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
                 <div class="text-center sm:text-left">
-                    <span class="font-display font-bold text-lg sm:text-xl text-gray-800">Honeybees Hostel</span>
-                    <p class="text-gray-500 text-sm mt-1">Premium Women's Hostel</p>
+                    <span class="font-display font-bold text-lg sm:text-xl text-gray-800">{{ setting('hostel_name') }}</span>
+                    <p class="text-gray-500 text-sm mt-1">{{ setting('tagline') }}</p>
+                    @if(setting('contact_phone') || setting('contact_email'))
+                        <p class="text-gray-400 text-xs mt-1">
+                            {{ setting('contact_phone') }}
+                            @if(setting('contact_phone') && setting('contact_email')) · @endif
+                            {{ setting('contact_email') }}
+                        </p>
+                    @endif
                 </div>
                 <div class="text-gray-400 text-xs sm:text-sm text-center sm:text-right">
-                    &copy; {{ date('Y') }} Honeybees Hostel. All rights reserved.
+                    <a href="{{ route('terms') }}" class="hover:text-primary-600 transition">Terms & Conditions</a>
+                    <p class="mt-1">&copy; {{ date('Y') }} {{ setting('hostel_name') }}. All rights reserved.</p>
                 </div>
             </div>
         </div>

@@ -47,7 +47,7 @@ document.getElementById('rzp-button').onclick = function(e) {
         "key": "{{ $razorpayKey }}",
         "amount": "{{ $order['amount'] }}",
         "currency": "{{ $order['currency'] }}",
-        "name": "Honeybees Hostel",
+        "name": "{{ setting('hostel_name') }}",
         "description": "Monthly Charges Payment",
         "order_id": "{{ $order['id'] }}",
         "handler": function (response) {

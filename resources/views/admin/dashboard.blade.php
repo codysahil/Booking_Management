@@ -5,111 +5,151 @@
 @section('content')
     <!-- Welcome Banner -->
     <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 rounded-3xl p-8 mb-8 text-white shadow-xl">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
                 <h2 class="text-3xl font-display font-bold mb-2">Welcome back! 👋</h2>
                 <p class="text-white/90">Here's what's happening with your hostels today.</p>
             </div>
-            <svg class="w-24 h-24 opacity-20" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
-            </svg>
+            <form method="GET" class="flex items-center gap-2">
+                <select name="branch_id" onchange="this.form.submit()"
+                    class="text-sm rounded-lg border-0 bg-white/20 text-white placeholder-white/70 focus:ring-2 focus:ring-white/50">
+                    <option value="" class="text-gray-900">All branches</option>
+                    @foreach ($branches as $branch)
+                        <option value="{{ $branch->id }}" class="text-gray-900" {{ (string) $branchId === (string) $branch->id ? 'selected' : '' }}>
+                            {{ $branch->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
         </div>
     </div>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-rose-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl flex items-center justify-center">
-                    <svg class="w-7 h-7 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-rose-600 bg-rose-50 px-3 py-1 rounded-full">Active</span>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500 mb-1">Total Branches</p>
-                <p class="text-3xl font-bold text-gray-900">{{ $stats['branches'] }}</p>
-            </div>
+        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-rose-100">
+            <p class="text-sm font-medium text-gray-500 mb-1">Occupancy</p>
+            <p class="text-3xl font-bold text-gray-900">{{ $stats['occupancy_rate'] }}%</p>
+            <p class="text-xs text-gray-500 mt-1">{{ $stats['beds'] - $stats['vacant_beds'] }} of {{ $stats['beds'] }} beds occupied</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-green-100">
+            <p class="text-sm font-medium text-gray-500 mb-1">Collected this month</p>
+            <p class="text-3xl font-bold text-green-600">{{ money($collectedThisMonth) }}</p>
+            <p class="text-xs text-gray-500 mt-1">Expenses: {{ money($expensesThisMonth) }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-amber-100">
+            <p class="text-sm font-medium text-gray-500 mb-1">Pending / overdue dues</p>
+            <p class="text-3xl font-bold text-amber-600">{{ money($pendingChargesAmount + $pendingDuesAmount) }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ $overdueCount }} charge(s) overdue</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-purple-100">
+            <p class="text-sm font-medium text-gray-500 mb-1">Open resident requests</p>
+            <p class="text-3xl font-bold text-purple-600">{{ $openRequestsCount }}</p>
+            <a href="{{ route('admin.requests.index') }}" class="text-xs text-purple-600 hover:underline">View all →</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Income vs Expenses chart -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-100">
+            <h3 class="text-lg font-display font-bold text-gray-900 mb-4">Income vs Expenses (last 6 months)</h3>
+            <canvas id="incomeExpenseChart" height="110"></canvas>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-pink-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-pink-100 to-purple-100 rounded-2xl flex items-center justify-center">
-                    <svg class="w-7 h-7 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-pink-600 bg-pink-50 px-3 py-1 rounded-full">Managed</span>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500 mb-1">Total Rooms</p>
-                <p class="text-3xl font-bold text-gray-900">{{ $stats['rooms'] }}</p>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-purple-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-2xl flex items-center justify-center">
-                    <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v6a2 2 0 002 2h14a2 2 0 002-2v-6a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">Total</span>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500 mb-1">Total Beds</p>
-                <p class="text-3xl font-bold text-gray-900">{{ $stats['beds'] }}</p>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-green-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center">
-                    <svg class="w-7 h-7 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">Available</span>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500 mb-1">Vacant Beds</p>
-                <p class="text-3xl font-bold text-gray-900">{{ $stats['vacant_beds'] }}</p>
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-100">
+            <h3 class="text-lg font-display font-bold text-gray-900 mb-4">Quick Actions</h3>
+            <div class="space-y-3">
+                <a href="{{ route('admin.customers.create') }}"
+                    class="block text-center px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition">
+                    Check-In a Customer
+                </a>
+                <a href="{{ route('admin.expenses.create') }}"
+                    class="block text-center px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-xl hover:from-pink-600 hover:to-purple-600 transition">
+                    Record an Expense
+                </a>
+                <a href="{{ route('admin.announcements.create') }}"
+                    class="block text-center px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold rounded-xl hover:from-purple-600 hover:to-indigo-600 transition">
+                    Post an Announcement
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-100">
-        <h3 class="text-2xl font-display font-bold text-gray-900 mb-6 flex items-center">
-            <svg class="w-6 h-6 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-            </svg>
-            Quick Actions
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href="{{ route('admin.branches.create') }}"
-                class="group flex items-center justify-center px-6 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Add New Branch
-            </a>
-            <a href="{{ route('admin.rooms.create') }}"
-                class="group flex items-center justify-center px-6 py-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Add New Room
-            </a>
-            <a href="{{ route('admin.customers.index') }}"
-                class="group flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-                View Customers
-            </a>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Bookings -->
+        <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-lg font-display font-bold text-gray-900">Recent Bookings</h3>
+                <a href="{{ route('admin.bookings.index') }}" class="text-xs text-rose-600 hover:underline">View all →</a>
+            </div>
+            <div class="divide-y divide-gray-100">
+                @forelse($recentBookings as $booking)
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900">{{ $booking->customer->name }}</p>
+                            <p class="text-xs text-gray-500">{{ $booking->bed->room->branch->name }} · {{ $booking->booking_reference }}</p>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full {{ $booking->status === 'active' ? 'bg-green-100 text-green-800' : ($booking->status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800') }}">
+                            {{ ucfirst($booking->status) }}
+                        </span>
+                    </div>
+                @empty
+                    <p class="p-6 text-sm text-gray-500 text-center">No bookings yet.</p>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Open Requests -->
+        <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-lg font-display font-bold text-gray-900">Open Resident Requests</h3>
+                <a href="{{ route('admin.requests.index') }}" class="text-xs text-rose-600 hover:underline">View all →</a>
+            </div>
+            <div class="divide-y divide-gray-100">
+                @forelse($openRequests as $reqItem)
+                    <a href="{{ route('admin.requests.show', $reqItem) }}" class="p-4 flex items-center justify-between hover:bg-gray-50 transition">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900">{{ $reqItem->subject }}</p>
+                            <p class="text-xs text-gray-500">{{ $reqItem->customer->name ?? 'Unknown' }} · {{ $reqItem->type_label }}</p>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                    </a>
+                @empty
+                    <p class="p-6 text-sm text-gray-500 text-center">No open requests. 🎉</p>
+                @endforelse
+            </div>
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+    const ctx = document.getElementById('incomeExpenseChart');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: @json($incomeExpenseChart->pluck('label')),
+            datasets: [
+                {
+                    label: 'Income',
+                    data: @json($incomeExpenseChart->pluck('income')),
+                    backgroundColor: '#ec4899',
+                    borderRadius: 6,
+                },
+                {
+                    label: 'Expenses',
+                    data: @json($incomeExpenseChart->pluck('expenses')),
+                    backgroundColor: '#c4b5fd',
+                    borderRadius: 6,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } },
+            scales: { y: { beginAtZero: true } },
+        },
+    });
+</script>
+@endpush

@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Hostel Management') }}</title>
+    <title>{{ setting('hostel_name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -23,7 +23,7 @@
                 <div class="flex items-center">
                     <a href="{{ route('customer.dashboard') }}"
                         class="font-display font-bold text-xl sm:text-2xl text-primary-600">
-                        Honeybees<span class="text-gray-800"> Hostel</span>
+                        {{ setting('hostel_name') }}
                     </a>
                 </div>
                 <div class="hidden md:flex items-center gap-6">
@@ -76,6 +76,24 @@
                                 </svg>
                                 Payment History
                             </a>
+                            <a href="{{ route('customer.requests.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-6l-4 4v-4z">
+                                    </path>
+                                </svg>
+                                My Requests
+                            </a>
+                            <a href="{{ route('customer.announcements.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z">
+                                    </path>
+                                </svg>
+                                Announcements
+                            </a>
                             <form method="POST" action="{{ route('customer.logout') }}">
                                 @csrf
                                 <button type="submit"
@@ -116,7 +134,7 @@
             <!-- Header with Close Button -->
             <div class="bg-gradient-to-r from-rose-500 to-pink-500 p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="font-display font-bold text-xl text-white">Honeybees Hostel</span>
+                    <span class="font-display font-bold text-xl text-white">{{ setting('hostel_name') }}</span>
                     <button id="close-menu-btn" type="button"
                         class="text-white hover:bg-white/20 rounded-full p-2 transition">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,6 +175,36 @@
                         </path>
                     </svg>
                     <span>Dashboard</span>
+                </a>
+                <a href="{{ route('customer.payments.history') }}"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-white rounded-xl font-medium transition group">
+                    <svg class="w-5 h-5 text-primary-500 group-hover:scale-110 transition" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                        </path>
+                    </svg>
+                    <span>Payment History</span>
+                </a>
+                <a href="{{ route('customer.requests.index') }}"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-white rounded-xl font-medium transition group">
+                    <svg class="w-5 h-5 text-primary-500 group-hover:scale-110 transition" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-6l-4 4v-4z">
+                        </path>
+                    </svg>
+                    <span>My Requests</span>
+                </a>
+                <a href="{{ route('customer.announcements.index') }}"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-white rounded-xl font-medium transition group">
+                    <svg class="w-5 h-5 text-primary-500 group-hover:scale-110 transition" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z">
+                        </path>
+                    </svg>
+                    <span>Announcements</span>
                 </a>
                 <a href="{{ route('about') }}"
                     class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-white rounded-xl font-medium transition group">
@@ -263,11 +311,11 @@
         <div class="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
                 <div class="text-center sm:text-left">
-                    <span class="font-display font-bold text-lg sm:text-xl text-gray-800">Honeybees Hostel</span>
+                    <span class="font-display font-bold text-lg sm:text-xl text-gray-800">{{ setting('hostel_name') }}</span>
                     <p class="text-gray-500 text-sm mt-1">Premium Women's Hostel</p>
                 </div>
                 <div class="text-gray-400 text-xs sm:text-sm text-center sm:text-right">
-                    &copy; {{ date('Y') }} Honeybees Hostel. All rights reserved.
+                    &copy; {{ date('Y') }} {{ setting('hostel_name') }}. All rights reserved.
                 </div>
             </div>
         </div>
