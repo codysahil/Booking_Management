@@ -85,7 +85,9 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL'),
+            // Railway's Postgres plugin injects DATABASE_URL; Laravel's convention is DB_URL.
+            // Accepting either means the same config works whether you set it by hand or Railway sets it for you.
+            'url' => env('DB_URL', env('DATABASE_URL')),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'laravel'),
