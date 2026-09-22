@@ -20,7 +20,7 @@ Route::get('/gallery', function () {
     return view('public.gallery');
 })->name('gallery');
 Route::get('/contact', function () {
-    return view('public.contact');
+    return view('public.contact', ['branches' => App\Models\Branch::all()]);
 })->name('contact');
 Route::get('/terms', function () {
     return view('public.terms');

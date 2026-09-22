@@ -128,11 +128,11 @@
 
     <!-- Mobile Menu Sidebar (Customer) -->
     <div id="mobile-menu"
-        class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out md:hidden"
+        class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out md:hidden"
         style="transform: translateX(100%); z-index: 99999;">
         <div class="flex flex-col h-full">
             <!-- Header with Close Button -->
-            <div class="bg-gradient-to-r from-rose-500 to-pink-500 p-6">
+            <div class="bg-gradient-to-r from-teal-500 to-cyan-500 p-6">
                 <div class="flex items-center justify-between mb-4">
                     <span class="font-display font-bold text-xl text-white">{{ setting('hostel_name') }}</span>
                     <button id="close-menu-btn" type="button"
@@ -312,7 +312,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
                 <div class="text-center sm:text-left">
                     <span class="font-display font-bold text-lg sm:text-xl text-gray-800">{{ setting('hostel_name') }}</span>
-                    <p class="text-gray-500 text-sm mt-1">Premium Women's Hostel</p>
+                    <p class="text-gray-500 text-sm mt-1">{{ setting('tagline') }}</p>
                 </div>
                 <div class="text-gray-400 text-xs sm:text-sm text-center sm:text-right">
                     &copy; {{ date('Y') }} {{ setting('hostel_name') }}. All rights reserved.

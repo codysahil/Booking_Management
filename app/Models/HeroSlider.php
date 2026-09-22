@@ -29,6 +29,10 @@ class HeroSlider extends Model
             return 'https://placehold.co/1920x600?text=Slider+Image';
         }
 
+        if (str_starts_with($this->image_path, 'http://') || str_starts_with($this->image_path, 'https://')) {
+            return $this->image_path;
+        }
+
         try {
             return Storage::url($this->image_path);
         } catch (\Exception $e) {

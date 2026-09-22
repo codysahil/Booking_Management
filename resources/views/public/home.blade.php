@@ -31,7 +31,7 @@
     </style>
     
     @if(isset($sliders) && $sliders->count() > 0)
-    <div class="px-4 md:px-8 lg:px-16 py-4 md:py-6 bg-gradient-to-b from-rose-50 to-white">
+    <div class="px-4 md:px-8 lg:px-16 py-4 md:py-6 bg-gradient-to-b from-teal-50 to-white">
         <div class="relative w-full aspect-[4/3] sm:aspect-[16/9] md:aspect-[21/9] max-h-[500px] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl ring-1 ring-black/5">
         <div class="slider-container relative w-full h-full">
             @foreach($sliders as $index => $slider)
@@ -93,7 +93,7 @@
 
         <!-- Progress Bar -->
         <div class="absolute bottom-0 left-0 right-0 h-1 bg-white/20 rounded-b-3xl overflow-hidden">
-            <div id="slider-progress" class="h-full bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-100" style="width: 0%"></div>
+            <div id="slider-progress" class="h-full bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-100" style="width: 0%"></div>
         </div>
         </div>
     </div>
@@ -190,12 +190,12 @@
     @endif
 
     <!-- Hero Section - Feminine & Elegant Design -->
-    <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
+    <div class="relative overflow-hidden bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50">
         <!-- Decorative Floral Elements -->
         <div class="absolute inset-0 overflow-hidden opacity-30">
-            <div class="absolute top-20 right-20 w-64 h-64 bg-rose-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-            <div class="absolute bottom-20 left-20 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+            <div class="absolute top-20 right-20 w-64 h-64 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+            <div class="absolute bottom-20 left-20 w-72 h-72 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-violet-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
         </div>
 
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 lg:pt-16 pb-16 sm:pb-20 lg:pb-28">
@@ -203,29 +203,29 @@
                 <!-- Left Content -->
                 <div class="text-left space-y-6 sm:space-y-8">
                     <!-- Badge with Heart -->
-                    <div class="inline-flex items-center space-x-2 bg-white/90 backdrop-blur-sm px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-lg border-2 border-rose-100">
-                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-rose-500 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                    <div class="inline-flex items-center space-x-2 bg-white/90 backdrop-blur-sm px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-lg border-2 border-teal-100">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-teal-500 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
                         </svg>
-                        <span class="text-xs sm:text-sm font-semibold text-gray-700">Women's Hostel in Chennai</span>
+                        <span class="text-xs sm:text-sm font-semibold text-gray-700">PG Accommodation in Greater Noida</span>
                     </div>
 
                     <!-- Main Heading -->
                     <div>
                         <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-tight mb-4 sm:mb-6">
-                            <span class="text-gray-800">Where</span>
-                            <span class="block bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">
-                                Dreams Bloom
+                            <span class="text-gray-800">Comfortable Stays,</span>
+                            <span class="block bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500 bg-clip-text text-transparent">
+                                Made Simple
                             </span>
                         </h1>
                         <p class="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-xl">
-                            A nurturing sanctuary designed exclusively for women. Experience comfort, safety, and sisterhood in every corner.
+                            Fully-furnished PG rooms for students and working professionals near Knowledge Park &amp; Pari Chowk. Comfort, safety and community for everyone.
                         </p>
                     </div>
 
                     <!-- CTA Buttons -->
                     <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                        <a href="#locations" class="group inline-flex items-center justify-center px-6 sm:px-8 lg:px-10 py-4 sm:py-5 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white text-base sm:text-lg font-bold rounded-full shadow-2xl hover:shadow-rose-300/50 hover:scale-105 transition-all duration-300">
+                        <a href="#locations" class="group inline-flex items-center justify-center px-6 sm:px-8 lg:px-10 py-4 sm:py-5 bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500 text-white text-base sm:text-lg font-bold rounded-full shadow-2xl hover:shadow-teal-300/50 hover:scale-105 transition-all duration-300">
                             <svg class="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
@@ -234,8 +234,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                             </svg>
                         </a>
-                        <a href="#features" class="inline-flex items-center justify-center px-6 sm:px-8 lg:px-10 py-4 sm:py-5 bg-white text-gray-700 text-base sm:text-lg font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-rose-100">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                        <a href="#features" class="inline-flex items-center justify-center px-6 sm:px-8 lg:px-10 py-4 sm:py-5 bg-white text-gray-700 text-base sm:text-lg font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-teal-100">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-teal-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
                             </svg>
                             Explore Amenities
@@ -245,30 +245,30 @@
                     <!-- Quick Stats with Icons -->
                     <div class="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6 pt-6 sm:pt-8">
                         <div class="text-center">
-                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                 </svg>
                             </div>
-                            <div class="text-2xl sm:text-3xl font-bold text-rose-600">{{ $branches->count() }}+</div>
+                            <div class="text-2xl sm:text-3xl font-bold text-teal-600">{{ $branches->count() }}+</div>
                             <div class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Prime Locations</div>
                         </div>
                         <div class="text-center">
-                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-cyan-100 to-violet-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                                 </svg>
                             </div>
-                            <div class="text-2xl sm:text-3xl font-bold text-pink-600">{{ $branches->sum('rooms_count') }}+</div>
+                            <div class="text-2xl sm:text-3xl font-bold text-cyan-600">{{ $branches->sum('rooms_count') }}+</div>
                             <div class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Cozy Rooms</div>
                         </div>
                         <div class="text-center">
-                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                 </svg>
                             </div>
-                            <div class="text-2xl sm:text-3xl font-bold text-purple-600">24/7</div>
+                            <div class="text-2xl sm:text-3xl font-bold text-violet-600">24/7</div>
                             <div class="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Safe & Secure</div>
                         </div>
                     </div>
@@ -279,7 +279,7 @@
                     <div class="relative">
                         <!-- Main Image Card -->
                         <div class="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
-                            <div class="aspect-[4/5] bg-gradient-to-br from-rose-300 via-pink-300 to-purple-300 flex items-center justify-center p-12">
+                            <div class="aspect-[4/5] bg-gradient-to-br from-teal-300 via-cyan-300 to-violet-300 flex items-center justify-center p-12">
                                 <div class="text-center text-white">
                                     <!-- Decorative Icon -->
                                     <div class="w-32 h-32 mx-auto mb-6 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
@@ -294,7 +294,7 @@
                         </div>
                         
                         <!-- Floating Feature Cards -->
-                        <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-2xl p-5 border-2 border-rose-100 animate-float">
+                        <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-2xl p-5 border-2 border-teal-100 animate-float">
                             <div class="flex items-center space-x-3">
                                 <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center">
                                     <svg class="w-7 h-7 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -302,16 +302,16 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <div class="text-sm font-bold text-gray-900">100% Women Safe</div>
-                                    <div class="text-xs text-gray-500">Verified & Secure</div>
+                                    <div class="text-sm font-bold text-gray-900">100% Verified Stay</div>
+                                    <div class="text-xs text-gray-500">Safe & Secure</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="absolute -top-6 -right-6 bg-white rounded-2xl shadow-2xl p-5 border-2 border-purple-100 animate-float animation-delay-2000">
+                        <div class="absolute -top-6 -right-6 bg-white rounded-2xl shadow-2xl p-5 border-2 border-violet-100 animate-float animation-delay-2000">
                             <div class="flex items-center space-x-3">
-                                <div class="w-14 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center">
-                                    <svg class="w-7 h-7 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                <div class="w-14 h-14 bg-gradient-to-br from-violet-100 to-cyan-100 rounded-2xl flex items-center justify-center">
+                                    <svg class="w-7 h-7 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
                                     </svg>
                                 </div>
@@ -328,11 +328,11 @@
     </div>
 
     <!-- Features Section - Soft & Welcoming -->
-    <div id="features" class="py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-white to-rose-50">
+    <div id="features" class="py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-white to-teal-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Section Header -->
             <div class="text-center mb-10 sm:mb-12 lg:mb-16">
-                <div class="inline-flex items-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 text-rose-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 border-2 border-rose-200">
+                <div class="inline-flex items-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-teal-100 via-cyan-100 to-violet-100 text-teal-700 text-xs sm:text-sm font-bold mb-4 sm:mb-6 border-2 border-teal-200">
                     <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                     </svg>
@@ -340,7 +340,7 @@
                 </div>
                 <h2 class="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-gray-900 mb-3 sm:mb-4 px-4">
                     Designed With
-                    <span class="block text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500">
+                    <span class="block text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500">
                         You in Mind
                     </span>
                 </h2>
@@ -353,11 +353,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 @php
                 $features = [
-                    ['icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', 'title' => '24/7 Security', 'desc' => 'Your safety is our priority with CCTV, biometric access, and trained female security staff', 'color' => 'rose', 'emoji' => '🛡️'],
-                    ['icon' => 'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0', 'title' => 'High-Speed WiFi', 'desc' => 'Stay connected with unlimited fiber internet perfect for work and study', 'color' => 'purple', 'emoji' => '📶'],
-                    ['icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', 'title' => 'Fully Furnished', 'desc' => 'Move in hassle-free with premium furniture, AC, wardrobe, and cozy bedding', 'color' => 'pink', 'emoji' => '🏠'],
+                    ['icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', 'title' => '24/7 Security', 'desc' => 'Your safety is our priority with CCTV, biometric access, and trained security staff on-site', 'color' => 'teal', 'emoji' => '🛡️'],
+                    ['icon' => 'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0', 'title' => 'High-Speed WiFi', 'desc' => 'Stay connected with unlimited fiber internet perfect for work and study', 'color' => 'violet', 'emoji' => '📶'],
+                    ['icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', 'title' => 'Fully Furnished', 'desc' => 'Move in hassle-free with premium furniture, AC, wardrobe, and cozy bedding', 'color' => 'cyan', 'emoji' => '🏠'],
                     ['icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => 'Daily Housekeeping', 'desc' => 'Relax while our professional team maintains a clean and hygienic environment', 'color' => 'green', 'emoji' => '✨'],
-                    ['icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z', 'title' => 'Sisterhood Community', 'desc' => 'Join workshops, events, and make lifelong friendships with amazing women', 'color' => 'amber', 'emoji' => '💕'],
+                    ['icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z', 'title' => 'Vibrant Community', 'desc' => 'Join events and common-area hangouts, and make lifelong friendships with fellow residents', 'color' => 'amber', 'emoji' => '🤝'],
                     ['icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => 'No Curfews', 'desc' => 'Live freely with 24/7 access and smart card entry - your schedule, your rules', 'color' => 'indigo', 'emoji' => '🔑'],
                 ];
                 @endphp
@@ -390,7 +390,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Section Header -->
             <div class="text-center mb-10 sm:mb-12 lg:mb-16">
-                <span class="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-secondary-100 to-pink-100 text-secondary-700 text-xs sm:text-sm font-bold mb-3 sm:mb-4">
+                <span class="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-secondary-100 to-cyan-100 text-secondary-700 text-xs sm:text-sm font-bold mb-3 sm:mb-4">
                     📍 OUR LOCATIONS
                 </span>
                 <h2 class="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-gray-900 mb-3 sm:mb-4 px-4">
@@ -398,7 +398,7 @@
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600">Location</span>
                 </h2>
                 <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-                    Premium hostels strategically located in the heart of the city
+                    Premium PG accommodations strategically located across Greater Noida
                 </p>
             </div>
 
@@ -494,23 +494,23 @@
                     <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                     </svg>
-                    STORIES FROM OUR FAMILY
+                    STORIES FROM OUR RESIDENTS
                 </div>
                 <h2 class="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-gray-900 mb-3 sm:mb-4 px-4">
                     Hear From Our
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-500">Sisters</span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-cyan-500">Residents</span>
                 </h2>
                 <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-                    Real experiences from women who call this place home
+                    Real experiences from residents who call this place home
                 </p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 @php
                 $testimonials = [
-                    ['name' => 'Priya Sharma', 'role' => 'Software Engineer', 'text' => 'Best decision I made! The community here is amazing and I feel completely safe. The amenities are top-notch and the sisterhood is real.', 'color' => 'rose'],
-                    ['name' => 'Ananya Reddy', 'role' => 'Medical Student', 'text' => 'Perfect for students like me. High-speed WiFi, quiet study spaces, and supportive roommates. This place feels like a second home!', 'color' => 'pink'],
-                    ['name' => 'Meera Patel', 'role' => 'Marketing Professional', 'text' => 'The location is perfect for my office commute. The staff treats us like family and the rooms are always spotless. Highly recommend!', 'color' => 'purple'],
+                    ['name' => 'Priya Sharma', 'role' => 'Software Engineer, Alpha 1', 'text' => 'Best decision I made! The community here is amazing and I feel completely safe. The amenities are top-notch and the staff is always helpful.', 'color' => 'teal'],
+                    ['name' => 'Rohan Verma', 'role' => 'MBA Student, Knowledge Park', 'text' => 'Perfect for students like me. High-speed WiFi, quiet study spaces, and a 10-minute walk to campus. This place feels like a second home!', 'color' => 'cyan'],
+                    ['name' => 'Ananya Reddy', 'role' => 'Marketing Professional, Pari Chowk', 'text' => 'The location is perfect for my office commute. The staff treats us like family and the rooms are always spotless. Highly recommend!', 'color' => 'violet'],
                 ];
                 @endphp
 
@@ -552,7 +552,7 @@
     </div>
 
     <!-- Final CTA Section - Warm & Inviting -->
-    <div class="relative py-16 sm:py-20 lg:py-28 overflow-hidden bg-gradient-to-br from-rose-500 via-pink-500 to-purple-500">
+    <div class="relative py-16 sm:py-20 lg:py-28 overflow-hidden bg-gradient-to-br from-teal-500 via-cyan-500 to-violet-500">
         <!-- Animated Background -->
         <div class="absolute inset-0 opacity-20">
             <div class="absolute top-0 left-0 w-64 sm:w-96 h-64 sm:h-96 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
@@ -579,15 +579,15 @@
             </div>
 
             <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight">
-                Your Journey to<br class="hidden sm:block"/>
-                <span class="inline-block bg-white/20 backdrop-blur-sm px-4 sm:px-6 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl mt-2">Empowerment Starts Here</span>
+                Your Next Home<br class="hidden sm:block"/>
+                <span class="inline-block bg-white/20 backdrop-blur-sm px-4 sm:px-6 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl mt-2">Is Just a Click Away</span>
             </h2>
             <p class="text-base sm:text-lg lg:text-xl text-white/95 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed">
-                Join a community of inspiring women who support, uplift, and celebrate each other every day
+                Join hundreds of students and working professionals who've found comfortable, hassle-free living here
             </p>
             
             <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-10 sm:mb-16">
-                <a href="#locations" class="w-full sm:w-auto group inline-flex items-center justify-center px-8 sm:px-10 lg:px-12 py-4 sm:py-5 bg-white text-rose-600 text-base sm:text-lg font-bold rounded-full hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-white/50 transform hover:scale-105">
+                <a href="#locations" class="w-full sm:w-auto group inline-flex items-center justify-center px-8 sm:px-10 lg:px-12 py-4 sm:py-5 bg-white text-teal-600 text-base sm:text-lg font-bold rounded-full hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-white/50 transform hover:scale-105">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -623,8 +623,8 @@
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 border-2 border-white/20">
                     <div class="text-3xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">100%</div>
-                    <div class="text-white/90 text-sm font-medium">Women Safe</div>
-                    <div class="text-white/70 text-xs mt-0.5 sm:mt-1">Your safety, our priority</div>
+                    <div class="text-white/90 text-sm font-medium">Verified Listings</div>
+                    <div class="text-white/70 text-xs mt-0.5 sm:mt-1">Every branch personally verified</div>
                 </div>
             </div>
         </div>

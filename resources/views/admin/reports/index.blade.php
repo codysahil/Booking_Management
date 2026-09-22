@@ -29,7 +29,7 @@
         <form method="GET" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Period</label>
-                <select name="period" onchange="this.form.submit()" class="w-full px-2 sm:px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-rose-500">
+                <select name="period" onchange="this.form.submit()" class="w-full px-2 sm:px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-teal-500">
                     <option value="week" {{ $period == 'week' ? 'selected' : '' }}>This Week</option>
                     <option value="month" {{ $period == 'month' ? 'selected' : '' }}>Monthly</option>
                     <option value="quarter" {{ $period == 'quarter' ? 'selected' : '' }}>Quarterly</option>
@@ -38,7 +38,7 @@
             </div>
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Year</label>
-                <select name="year" onchange="this.form.submit()" class="w-full px-2 sm:px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-rose-500">
+                <select name="year" onchange="this.form.submit()" class="w-full px-2 sm:px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-teal-500">
                     @for($y = now()->year; $y >= now()->year - 5; $y--)
                         <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
                     @endfor
@@ -46,7 +46,7 @@
             </div>
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Month</label>
-                <select name="month" onchange="this.form.submit()" class="w-full px-2 sm:px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-rose-500">
+                <select name="month" onchange="this.form.submit()" class="w-full px-2 sm:px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-teal-500">
                     @for($m = 1; $m <= 12; $m++)
                         <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
                     @endfor
@@ -54,7 +54,7 @@
             </div>
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Branch</label>
-                <select name="branch_id" onchange="this.form.submit()" class="w-full px-2 sm:px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-rose-500">
+                <select name="branch_id" onchange="this.form.submit()" class="w-full px-2 sm:px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-teal-500">
                     <option value="">All Branches</option>
                     @foreach($branches as $branch)
                         <option value="{{ $branch->id }}" {{ $branch_id == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
@@ -85,12 +85,12 @@
         </div>
 
         <!-- Occupancy Rate -->
-        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-5 text-white">
+        <div class="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-xl p-5 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-blue-100 text-sm">Occupancy Rate</p>
+                    <p class="text-cyan-100 text-sm">Occupancy Rate</p>
                     <p class="text-2xl font-bold">{{ $occupancyData['rate'] }}%</p>
-                    <p class="text-sm mt-1 text-blue-200">{{ $occupancyData['occupied'] }}/{{ $occupancyData['total'] }} beds</p>
+                    <p class="text-sm mt-1 text-cyan-200">{{ $occupancyData['occupied'] }}/{{ $occupancyData['total'] }} beds</p>
                 </div>
                 <div class="bg-white/20 p-3 rounded-full">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,12 +101,12 @@
         </div>
 
         <!-- Active Customers -->
-        <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-5 text-white">
+        <div class="bg-gradient-to-br from-violet-500 to-cyan-600 rounded-xl p-5 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-purple-100 text-sm">Active Customers</p>
+                    <p class="text-violet-100 text-sm">Active Customers</p>
                     <p class="text-2xl font-bold">{{ $customerStats['active'] }}</p>
-                    <p class="text-sm mt-1 text-purple-200">+{{ $customerStats['new'] }} new this period</p>
+                    <p class="text-sm mt-1 text-violet-200">+{{ $customerStats['new'] }} new this period</p>
                 </div>
                 <div class="bg-white/20 p-3 rounded-full">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,7 +270,7 @@
             labels: {!! json_encode(collect($revenueByBranch)->pluck('name')) !!},
             datasets: [{
                 data: {!! json_encode(collect($revenueByBranch)->pluck('revenue')) !!},
-                backgroundColor: ['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b']
+                backgroundColor: ['#14b8a6', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b']
             }]
         },
         options: {

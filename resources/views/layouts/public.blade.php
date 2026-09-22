@@ -25,7 +25,7 @@
                     <a href="{{ route('about') }}" class="text-gray-600 hover:text-primary-600 font-medium transition whitespace-nowrap">About Us</a>
                     <a href="{{ route('gallery') }}" class="text-gray-600 hover:text-primary-600 font-medium transition whitespace-nowrap">Gallery</a>
                     <a href="{{ route('contact') }}" class="text-gray-600 hover:text-primary-600 font-medium transition whitespace-nowrap">Contact</a>
-                    <a href="{{ route('customer.login') }}" class="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-6 py-2.5 rounded-full font-medium hover:from-rose-600 hover:to-pink-600 transition shadow-lg shadow-rose-200 whitespace-nowrap">Login</a>
+                    <a href="{{ route('customer.login') }}" class="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-2.5 rounded-full font-medium hover:from-teal-600 hover:to-cyan-600 transition shadow-lg shadow-teal-200 whitespace-nowrap">Login</a>
                 </div>
                 <div class="md:hidden flex items-center">
                     <button id="mobile-menu-button" type="button" class="text-gray-600 hover:text-primary-600">
@@ -45,7 +45,7 @@
     <div id="mobile-menu" class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out md:hidden" style="transform: translateX(100%); z-index: 99999;">
         <div class="flex flex-col h-full">
             <!-- Header with Gradient -->
-            <div class="relative bg-gradient-to-br from-rose-500 via-pink-500 to-purple-600 p-6 pb-8">
+            <div class="relative bg-gradient-to-br from-teal-500 via-cyan-500 to-violet-600 p-6 pb-8">
                 <button id="close-menu-btn" type="button" class="absolute top-3 right-3 text-white/80 hover:text-white hover:bg-white/10 rounded-full p-1.5 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -67,9 +67,9 @@
             <!-- Menu Items with Cards -->
             <div class="flex-1 overflow-y-auto p-6 -mt-6">
                 <div class="bg-white rounded-2xl shadow-lg p-2 mb-6">
-                    <a href="{{ route('about') }}" class="flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 rounded-xl font-medium transition-all group">
-                        <div class="w-10 h-10 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('about') }}" class="flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 rounded-xl font-medium transition-all group">
+                        <div class="w-10 h-10 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </div>
@@ -77,14 +77,14 @@
                             <span class="font-semibold">About Us</span>
                             <p class="text-xs text-gray-500">Learn our story</p>
                         </div>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-rose-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-teal-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </a>
                     
-                    <a href="{{ route('gallery') }}" class="flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 rounded-xl font-medium transition-all group">
-                        <div class="w-10 h-10 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('gallery') }}" class="flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 rounded-xl font-medium transition-all group">
+                        <div class="w-10 h-10 bg-gradient-to-br from-violet-100 to-cyan-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                         </div>
@@ -92,14 +92,14 @@
                             <span class="font-semibold">Gallery</span>
                             <p class="text-xs text-gray-500">View our spaces</p>
                         </div>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-rose-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-teal-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </a>
                     
-                    <a href="{{ route('contact') }}" class="flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gradient-to-r hover:from-rose-50 hover:to-pink-50 rounded-xl font-medium transition-all group">
-                        <div class="w-10 h-10 bg-gradient-to-br from-pink-100 to-rose-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('contact') }}" class="flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 rounded-xl font-medium transition-all group">
+                        <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-teal-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
                         </div>
@@ -107,14 +107,14 @@
                             <span class="font-semibold">Contact</span>
                             <p class="text-xs text-gray-500">Get in touch</p>
                         </div>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-rose-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-teal-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </a>
                 </div>
                 
                 <!-- CTA Card -->
-                <div class="bg-gradient-to-br from-rose-500 via-pink-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl">
+                <div class="bg-gradient-to-br from-teal-500 via-cyan-500 to-violet-600 rounded-2xl p-6 text-white shadow-xl">
                     <div class="flex items-center gap-3 mb-3">
                         <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +126,7 @@
                             <p class="text-white/80 text-sm">Access your account</p>
                         </div>
                     </div>
-                    <a href="{{ route('customer.login') }}" class="block text-center bg-white text-rose-600 px-6 py-3 rounded-xl font-bold hover:bg-rose-50 transition shadow-lg mt-4">
+                    <a href="{{ route('customer.login') }}" class="block text-center bg-white text-teal-600 px-6 py-3 rounded-xl font-bold hover:bg-teal-50 transition shadow-lg mt-4">
                         Login to Your Account
                     </a>
                 </div>

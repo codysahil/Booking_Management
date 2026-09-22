@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
 @section('content')
-    <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 py-16 text-white">
+    <div class="bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500 py-16 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-center mb-4">
                 <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
@@ -119,7 +119,7 @@
                             @enderror
 
                             <button type="submit"
-                                class="w-full bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 transition shadow-lg">
+                                class="w-full bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-teal-600 hover:via-cyan-600 hover:to-violet-600 transition shadow-lg">
                                 Confirm Booking
                             </button>
 

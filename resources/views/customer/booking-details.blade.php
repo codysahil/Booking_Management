@@ -1,7 +1,7 @@
 @extends('layouts.customer')
 
 @section('content')
-    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Back Button -->
             <div class="mb-6">
@@ -181,7 +181,7 @@
                     </svg>
                     Print Details
                 </button>
-                <button onclick="alert('Support feature coming soon! Please contact the hostel office.')" class="flex-1 px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-lg hover:from-rose-600 hover:to-pink-600 transition font-medium shadow-lg">
+                <button onclick="alert('Support feature coming soon! Please contact the hostel office.')" class="flex-1 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg hover:from-teal-600 hover:to-cyan-600 transition font-medium shadow-lg">
                     <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>

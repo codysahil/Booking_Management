@@ -1,11 +1,11 @@
 @extends('layouts.public')
 
 @section('content')
-    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md mx-auto">
             <!-- Logo/Header -->
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full mb-4">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full mb-4">
                     <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
                     </svg>
@@ -84,19 +84,19 @@
 
                     <!-- Submit Button -->
                     <button type="submit"
-                        class="w-full bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 transition shadow-lg hover:shadow-xl">
+                        class="w-full bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-teal-600 hover:via-cyan-600 hover:to-violet-600 transition shadow-lg hover:shadow-xl">
                         Login to Portal
                     </button>
                 </form>
 
                 <!-- Help Text -->
                 <div class="mt-6 pt-6 border-t border-gray-200">
-                    <div class="bg-blue-50 rounded-xl p-4">
+                    <div class="bg-primary-50 rounded-xl p-4">
                         <div class="flex items-start">
-                            <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-5 h-5 text-primary-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                             </svg>
-                            <div class="flex-1 text-sm text-blue-800">
+                            <div class="flex-1 text-sm text-primary-800">
                                 <p class="font-medium mb-1">Need help logging in?</p>
                                 <ul class="space-y-1 text-xs">
                                     <li>• Your Customer ID was sent via SMS after booking</li>

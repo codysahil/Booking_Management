@@ -1,12 +1,12 @@
 @extends('layouts.customer')
 
 @section('content')
-    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl font-display font-bold text-gray-900">My Requests</h1>
                 <a href="{{ route('customer.requests.create') }}"
-                    class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition shadow-lg">
+                    class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition shadow-lg">
                     New Request
                 </a>
             </div>
@@ -26,7 +26,7 @@
                                 'completed' => 'bg-blue-100 text-blue-800',
                             ];
                         @endphp
-                        <a href="{{ route('customer.requests.show', $request) }}" class="block p-5 hover:bg-rose-50/50 transition">
+                        <a href="{{ route('customer.requests.show', $request) }}" class="block p-5 hover:bg-teal-50/50 transition">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="font-semibold text-gray-900">{{ $request->subject }}</p>

@@ -5,7 +5,7 @@
         $bookings = Auth::guard('customer')->user()->bookings()->with('bed.room.branch')->latest()->get();
     @endphp
     
-    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header -->
             <div class="flex justify-between items-center mb-8">
@@ -14,7 +14,7 @@
                     <p class="text-gray-600 mt-1">Customer ID: <span class="font-bold text-primary-600">{{ Auth::guard('customer')->user()->customer_code }}</span></p>
                 </div>
                 <a href="{{ route('customer.requests.create') }}"
-                    class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition shadow-lg">
+                    class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition shadow-lg">
                     New Request
                 </a>
             </div>
@@ -216,10 +216,10 @@
                     </a>
                 </div>
 
-                <div class="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 text-white">
+                <div class="bg-gradient-to-br from-violet-500 to-cyan-500 rounded-2xl p-6 text-white">
                     <h3 class="text-xl font-bold mb-2">Raise a Request</h3>
                     <p class="text-white/90 mb-4 text-sm">Room swap, vacation notice, maintenance, or refund requests</p>
-                    <button onclick="alert('Request feature coming soon! Please contact the hostel office for now.')" class="bg-white text-purple-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
+                    <button onclick="alert('Request feature coming soon! Please contact the hostel office for now.')" class="bg-white text-violet-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
                         New Request
                     </button>
                 </div>

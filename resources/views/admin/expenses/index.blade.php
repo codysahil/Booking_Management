@@ -41,7 +41,7 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4">
             <p class="text-xs text-gray-500">Total for this filter</p>
-            <p class="text-2xl font-bold text-rose-600">{{ money($totalForFilter) }}</p>
+            <p class="text-2xl font-bold text-teal-600">{{ money($totalForFilter) }}</p>
         </div>
         <div class="flex gap-3">
             <a href="{{ route('admin.expenses.export', request()->query()) }}"
@@ -52,7 +52,7 @@
                 Export CSV
             </a>
             <a href="{{ route('admin.expenses.create') }}"
-                class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition shadow-lg">
+                class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition shadow-lg">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -64,7 +64,7 @@
     <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-rose-50 to-pink-50">
+                <thead class="bg-gradient-to-r from-teal-50 to-cyan-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Branch</th>
@@ -77,7 +77,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
                     @forelse ($expenses as $expense)
-                        <tr class="hover:bg-rose-50/50">
+                        <tr class="hover:bg-teal-50/50">
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $expense->date->format('d M, Y') }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ $expense->branch->name ?? 'All branches' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $expense->category }}</td>

@@ -7,6 +7,10 @@ use App\Models\Room;
 use App\Models\Bed;
 use Illuminate\Database\Seeder;
 
+/**
+ * Demo branches for a Greater Noida PG business: one men's PG near Knowledge
+ * Park II, one women's PG near Pari Chowk — the two real PG hubs in the area.
+ */
 class BranchSeeder extends Seeder
 {
     public function run(): void
@@ -17,40 +21,22 @@ class BranchSeeder extends Seeder
             return;
         }
 
-        // Branch 1 - Annai Indira Nagar (15 rooms)
+        // Branch 1 - Knowledge Park II, Men's PG
         $branch1 = Branch::create([
-            'name' => 'Honeybees Hostel - Annai Indira Nagar',
-            'address' => '50, Annai Indira Nagar 1st Main Road, Thoraipakkam, Chennai - 600097 (Landmark: Tansq Jewellery)',
-            'google_map_url' => 'https://maps.google.com',
+            'name' => 'Nestay PG - Knowledge Park II (Men\'s PG)',
+            'address' => 'Plot 14, Knowledge Park II, Greater Noida, Uttar Pradesh - 201310 (Near Gautam Buddha University)',
+            'google_map_url' => 'https://maps.google.com/?q=Knowledge+Park+2+Greater+Noida',
         ]);
 
-        // Create 15 rooms for Branch 1 (Hostel-1) - Total 41 beds
-        // All rooms are AC except Room-15
         $branch1Rooms = [
-            // Ground Floor
-            ['name' => 'Room-1', 'floor' => 'G Floor', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            ['name' => 'Room-2', 'floor' => 'G Floor', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            ['name' => 'Room-3', 'floor' => 'G Floor', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
-            
-            // 1st Floor Left Wing
-            ['name' => 'Room-4', 'floor' => '1st Floor Left', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            ['name' => 'Room-5', 'floor' => '1st Floor Left', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
-            ['name' => 'Room-6', 'floor' => '1st Floor Left', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            
-            // 1st Floor Right Wing
-            ['name' => 'Room-7', 'floor' => '1st Floor Right', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            ['name' => 'Room-8', 'floor' => '1st Floor Right', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
-            ['name' => 'Room-9', 'floor' => '1st Floor Right', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            
-            // 2nd Floor Left Wing
-            ['name' => 'Room-10', 'floor' => '2nd Floor Left', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            ['name' => 'Room-11', 'floor' => '2nd Floor Left', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
-            ['name' => 'Room-12', 'floor' => '2nd Floor Left', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            
-            // 2nd Floor Right Wing
-            ['name' => 'Room-13', 'floor' => '2nd Floor Right', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            ['name' => 'Room-14', 'floor' => '2nd Floor Right', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
-            ['name' => 'Room-15', 'floor' => '2nd Floor Right', 'type' => 'Non-AC', 'beds' => 4, 'price' => 1200],
+            ['name' => 'Room-1', 'floor' => 'G Floor', 'type' => 'AC', 'beds' => 3, 'price' => 8500],
+            ['name' => 'Room-2', 'floor' => 'G Floor', 'type' => 'AC', 'beds' => 2, 'price' => 10500],
+            ['name' => 'Room-3', 'floor' => '1st Floor', 'type' => 'AC', 'beds' => 3, 'price' => 8500],
+            ['name' => 'Room-4', 'floor' => '1st Floor', 'type' => 'AC', 'beds' => 2, 'price' => 10500],
+            ['name' => 'Room-5', 'floor' => '1st Floor', 'type' => 'Non-AC', 'beds' => 4, 'price' => 6500],
+            ['name' => 'Room-6', 'floor' => '2nd Floor', 'type' => 'AC', 'beds' => 3, 'price' => 8500],
+            ['name' => 'Room-7', 'floor' => '2nd Floor', 'type' => 'AC', 'beds' => 2, 'price' => 10500],
+            ['name' => 'Room-8', 'floor' => '2nd Floor', 'type' => 'Non-AC', 'beds' => 4, 'price' => 6500],
         ];
 
         foreach ($branch1Rooms as $roomData) {
@@ -59,10 +45,9 @@ class BranchSeeder extends Seeder
                 'room_number' => $roomData['name'],
                 'type' => $roomData['type'],
                 'capacity' => $roomData['beds'],
-                'gender_allowed' => 'Female',
+                'gender_allowed' => 'Male',
             ]);
 
-            // Create beds for each room
             for ($i = 1; $i <= $roomData['beds']; $i++) {
                 Bed::create([
                     'room_id' => $room->id,
@@ -73,20 +58,20 @@ class BranchSeeder extends Seeder
             }
         }
 
-        // Branch 2 - Nethaji Cross Street (4 rooms)
+        // Branch 2 - Pari Chowk, Women's PG
         $branch2 = Branch::create([
-            'name' => 'Honeybees Hostel - Nethaji Cross Street',
-            'address' => 'Nethaji 1st Cross Street, Muttukkaranchavadi, Thoraipakkam, Chennai - 600097 (Landmark: Tansq Jewellery)',
-            'google_map_url' => 'https://maps.google.com',
+            'name' => 'Nestay PG - Pari Chowk (Women\'s PG)',
+            'address' => 'House No. 22, Alpha 1 Commercial Belt, Pari Chowk, Greater Noida, Uttar Pradesh - 201308 (Near Ansal Plaza)',
+            'google_map_url' => 'https://maps.google.com/?q=Pari+Chowk+Greater+Noida',
         ]);
 
-        // Create 4 rooms for Branch 2 (Hostel-2) - Total 11 beds
-        // All rooms are AC
         $branch2Rooms = [
-            ['name' => 'Room-16', 'floor' => 'Full Building', 'type' => 'AC', 'beds' => 2, 'price' => 2000],
-            ['name' => 'Room-17', 'floor' => 'Full Building', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            ['name' => 'Room-18', 'floor' => 'Full Building', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
-            ['name' => 'Room-19', 'floor' => 'Full Building', 'type' => 'AC', 'beds' => 3, 'price' => 1600],
+            ['name' => 'Room-1', 'floor' => 'G Floor', 'type' => 'AC', 'beds' => 2, 'price' => 11000],
+            ['name' => 'Room-2', 'floor' => 'G Floor', 'type' => 'AC', 'beds' => 3, 'price' => 9000],
+            ['name' => 'Room-3', 'floor' => '1st Floor', 'type' => 'AC', 'beds' => 2, 'price' => 11000],
+            ['name' => 'Room-4', 'floor' => '1st Floor', 'type' => 'AC', 'beds' => 3, 'price' => 9000],
+            ['name' => 'Room-5', 'floor' => '2nd Floor', 'type' => 'Non-AC', 'beds' => 3, 'price' => 7000],
+            ['name' => 'Room-6', 'floor' => '2nd Floor', 'type' => 'AC', 'beds' => 2, 'price' => 11000],
         ];
 
         foreach ($branch2Rooms as $roomData) {
@@ -98,7 +83,6 @@ class BranchSeeder extends Seeder
                 'gender_allowed' => 'Female',
             ]);
 
-            // Create beds for each room
             for ($i = 1; $i <= $roomData['beds']; $i++) {
                 Bed::create([
                     'room_id' => $room->id,
@@ -109,8 +93,8 @@ class BranchSeeder extends Seeder
             }
         }
 
-        $this->command->info('✅ Hostel-1 (Annai Indira Nagar): 15 rooms created - 41 beds total');
-        $this->command->info('✅ Hostel-2 (Nethaji Cross Street): 4 rooms created - 11 beds total');
-        $this->command->info('✅ Total beds created: ' . Bed::count() . ' (52 beds)');
+        $this->command->info('✅ Knowledge Park II (Men\'s PG): 8 rooms created - ' . $branch1->rooms()->withCount('beds')->get()->sum('beds_count') . ' beds total');
+        $this->command->info('✅ Pari Chowk (Women\'s PG): 6 rooms created - ' . $branch2->rooms()->withCount('beds')->get()->sum('beds_count') . ' beds total');
+        $this->command->info('✅ Total beds created: ' . Bed::count());
     }
 }

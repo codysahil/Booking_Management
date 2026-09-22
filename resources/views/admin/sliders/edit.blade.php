@@ -23,7 +23,7 @@
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Replace Image (Optional)</label>
                     <input type="file" name="image" accept="image/*"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('image') border-red-500 @enderror"
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 @error('image') border-red-500 @enderror"
                         onchange="previewImage(event)">
                     @error('image')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -38,7 +38,7 @@
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Title (Optional)</label>
                     <input type="text" name="title" value="{{ old('title', $slider->title) }}"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('title') border-red-500 @enderror">
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 @error('title') border-red-500 @enderror">
                     @error('title')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -47,7 +47,7 @@
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Description (Optional)</label>
                     <textarea name="description" rows="3"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('description') border-red-500 @enderror">{{ old('description', $slider->description) }}</textarea>
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 @error('description') border-red-500 @enderror">{{ old('description', $slider->description) }}</textarea>
                     @error('description')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -56,7 +56,7 @@
                 <div class="mb-6">
                     <label class="block text-gray-700 font-semibold mb-2">Display Order</label>
                     <input type="number" name="order" value="{{ old('order', $slider->order) }}" min="0"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('order') border-red-500 @enderror">
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 @error('order') border-red-500 @enderror">
                     @error('order')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -64,7 +64,7 @@
                 </div>
 
                 <div class="flex gap-4">
-                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
+                    <button type="submit" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-lg transition">
                         Update Slider Image
                     </button>
                     <a href="{{ route('admin.sliders.index') }}" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 rounded-lg text-center transition">

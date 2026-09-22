@@ -10,31 +10,36 @@ export default {
     ],
 
     safelist: [
-        // Rose colors
-        'bg-rose-50', 'bg-rose-100', 'bg-rose-500', 'bg-rose-600', 'bg-rose-700',
-        'text-rose-500', 'text-rose-600', 'text-rose-700',
-        'border-rose-100', 'border-rose-200', 'border-rose-300', 'border-rose-500',
-        'hover:bg-rose-700', 'hover:text-rose-600', 'hover:text-rose-700', 'hover:border-rose-300',
+        // Teal colors (brand primary)
+        'bg-teal-50', 'bg-teal-100', 'bg-teal-500', 'bg-teal-600', 'bg-teal-700',
+        'text-teal-500', 'text-teal-600', 'text-teal-700',
+        'border-teal-100', 'border-teal-200', 'border-teal-300', 'border-teal-500',
+        'hover:bg-teal-700', 'hover:text-teal-600', 'hover:text-teal-700', 'hover:border-teal-300',
+        'shadow-teal-100/50',
         // Emerald/Green colors
         'bg-emerald-100', 'bg-emerald-500',
         'text-emerald-500', 'text-emerald-600', 'text-emerald-700',
         'bg-green-100', 'bg-green-400', 'bg-green-500',
         'text-green-500', 'text-green-600', 'text-green-700', 'text-green-800',
-        // Pink colors
-        'bg-pink-50', 'bg-pink-100', 'bg-pink-500', 'bg-pink-600',
-        'text-pink-500', 'text-pink-600',
-        'from-rose-500', 'via-pink-500', 'to-purple-500',
-        'from-rose-600', 'via-pink-600', 'to-purple-600',
-        'hover:from-rose-600', 'hover:via-pink-600', 'hover:to-purple-600',
-        // Purple colors
-        'bg-purple-100', 'bg-purple-500', 'bg-purple-600', 'bg-purple-700',
-        'text-purple-500', 'text-purple-600',
+        // Cyan colors (brand mid-gradient)
+        'bg-cyan-50', 'bg-cyan-100', 'bg-cyan-500', 'bg-cyan-600',
+        'text-cyan-500', 'text-cyan-600',
+        'border-cyan-100', 'border-cyan-200', 'border-cyan-300',
+        'shadow-cyan-100/50',
+        'from-teal-500', 'via-cyan-500', 'to-violet-500',
+        'from-teal-600', 'via-cyan-600', 'to-violet-600',
+        'hover:from-teal-600', 'hover:via-cyan-600', 'hover:to-violet-600',
+        // Violet colors (brand accent)
+        'bg-violet-100', 'bg-violet-500', 'bg-violet-600', 'bg-violet-700',
+        'text-violet-500', 'text-violet-600',
+        'border-violet-100', 'border-violet-200', 'border-violet-300',
+        'shadow-violet-100/50',
         // Other utility colors
         'bg-amber-100', 'text-amber-600',
         'bg-blue-100', 'text-blue-600',
         'bg-indigo-100', 'text-indigo-600',
         // Peer checked states
-        'peer-checked:border-rose-500', 'peer-checked:bg-rose-500', 'peer-checked:bg-rose-50',
+        'peer-checked:border-teal-500', 'peer-checked:bg-teal-500', 'peer-checked:bg-teal-50',
     ],
 
     theme: {
@@ -45,16 +50,16 @@ export default {
             },
             colors: {
                 primary: {
-                    50: '#fdf2f8',
-                    100: '#fce7f3',
-                    200: '#fbcfe8',
-                    300: '#f9a8d4',
-                    400: '#f472b6',
-                    500: '#ec4899',
-                    600: '#db2777',
-                    700: '#be185d',
-                    800: '#9d174d',
-                    900: '#831843',
+                    50: '#f0fdfa',
+                    100: '#ccfbf1',
+                    200: '#99f6e4',
+                    300: '#5eead4',
+                    400: '#2dd4bf',
+                    500: '#14b8a6',
+                    600: '#0d9488',
+                    700: '#0f766e',
+                    800: '#115e59',
+                    900: '#134e4a',
                 },
                 secondary: {
                     50: '#f5f3ff',

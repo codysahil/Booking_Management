@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
 @section('content')
-    <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 py-16 text-white">
+    <div class="bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500 py-16 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 class="text-4xl font-display font-bold mb-3">{{ $branch->name }}</h1>
             <p class="text-white/90 flex items-center justify-center text-lg">
@@ -35,7 +35,7 @@
                         @if($room->images->count() > 0)
                             <img id="main-image-{{ $room->id }}" src="{{ $room->images->first()->safe_url }}" alt="{{ $room->room_number }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                         @else
-                            <div class="w-full h-full bg-gradient-to-br from-rose-100 via-pink-100 to-purple-100 flex items-center justify-center">
+                            <div class="w-full h-full bg-gradient-to-br from-teal-100 via-cyan-100 to-violet-100 flex items-center justify-center">
                                 <div class="text-center">
                                     <svg class="w-20 h-20 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -91,7 +91,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
-                                Women Only
+                                {{ $room->gender_allowed }} Only
                             </div>
                         </div>
 

@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex justify-end mb-6">
         <a href="{{ route('admin.team.create') }}"
-            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition shadow-lg">
+            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition shadow-lg">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -15,7 +15,7 @@
 
     <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gradient-to-r from-rose-50 to-pink-50">
+            <thead class="bg-gradient-to-r from-teal-50 to-cyan-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Name</th>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Email</th>
@@ -26,7 +26,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-100">
                 @foreach ($team as $member)
-                    <tr class="hover:bg-rose-50/50">
+                    <tr class="hover:bg-teal-50/50">
                         <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $member->name }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600">{{ $member->email }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600">{{ $member->role_label }}</td>
