@@ -10,7 +10,7 @@
             <div class="mb-4">
                 <label for="branch_id" class="block text-sm font-medium text-gray-700">Branch</label>
                 <select name="branch_id" id="branch_id"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
                     required>
                     @foreach($branches as $branch)
                         <option value="{{ $branch->id }}" {{ $room->branch_id == $branch->id ? 'selected' : '' }}>
@@ -23,7 +23,7 @@
             <div class="mb-4">
                 <label for="room_number" class="block text-sm font-medium text-gray-700">Room Number</label>
                 <input type="text" name="room_number" id="room_number" value="{{ $room->room_number }}"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
                     required>
             </div>
 
@@ -31,13 +31,13 @@
                 <div>
                     <label for="capacity" class="block text-sm font-medium text-gray-700">Capacity</label>
                     <input type="number" name="capacity" id="capacity" min="1" value="{{ $room->capacity }}"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
                         required>
                 </div>
                 <div>
                     <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
                     <select name="type" id="type"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
                         required>
                         <option value="Non-AC" {{ $room->type == 'Non-AC' ? 'selected' : '' }}>Non-AC</option>
                         <option value="AC" {{ $room->type == 'AC' ? 'selected' : '' }}>AC</option>
@@ -48,7 +48,7 @@
             <div class="mb-4">
                 <label for="gender_allowed" class="block text-sm font-medium text-gray-700">Gender Allowed</label>
                 <select name="gender_allowed" id="gender_allowed"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
                     required>
                     <option value="Any" {{ $room->gender_allowed == 'Any' ? 'selected' : '' }}>Any</option>
                     <option value="Male" {{ $room->gender_allowed == 'Male' ? 'selected' : '' }}>Male</option>
@@ -81,11 +81,11 @@
                 @endif
 
                 <input type="file" name="images[]" id="images" accept="image/*" multiple
-                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
                 <p class="text-xs text-gray-500 mt-1">Select multiple images at once (Hold Ctrl/Cmd) or add one by one. Max:
                     1MB per image, 5 images total</p>
 
-                <div id="file-count" class="mt-2 text-sm text-indigo-600 font-medium hidden"></div>
+                <div id="file-count" class="mt-2 text-sm text-primary-600 font-medium hidden"></div>
                 <div id="error-message" class="mt-2 text-sm text-red-600 font-medium hidden"></div>
                 <div id="image-preview" class="mt-4 grid grid-cols-3 gap-3 hidden"></div>
             </div>
@@ -93,7 +93,7 @@
             <div class="flex justify-end">
                 <a href="{{ route('admin.rooms.index') }}"
                     class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-300">Cancel</a>
-                <button type="submit" id="submit-btn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                <button type="submit" id="submit-btn" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700"
                     onclick="console.log('Button clicked!')">Update
                     Room</button>
             </div>
@@ -137,13 +137,13 @@
                 <div>
                     <label for="bed_number" class="block text-sm font-medium text-gray-700 mb-1">Bed Number</label>
                     <input type="text" name="bed_number" id="bed_number"
-                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm"
                         placeholder="e.g., Bed 1" required>
                 </div>
                 <div>
                     <label for="monthly_rent" class="block text-sm font-medium text-gray-700 mb-1">Monthly Rent (₹)</label>
                     <input type="number" name="monthly_rent" id="monthly_rent" min="0" step="0.01"
-                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm"
                         placeholder="3000" required>
                 </div>
                 <div class="flex items-end">
@@ -193,7 +193,7 @@
                                     @csrf
                                     @method('PUT')
                                     <select name="status" onchange="this.form.submit()"
-                                        class="text-xs sm:text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        class="text-xs sm:text-sm border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                         <option value="vacant" {{ $bed->status == 'vacant' ? 'selected' : '' }}>Vacant</option>
                                         <option value="occupied" {{ $bed->status == 'occupied' ? 'selected' : '' }}>Occupied
                                         </option>
@@ -324,8 +324,8 @@
                                 const div = document.createElement('div');
                                 div.className = 'relative group';
                                 div.innerHTML = `
-                                        <img src="${event.target.result}" class="w-full h-24 object-cover rounded-lg border-2 border-indigo-300">
-                                        <span class="absolute top-1 left-1 bg-indigo-600 text-white text-xs px-2 py-0.5 rounded-full shadow">New #${index + 1}</span>
+                                        <img src="${event.target.result}" class="w-full h-24 object-cover rounded-lg border-2 border-primary-300">
+                                        <span class="absolute top-1 left-1 bg-primary-600 text-white text-xs px-2 py-0.5 rounded-full shadow">New #${index + 1}</span>
                                         <button type="button" onclick="removeNewImage(${index})" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>

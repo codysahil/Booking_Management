@@ -10,12 +10,12 @@
                 <div class="flex flex-col sm:flex-row gap-3 flex-1">
                     <div class="relative flex-1 max-w-md">
                         <input type="text" id="searchInput" placeholder="Search rooms..." 
-                            class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:ring-0 transition-colors">
+                            class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-0 transition-colors">
                         <svg class="absolute left-3 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
-                    <select id="branchFilter" class="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:ring-0 transition-colors">
+                    <select id="branchFilter" class="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-0 transition-colors">
                         <option value="">All Branches</option>
                         @foreach(\App\Models\Branch::all() as $branch)
                             <option value="{{ $branch->name }}">{{ $branch->name }}</option>
@@ -23,7 +23,7 @@
                     </select>
                 </div>
                 <a href="{{ route('admin.rooms.create') }}"
-                    class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+                    class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-bold rounded-xl hover:from-cyan-600 hover:to-violet-600 transition-all duration-300 shadow-lg hover:shadow-xl">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -35,7 +35,7 @@
         <!-- Table -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-pink-50 to-purple-50">
+                <thead class="bg-gradient-to-r from-cyan-50 to-violet-50">
                     <tr>
                         <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                             Room
@@ -59,10 +59,10 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100" id="roomTableBody">
                     @forelse($rooms as $room)
-                        <tr class="hover:bg-pink-50/50 transition-colors duration-150">
+                        <tr class="hover:bg-cyan-50/50 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-400 rounded-xl flex items-center justify-center text-white font-bold mr-3">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-violet-400 rounded-xl flex items-center justify-center text-white font-bold mr-3">
                                         {{ substr($room->room_number, -2) }}
                                     </div>
                                     <div class="text-sm font-bold text-gray-900">{{ $room->room_number }}</div>
@@ -77,7 +77,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-violet-100 text-violet-700">
                                     {{ $room->capacity }} Sharing
                                 </span>
                             </td>
@@ -95,7 +95,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <a href="{{ route('admin.rooms.edit', $room) }}"
-                                    class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors mr-2">
+                                    class="inline-flex items-center px-3 py-1.5 bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors mr-2">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
@@ -148,7 +148,7 @@
                                 Previous
                             </span>
                         @else
-                            <a href="{{ $rooms->previousPageUrl() }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-pink-50 hover:border-pink-300 hover:text-pink-600 transition-all">
+                            <a href="{{ $rooms->previousPageUrl() }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-cyan-50 hover:border-cyan-300 hover:text-cyan-600 transition-all">
                                 Previous
                             </a>
                         @endif
@@ -156,11 +156,11 @@
                         {{-- Page Numbers --}}
                         @foreach ($rooms->getUrlRange(1, $rooms->lastPage()) as $page => $url)
                             @if ($page == $rooms->currentPage())
-                                <span class="px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg">
+                                <span class="px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-cyan-500 to-violet-500 rounded-lg">
                                     {{ $page }}
                                 </span>
                             @else
-                                <a href="{{ $url }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-pink-50 hover:border-pink-300 hover:text-pink-600 transition-all">
+                                <a href="{{ $url }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-cyan-50 hover:border-cyan-300 hover:text-cyan-600 transition-all">
                                     {{ $page }}
                                 </a>
                             @endif
@@ -168,7 +168,7 @@
 
                         {{-- Next Button --}}
                         @if ($rooms->hasMorePages())
-                            <a href="{{ $rooms->nextPageUrl() }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-pink-50 hover:border-pink-300 hover:text-pink-600 transition-all">
+                            <a href="{{ $rooms->nextPageUrl() }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:bg-cyan-50 hover:border-cyan-300 hover:text-cyan-600 transition-all">
                                 Next
                             </a>
                         @else

@@ -17,7 +17,7 @@
                     $kindIcons = ['booking' => '🛏️', 'request' => '📝', 'payment' => '💰', 'info' => 'ℹ️'];
                 @endphp
                 <a href="{{ route('admin.notifications.read', ['notification' => $notification->id, 'url' => $notification->data['url'] ?? route('admin.notifications.index')]) }}"
-                    class="flex items-start gap-4 p-5 hover:bg-rose-50/50 transition {{ $notification->read_at ? '' : 'bg-rose-50/30' }}">
+                    class="flex items-start gap-4 p-5 hover:bg-teal-50/50 transition {{ $notification->read_at ? '' : 'bg-teal-50/30' }}">
                     <span class="text-2xl">{{ $kindIcons[$notification->data['kind'] ?? 'info'] ?? 'ℹ️' }}</span>
                     <div class="flex-1">
                         <p class="text-sm font-semibold text-gray-900">{{ $notification->data['title'] ?? 'Notification' }}</p>
@@ -25,7 +25,7 @@
                         <p class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
                     </div>
                     @unless($notification->read_at)
-                        <span class="w-2 h-2 mt-2 rounded-full bg-rose-500"></span>
+                        <span class="w-2 h-2 mt-2 rounded-full bg-teal-500"></span>
                     @endunless
                 </a>
             @empty

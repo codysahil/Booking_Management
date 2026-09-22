@@ -17,7 +17,7 @@ class BookingFlowTest extends TestCase
     {
         $response = $this->get(route('home'));
         $response->assertStatus(200);
-        $response->assertSee('Honeybees');
+        $response->assertSee('Nestay');
     }
 
     public function test_public_can_view_branch_details()

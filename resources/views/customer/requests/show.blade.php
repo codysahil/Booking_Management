@@ -1,7 +1,7 @@
 @extends('layouts.customer')
 
 @section('content')
-    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 py-8">
         <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <a href="{{ route('customer.requests.index') }}" class="text-gray-500 hover:text-gray-700 flex items-center mb-6">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

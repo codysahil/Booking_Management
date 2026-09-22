@@ -10,13 +10,13 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        $email = env('ADMIN_EMAIL', 'admin@honeybees.com');
+        $email = env('ADMIN_EMAIL', 'admin@nestaypg.in');
         $password = env('ADMIN_PASSWORD', 'admin123');
 
         $user = User::firstOrCreate(
             ['email' => $email],
             [
-                'name' => 'Honeybees Admin',
+                'name' => 'Nestay Admin',
                 'password' => Hash::make($password),
                 'role' => User::ROLE_ADMIN,
                 'is_active' => true,

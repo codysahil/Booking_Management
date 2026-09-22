@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
 @section('content')
-    <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-16">
+    <div class="relative overflow-hidden bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 py-16">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">Terms & Conditions</h1>
             <p class="text-lg text-gray-600">Please read these terms before booking a stay at {{ setting('hostel_name') }}.</p>

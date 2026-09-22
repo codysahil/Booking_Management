@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-800">Homepage Slider Images</h1>
-        <a href="{{ route('admin.sliders.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
+        <a href="{{ route('admin.sliders.create') }}" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg transition">
             Add New Slide
         </a>
     </div>
@@ -47,7 +47,7 @@
                             </form>
                         </td>
                         <td class="px-6 py-4 text-sm font-medium space-x-2">
-                            <a href="{{ route('admin.sliders.edit', $slider) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                            <a href="{{ route('admin.sliders.edit', $slider) }}" class="text-primary-600 hover:text-primary-900">Edit</a>
                             <form action="{{ route('admin.sliders.destroy', $slider) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure?')">
                                 @csrf
                                 @method('DELETE')

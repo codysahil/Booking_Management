@@ -114,7 +114,7 @@
                             You can pay the advance online now, or pay in cash at check-in.
                         </p>
                         <button id="pay-advance-btn"
-                            class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition shadow-lg">
+                            class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition shadow-lg">
                             Pay ₹{{ number_format($pendingAdvance->amount) }} Now
                         </button>
                         <p id="pay-advance-status" class="text-sm mt-2"></p>

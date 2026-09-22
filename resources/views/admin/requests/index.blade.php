@@ -29,7 +29,7 @@
 
     <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gradient-to-r from-rose-50 to-pink-50">
+            <thead class="bg-gradient-to-r from-teal-50 to-cyan-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Resident</th>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Type</th>
@@ -41,7 +41,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-100">
                 @forelse ($requests as $request)
-                    <tr class="hover:bg-rose-50/50">
+                    <tr class="hover:bg-teal-50/50">
                         <td class="px-6 py-4 text-sm">
                             <div class="font-medium text-gray-900">{{ $request->customer->name ?? 'Unknown' }}</div>
                             <div class="text-xs text-gray-500">{{ $request->customer->customer_code ?? '' }}</div>

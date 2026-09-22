@@ -4,7 +4,7 @@
 
 @section('content')
     <!-- Welcome Banner -->
-    <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 rounded-3xl p-8 mb-8 text-white shadow-xl">
+    <div class="bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500 rounded-3xl p-8 mb-8 text-white shadow-xl">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
                 <h2 class="text-3xl font-display font-bold mb-2">Welcome back! 👋</h2>
@@ -26,7 +26,7 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-rose-100">
+        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-teal-100">
             <p class="text-sm font-medium text-gray-500 mb-1">Occupancy</p>
             <p class="text-3xl font-bold text-gray-900">{{ $stats['occupancy_rate'] }}%</p>
             <p class="text-xs text-gray-500 mt-1">{{ $stats['beds'] - $stats['vacant_beds'] }} of {{ $stats['beds'] }} beds occupied</p>
@@ -44,10 +44,10 @@
             <p class="text-3xl font-bold text-amber-600">{{ money($pendingChargesAmount + $pendingDuesAmount) }}</p>
             <p class="text-xs text-gray-500 mt-1">{{ $overdueCount }} charge(s) overdue</p>
         </div>
-        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-purple-100">
+        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-violet-100">
             <p class="text-sm font-medium text-gray-500 mb-1">Open resident requests</p>
-            <p class="text-3xl font-bold text-purple-600">{{ $openRequestsCount }}</p>
-            <a href="{{ route('admin.requests.index') }}" class="text-xs text-purple-600 hover:underline">View all →</a>
+            <p class="text-3xl font-bold text-violet-600">{{ $openRequestsCount }}</p>
+            <a href="{{ route('admin.requests.index') }}" class="text-xs text-violet-600 hover:underline">View all →</a>
         </div>
     </div>
 
@@ -63,15 +63,15 @@
             <h3 class="text-lg font-display font-bold text-gray-900 mb-4">Quick Actions</h3>
             <div class="space-y-3">
                 <a href="{{ route('admin.customers.create') }}"
-                    class="block text-center px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition">
+                    class="block text-center px-4 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition">
                     Check-In a Customer
                 </a>
                 <a href="{{ route('admin.expenses.create') }}"
-                    class="block text-center px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-xl hover:from-pink-600 hover:to-purple-600 transition">
+                    class="block text-center px-4 py-3 bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-bold rounded-xl hover:from-cyan-600 hover:to-violet-600 transition">
                     Record an Expense
                 </a>
                 <a href="{{ route('admin.announcements.create') }}"
-                    class="block text-center px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold rounded-xl hover:from-purple-600 hover:to-indigo-600 transition">
+                    class="block text-center px-4 py-3 bg-gradient-to-r from-violet-500 to-teal-500 text-white font-bold rounded-xl hover:from-violet-600 hover:to-teal-600 transition">
                     Post an Announcement
                 </a>
             </div>
@@ -83,7 +83,7 @@
         <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-display font-bold text-gray-900">Recent Bookings</h3>
-                <a href="{{ route('admin.bookings.index') }}" class="text-xs text-rose-600 hover:underline">View all →</a>
+                <a href="{{ route('admin.bookings.index') }}" class="text-xs text-teal-600 hover:underline">View all →</a>
             </div>
             <div class="divide-y divide-gray-100">
                 @forelse($recentBookings as $booking)
@@ -106,7 +106,7 @@
         <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-display font-bold text-gray-900">Open Resident Requests</h3>
-                <a href="{{ route('admin.requests.index') }}" class="text-xs text-rose-600 hover:underline">View all →</a>
+                <a href="{{ route('admin.requests.index') }}" class="text-xs text-teal-600 hover:underline">View all →</a>
             </div>
             <div class="divide-y divide-gray-100">
                 @forelse($openRequests as $reqItem)
@@ -137,7 +137,7 @@
                 {
                     label: 'Income',
                     data: @json($incomeExpenseChart->pluck('income')),
-                    backgroundColor: '#ec4899',
+                    backgroundColor: '#14b8a6',
                     borderRadius: 6,
                 },
                 {

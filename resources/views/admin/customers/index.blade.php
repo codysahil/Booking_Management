@@ -72,7 +72,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <a href="{{ route('admin.customers.show', $customer) }}" class="text-primary-600 hover:text-primary-900 mr-3">View</a>
-                                <a href="{{ route('admin.customers.edit', $customer) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <a href="{{ route('admin.customers.edit', $customer) }}" class="text-primary-600 hover:text-primary-900">Edit</a>
                             </td>
                         </tr>
                     @empty

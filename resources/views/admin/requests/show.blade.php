@@ -70,7 +70,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Response to resident (emailed if they have an email on file)</label>
                     <textarea name="admin_response" rows="4" class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">{{ old('admin_response', $residentRequest->admin_response) }}</textarea>
                 </div>
-                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition shadow-lg">
+                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition shadow-lg">
                     Save & Notify Resident
                 </button>
             </form>

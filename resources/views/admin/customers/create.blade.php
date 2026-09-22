@@ -24,31 +24,31 @@
 
         @if ($booking)
             <!-- Booking Info Card -->
-            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+            <div class="bg-primary-50 border-2 border-primary-200 rounded-xl p-6 mb-6">
                 <div class="flex items-start">
-                    <svg class="w-6 h-6 text-blue-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-6 h-6 text-primary-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                             clip-rule="evenodd"></path>
                     </svg>
                     <div class="flex-1">
-                        <h3 class="text-lg font-bold text-blue-900 mb-2">Online Booking Details</h3>
+                        <h3 class="text-lg font-bold text-primary-900 mb-2">Online Booking Details</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
-                                <p class="text-blue-600 font-medium">Booking Ref</p>
-                                <p class="text-blue-900 font-bold">{{ $booking->booking_reference }}</p>
+                                <p class="text-primary-600 font-medium">Booking Ref</p>
+                                <p class="text-primary-900 font-bold">{{ $booking->booking_reference }}</p>
                             </div>
                             <div>
-                                <p class="text-blue-600 font-medium">Customer ID</p>
-                                <p class="text-blue-900 font-bold">{{ $booking->customer->customer_code }}</p>
+                                <p class="text-primary-600 font-medium">Customer ID</p>
+                                <p class="text-primary-900 font-bold">{{ $booking->customer->customer_code }}</p>
                             </div>
                             <div>
-                                <p class="text-blue-600 font-medium">Branch</p>
-                                <p class="text-blue-900 font-bold">{{ $booking->bed->room->branch->name }}</p>
+                                <p class="text-primary-600 font-medium">Branch</p>
+                                <p class="text-primary-900 font-bold">{{ $booking->bed->room->branch->name }}</p>
                             </div>
                             <div>
-                                <p class="text-blue-600 font-medium">Bed</p>
-                                <p class="text-blue-900 font-bold">{{ $booking->bed->room->room_number }} •
+                                <p class="text-primary-600 font-medium">Bed</p>
+                                <p class="text-primary-900 font-bold">{{ $booking->bed->room->room_number }} •
                                     {{ $booking->bed->bed_number }}</p>
                             </div>
                         </div>

@@ -1,7 +1,7 @@
 @extends('layouts.customer')
 
 @section('content')
-    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 py-8">
         <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 class="text-3xl font-display font-bold text-gray-900 mb-8">New Request</h1>
 
@@ -44,7 +44,7 @@
                             class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
                     </div>
                     <div class="flex gap-3">
-                        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition shadow-lg">
+                        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition shadow-lg">
                             Submit Request
                         </button>
                         <a href="{{ route('customer.requests.index') }}" class="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition">Cancel</a>

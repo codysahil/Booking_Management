@@ -61,7 +61,7 @@
     <!-- Payments Table -->
     <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gradient-to-r from-rose-50 to-pink-50">
+            <thead class="bg-gradient-to-r from-teal-50 to-cyan-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Date</th>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Customer</th>
@@ -73,7 +73,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-100">
                 @forelse($payments as $payment)
-                    <tr class="hover:bg-rose-50/50">
+                    <tr class="hover:bg-teal-50/50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ ($payment->paid_at ?? $payment->created_at)->format('d M, Y') }}
                             <br><span class="text-xs text-gray-500">{{ ($payment->paid_at ?? $payment->created_at)->format('h:i A') }}</span>

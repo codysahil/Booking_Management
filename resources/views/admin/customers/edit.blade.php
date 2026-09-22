@@ -147,7 +147,7 @@
                     Cancel
                 </a>
                 <button type="submit"
-                    class="px-6 py-3 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white rounded-lg font-bold hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 transition shadow-lg">
+                    class="px-6 py-3 bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500 text-white rounded-lg font-bold hover:from-teal-600 hover:via-cyan-600 hover:to-violet-600 transition shadow-lg">
                     Update Customer
                 </button>
             </div>

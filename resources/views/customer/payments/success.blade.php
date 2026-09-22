@@ -1,7 +1,7 @@
 @extends('layouts.customer')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8 flex items-center justify-center">
+<div class="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 py-8 flex items-center justify-center">
     <div class="max-w-md mx-auto px-4">
         <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8 text-center">
             <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">

@@ -13,15 +13,15 @@
 return [
     'defaults' => [
         // Branding
-        'hostel_name' => env('HOSTEL_NAME', 'Honeybees Hostel'),
-        'tagline' => env('HOSTEL_TAGLINE', 'Safe, comfortable stays'),
+        'hostel_name' => env('HOSTEL_NAME', 'Nestay PG'),
+        'tagline' => env('HOSTEL_TAGLINE', 'Comfortable PG stays in Greater Noida'),
         'logo_path' => null,
 
         // Contact (blank values are hidden on the site)
-        'contact_phone' => env('HOSTEL_PHONE'),
-        'contact_email' => env('HOSTEL_EMAIL'),
+        'contact_phone' => env('HOSTEL_PHONE', '+91 98765 43210'),
+        'contact_email' => env('HOSTEL_EMAIL', 'contact@nestaypg.in'),
         'contact_whatsapp' => env('HOSTEL_WHATSAPP'),
-        'contact_address' => env('HOSTEL_ADDRESS'),
+        'contact_address' => env('HOSTEL_ADDRESS', 'Knowledge Park II & Pari Chowk, Greater Noida, Uttar Pradesh'),
 
         // Billing
         'min_advance' => 3000,

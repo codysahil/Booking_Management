@@ -2,12 +2,12 @@
 
 @section('content')
     <!-- Hero Section -->
-    <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-20">
+    <div class="relative overflow-hidden bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
                 <h1 class="text-5xl md:text-6xl font-display font-bold text-gray-900 mb-6">
                     Our
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500">
                         Gallery
                     </span>
                 </h1>
@@ -24,7 +24,7 @@
             <!-- Rooms Section -->
             <div class="mb-20">
                 <h2 class="text-3xl font-display font-bold text-gray-900 mb-8 text-center">
-                    <span class="text-rose-500">🏠</span> Our Rooms
+                    <span class="text-teal-500">🏠</span> Our Rooms
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @php
@@ -54,7 +54,7 @@
             <!-- Common Areas Section -->
             <div class="mb-20">
                 <h2 class="text-3xl font-display font-bold text-gray-900 mb-8 text-center">
-                    <span class="text-pink-500">✨</span> Common Areas
+                    <span class="text-cyan-500">✨</span> Common Areas
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @php
@@ -84,7 +84,7 @@
             <!-- Community Events Section -->
             <div>
                 <h2 class="text-3xl font-display font-bold text-gray-900 mb-8 text-center">
-                    <span class="text-purple-500">💕</span> Community Events
+                    <span class="text-violet-500">💕</span> Community Events
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     @php
@@ -111,7 +111,7 @@
     </div>
 
     <!-- CTA Section -->
-    <div class="py-20 bg-gradient-to-br from-rose-500 via-pink-500 to-purple-500">
+    <div class="py-20 bg-gradient-to-br from-teal-500 via-cyan-500 to-violet-500">
         <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
             <h2 class="text-4xl md:text-5xl font-display font-bold text-white mb-6">
                 Love What You See?
@@ -120,7 +120,7 @@
                 Schedule a visit to experience it in person
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('home') }}#locations" class="inline-flex items-center justify-center px-12 py-5 bg-white text-rose-600 text-lg font-bold rounded-full hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-white/50 transform hover:scale-105">
+                <a href="{{ route('home') }}#locations" class="inline-flex items-center justify-center px-12 py-5 bg-white text-teal-600 text-lg font-bold rounded-full hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-white/50 transform hover:scale-105">
                     Book Your Room
                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
