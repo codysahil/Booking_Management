@@ -33,6 +33,8 @@ Route::post('/booking/process-payment', [App\Http\Controllers\Public\BookingCont
 Route::get('/booking/confirmation/{booking}', [App\Http\Controllers\Public\BookingController::class, 'confirmation'])
     ->name('booking.confirmation')
     ->middleware('signed');
+Route::post('/booking/{booking}/advance/create-order', [App\Http\Controllers\Public\BookingController::class, 'createAdvanceOrder'])->name('booking.advance.create-order');
+Route::post('/booking/{booking}/advance/verify', [App\Http\Controllers\Public\BookingController::class, 'verifyAdvancePayment'])->name('booking.advance.verify');
 
 // ============================================
 // ADMIN AUTH ROUTES

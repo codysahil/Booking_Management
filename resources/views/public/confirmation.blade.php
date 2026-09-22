@@ -102,9 +102,24 @@
 
             <div class="mt-6 pt-6 border-t border-gray-200">
                 <div class="flex justify-between items-center">
-                    <span class="text-lg font-bold text-gray-900">Advance Paid:</span>
-                    <span class="text-3xl font-bold text-green-600">₹{{ number_format($booking->customer->payments->first()->amount ?? 0) }}</span>
+                    <span class="text-lg font-bold text-gray-900">Advance{{ $pendingAdvance ? ' Due' : ' Paid' }}:</span>
+                    <span class="text-3xl font-bold {{ $pendingAdvance ? 'text-amber-600' : 'text-green-600' }}">
+                        ₹{{ number_format($pendingAdvance->amount ?? ($booking->customer->payments->first()->amount ?? 0)) }}
+                    </span>
                 </div>
+
+                @if($pendingAdvance && $onlinePaymentsEnabled)
+                    <div class="mt-4 bg-primary-50 border border-primary-100 rounded-xl p-4">
+                        <p class="text-sm text-gray-700 mb-3">
+                            You can pay the advance online now, or pay in cash at check-in.
+                        </p>
+                        <button id="pay-advance-btn"
+                            class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-pink-600 transition shadow-lg">
+                            Pay ₹{{ number_format($pendingAdvance->amount) }} Now
+                        </button>
+                        <p id="pay-advance-status" class="text-sm mt-2"></p>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -166,4 +181,65 @@
             </a>
         </div>
     </div>
+
+    @if($pendingAdvance && $onlinePaymentsEnabled)
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script>
+            document.getElementById('pay-advance-btn').addEventListener('click', function () {
+                var button = this;
+                var status = document.getElementById('pay-advance-status');
+                button.disabled = true;
+                button.textContent = 'Preparing payment...';
+
+                fetch('{{ route('booking.advance.create-order', $booking) }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (order) {
+                        button.textContent = 'Pay ₹{{ number_format($pendingAdvance->amount) }} Now';
+                        button.disabled = false;
+
+                        var rzp = new Razorpay({
+                            key: order.key,
+                            amount: order.amount,
+                            currency: order.currency,
+                            order_id: order.order_id,
+                            name: '{{ setting('hostel_name') }}',
+                            description: 'Advance payment',
+                            handler: function (response) {
+                                status.textContent = 'Verifying payment...';
+                                fetch('{{ route('booking.advance.verify', $booking) }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Accept': 'application/json',
+                                    },
+                                    body: JSON.stringify(response),
+                                })
+                                    .then(function (r) { return r.json(); })
+                                    .then(function (result) {
+                                        if (result.success) {
+                                            status.textContent = 'Payment received! Reloading...';
+                                            window.location.reload();
+                                        } else {
+                                            status.textContent = result.message || 'Payment verification failed. Please contact the office.';
+                                        }
+                                    });
+                            },
+                        });
+                        rzp.open();
+                    })
+                    .catch(function () {
+                        status.textContent = 'Could not start payment. Please try again.';
+                        button.disabled = false;
+                        button.textContent = 'Pay ₹{{ number_format($pendingAdvance->amount) }} Now';
+                    });
+            });
+        </script>
+    @endif
 @endsection
