@@ -1,59 +1,177 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Hostel / PG Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A complete booking, billing and resident-management platform for a hostel or
+PG (paying-guest) business, built on Laravel 12. It covers the whole
+lifecycle: a public booking website, an admin back office for staff, and a
+self-service portal for residents.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Public booking site**
+- Branch and room listings with photos, live bed availability, and a
+  multi-bed group booking flow with a 10-minute hold on selected beds.
+- Checkout collects the resident's details, requires accepting the
+  Terms & Conditions, and creates the booking with a pending advance.
+- A signed confirmation page (not guessable/sequential) shows the booking
+  and can optionally take the advance payment online via Razorpay, or leave
+  it to be collected at check-in.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**Admin panel** (`/admin`, staff accounts: **Owner/Admin** and **Manager**)
+- Branches, rooms and beds; a homepage image slider.
+- Bookings, walk-in and online check-in with photo/ID upload.
+- Monthly rent charges — generate, edit, mark paid, and per-customer history.
+- Dues — one-off fines, EB, damage, or other charges per customer.
+- Expenses — categorized, filterable, with receipt upload and CSV export.
+- Payment ledger with printable receipts for every payment collected,
+  whether cash, UPI/card via Razorpay, or recorded manually.
+- Reports: revenue/occupancy dashboard with CSV export, and a dedicated
+  Profit & Loss report (income vs. expenses by category, branch filter).
+- Resident requests inbox (room swap, vacation notice, refund, service,
+  complaint) with responses emailed back to the resident.
+- Announcements shown on residents' dashboards, and an in-panel
+  notification centre with an unread badge for new bookings, requests and
+  payments.
+- Dashboard: occupancy, collected this month, pending/overdue dues,
+  expenses, net income, a 6-month income-vs-expense chart, recent bookings
+  and open requests — all filterable by branch.
+- **Settings** (Owner only): branding (name, tagline, logo), contact
+  details, billing rules (advance amount, rent due day, late fee, notice
+  period), receipt footer/GSTIN, and the Terms & Conditions text.
+- **Team** (Owner only): add/deactivate Manager accounts. Managers can run
+  day-to-day operations but cannot access Settings or Team.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Resident portal** (`/customer`, sign in with the Customer ID issued at
+booking)
+- Dashboard with active booking, pending dues and announcements.
+- Pay rent/dues online via Razorpay, with a full payment history and
+  printable receipts.
+- Submit and track requests (swap, vacation, refund, service, complaint),
+  with the vacation type enforcing the configured notice period.
 
-## Learning Laravel
+**Scheduled jobs** (already wired into `bootstrap/app.php`)
+- `charges:generate` — creates next month's rent charge for every active
+  booking (1st of the month).
+- `charges:mark-overdue` — flags unpaid charges past their due date (daily).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Tech stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.2+, Laravel 12
+- SQLite by default (works out of the box); MySQL/PostgreSQL supported via
+  standard Laravel `DB_*` env vars
+- Tailwind CSS 4 + Vite, Alpine.js, Chart.js (CDN)
+- [Razorpay](https://razorpay.com) for online payments (optional — the app
+  runs fully on cash/manual payments if it isn't configured)
+- [Cloudinary](https://cloudinary.com) for photo/document storage (optional
+  — falls back to local/public disk storage)
 
-## Laravel Sponsors
+## Requirements
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- PHP >= 8.2 with the extensions Laravel needs (`ext-mbstring`, `ext-pdo`,
+  `ext-sqlite3` or your chosen DB driver, etc.)
+- Composer 2
+- Node.js 18+ and npm
 
-### Premium Partners
+## Local installation
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+composer install
+npm install
 
-## Contributing
+cp .env.example .env
+php artisan key:generate
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+touch database/database.sqlite   # only if using the default SQLite setup
+php artisan migrate
 
-## Code of Conduct
+php artisan db:seed --class=AdminSeeder   # creates the owner account
+# Optional demo data (branches/rooms/beds and homepage slides):
+php artisan db:seed --class=BranchSeeder
+php artisan db:seed --class=HeroSliderSeeder
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+php artisan storage:link
+npm run build   # or `npm run dev` while developing
 
-## Security Vulnerabilities
+php artisan serve
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Sign in to the admin panel at `/admin/login` with the email/password from
+`ADMIN_EMAIL` / `ADMIN_PASSWORD` (defaults to `admin@honeybees.com` /
+`admin123` — **change these in your `.env` before seeding**, and change the
+password again after first login). `AdminSeeder` never overwrites an
+existing user, so re-running it on a live database is always safe.
 
-## License
+> `BranchSeeder` ships with the demo hostel's real branch names, addresses
+> and room layout from the original deployment. Replace it with your own
+> branches/rooms (via the admin panel, or by editing the seeder) before
+> taking a store live — it only runs once (it skips itself if any branch
+> already exists), so it's safe to leave in place either way.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Running tests
+
+```bash
+php artisan test
+```
+
+The suite uses an in-memory SQLite database (see `phpunit.xml`) and covers
+the booking flow (including the double-booking guard and group bookings),
+staff/manager access control, payments, expenses, dues, requests,
+announcements, settings/team, and the scheduled commands.
+
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `APP_URL` | Public base URL — required for correct signed links (booking confirmation) and asset URLs. |
+| `DB_CONNECTION`, `DB_*` | Database connection. Defaults to SQLite; set the usual Laravel vars for MySQL/PostgreSQL. |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Owner account created by `AdminSeeder`. |
+| `RAZORPAY_KEY`, `RAZORPAY_SECRET` | Enables online payments (checkout, rent/dues payment, advance payment) when both are set. |
+| `RAZORPAY_WEBHOOK_SECRET` | Required for the `/webhook/razorpay` endpoint to accept events — set this to the secret configured on the same webhook in the Razorpay dashboard. Without it, the webhook refuses all events (it never falls back to accepting unverified ones). |
+| `HOSTEL_NAME`, `HOSTEL_TAGLINE`, `HOSTEL_PHONE`, `HOSTEL_EMAIL`, `HOSTEL_WHATSAPP`, `HOSTEL_ADDRESS` | Starting values for branding/contact shown on the site, until the Owner saves them from Admin → Settings (which then takes over). |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Optional — route customer/employee photo and ID-proof uploads to Cloudinary instead of local storage. |
+| `MAIL_*` | Needed to actually deliver resident-facing emails (e.g. `RequestStatusChanged`) and password resets; defaults to logging mail to the log file. |
+| `SESSION_DRIVER`, `QUEUE_CONNECTION`, `CACHE_STORE` | Standard Laravel infrastructure config — the `database` driver used by default needs the `migrate` step above. |
+
+See `.env.example` for the full list with sensible local defaults.
+
+## Deployment
+
+The repo includes a ready-to-use [Railway](https://railway.app) setup
+(`railway.json`, `nixpacks.toml`, `Procfile`, `start.sh`): on each deploy it
+clears caches, links storage, runs `migrate --force` and `db:seed --force`
+(safe to repeat — every seeder here is idempotent), then starts
+`php artisan serve`. To deploy elsewhere, reproduce the same steps:
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm install && npm run build
+
+php artisan migrate --force
+php artisan db:seed --force
+php artisan storage:link
+php artisan config:cache   # optional once your env vars are finalized
+```
+
+**Scheduler**: `charges:generate` and `charges:mark-overdue` only run if
+something invokes Laravel's scheduler. Point a real cron job (or your
+host's scheduled-task feature) at:
+
+```bash
+* * * * * php /path/to/artisan schedule:run >> /dev/null 2>&1
+```
+
+A single long-running web dyno (as in `start.sh`) does **not** trigger this
+on its own — add a separate cron/worker process on your host, or run the
+two commands directly on your own schedule if you'd rather not run the
+scheduler at all.
+
+## Project structure notes
+
+- `app/Services/PaymentRecorder.php` is the single place that writes to the
+  `payments` ledger and marks charges/dues as paid — online payments,
+  webhook retries and cash entries all go through it, so nothing can be
+  recorded twice for the same Razorpay payment.
+- `app/Models/Setting.php` + `config/hostel.php` back the `setting()` helper
+  used throughout the views for branding/contact/billing values.
+- `app/Http/Middleware/EnsureUserIsStaff.php` (aliased `admin`) gates the
+  whole `/admin` area to active staff accounts, and can be scoped to the
+  owner only with `admin:admin` (used for Settings and Team).

@@ -34,7 +34,10 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-green-100">
             <p class="text-sm font-medium text-gray-500 mb-1">Collected this month</p>
             <p class="text-3xl font-bold text-green-600">{{ money($collectedThisMonth) }}</p>
-            <p class="text-xs text-gray-500 mt-1">Expenses: {{ money($expensesThisMonth) }}</p>
+            <p class="text-xs text-gray-500 mt-1">
+                Expenses: {{ money($expensesThisMonth) }} ·
+                Net: <span class="{{ $collectedThisMonth - $expensesThisMonth >= 0 ? 'text-green-600' : 'text-red-600' }} font-semibold">{{ money($collectedThisMonth - $expensesThisMonth) }}</span>
+            </p>
         </div>
         <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-amber-100">
             <p class="text-sm font-medium text-gray-500 mb-1">Pending / overdue dues</p>
