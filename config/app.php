@@ -56,6 +56,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tenant Subdomain Base Domain
+    |--------------------------------------------------------------------------
+    |
+    | When set, each hostel gets its own URL at {tenant-slug}.{tenant_domain}
+    | (e.g. sunrise-pg.yourdomain.com) — requires owning that domain and
+    | pointing a wildcard DNS record (*.yourdomain.com) at this app, then
+    | adding the wildcard domain in Railway. Left null, every hostel shares
+    | the same URL and is told apart purely by which account logs in —
+    | today's behavior, and the fallback whenever a request doesn't arrive
+    | on a matching subdomain (including every test).
+    |
+    */
+
+    'tenant_domain' => env('TENANT_DOMAIN'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

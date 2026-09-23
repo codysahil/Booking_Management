@@ -46,15 +46,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     // Branch & Room Management
-    Route::resource('branches', App\Http\Controllers\Admin\BranchController::class);
-    Route::resource('rooms', App\Http\Controllers\Admin\RoomController::class);
+    Route::resource('branches', App\Http\Controllers\Admin\BranchController::class)->except(['show']);
+    Route::resource('rooms', App\Http\Controllers\Admin\RoomController::class)->except(['show']);
     Route::post('/rooms/{room}/beds', [App\Http\Controllers\Admin\BedController::class, 'store'])->name('rooms.beds.store');
     Route::delete('/beds/{bed}', [App\Http\Controllers\Admin\BedController::class, 'destroy'])->name('beds.destroy');
     Route::put('/beds/{bed}/status', [App\Http\Controllers\Admin\BedController::class, 'updateStatus'])->name('beds.update-status');
     Route::delete('/rooms/{room}/images/{image}', [App\Http\Controllers\Admin\RoomController::class, 'destroyImage'])->name('rooms.images.destroy');
 
     // Hero Slider Management
-    Route::resource('sliders', App\Http\Controllers\Admin\HeroSliderController::class);
+    Route::resource('sliders', App\Http\Controllers\Admin\HeroSliderController::class)->except(['show']);
     Route::patch('/sliders/{slider}/toggle', [App\Http\Controllers\Admin\HeroSliderController::class, 'toggleStatus'])->name('sliders.toggle');
 
     // Reports & Analytics

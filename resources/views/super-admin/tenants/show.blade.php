@@ -12,6 +12,23 @@
         </a>
     </div>
 
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <h2 class="font-bold text-gray-900 mb-2">Admin login link</h2>
+        @if (config('app.tenant_domain'))
+            <p class="text-sm text-gray-700">
+                <a href="http://{{ $tenant->slug }}.{{ config('app.tenant_domain') }}/admin/login" class="text-slate-900 underline" target="_blank">
+                    {{ $tenant->slug }}.{{ config('app.tenant_domain') }}/admin/login
+                </a>
+            </p>
+            <p class="text-xs text-gray-500 mt-1">Share this exact link with the owner — logging in anywhere else won't work for their account.</p>
+        @else
+            <p class="text-sm text-gray-700">
+                <a href="{{ route('admin.login') }}" class="text-slate-900 underline" target="_blank">{{ route('admin.login') }}</a>
+            </p>
+            <p class="text-xs text-gray-500 mt-1">Every hostel shares this same link for now — set <code class="bg-gray-100 px-1 rounded">TENANT_DOMAIN</code> once you have a domain to give each hostel its own URL instead.</p>
+        @endif
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 class="font-bold text-gray-900 mb-4">Account</h2>
