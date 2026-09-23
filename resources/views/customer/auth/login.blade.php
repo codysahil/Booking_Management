@@ -1,7 +1,13 @@
-@extends('layouts.public')
-
-@section('content')
-    <div class="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 py-12 px-4 sm:px-6 lg:px-8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login - {{ setting('hostel_name') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="bg-gradient-to-br from-teal-50 via-cyan-50 to-violet-50 min-h-screen">
+    <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md mx-auto">
             <!-- Logo/Header -->
             <div class="text-center mb-8">
@@ -108,16 +114,7 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Back to Home -->
-            <div class="mt-6 text-center">
-                <a href="{{ route('home') }}" class="text-sm text-gray-600 hover:text-primary-600 transition">
-                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                    Back to Home
-                </a>
-            </div>
         </div>
     </div>
-@endsection
+</body>
+</html>

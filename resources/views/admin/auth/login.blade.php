@@ -76,13 +76,6 @@
                     Sign In
                 </button>
             </form>
-
-            <!-- Back to Website -->
-            <div class="mt-6 text-center">
-                <a href="{{ route('home') }}" class="text-sm text-gray-600 hover:text-gray-900 transition">
-                    ← Back to Website
-                </a>
-            </div>
         </div>
 
         <!-- Footer -->

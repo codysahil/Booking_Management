@@ -10,31 +10,9 @@ Route::post('/webhook/razorpay', [App\Http\Controllers\Webhook\RazorpayWebhookCo
     ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 // ============================================
-// PUBLIC ROUTES (Booking System)
+// ROOT — this is a private management platform, not a public storefront.
 // ============================================
-Route::get('/', [App\Http\Controllers\Public\BookingController::class, 'index'])->name('home');
-Route::get('/about', function () {
-    return view('public.about');
-})->name('about');
-Route::get('/gallery', function () {
-    return view('public.gallery');
-})->name('gallery');
-Route::get('/contact', function () {
-    return view('public.contact', ['branches' => App\Models\Branch::all()]);
-})->name('contact');
-Route::get('/terms', function () {
-    return view('public.terms');
-})->name('terms');
-Route::get('/branch/{branch}', [App\Http\Controllers\Public\BookingController::class, 'showBranch'])->name('booking.branch');
-Route::get('/branch/{branch}/room/{room}', [App\Http\Controllers\Public\BookingController::class, 'showRoom'])->name('booking.room');
-Route::post('/booking/select-beds', [App\Http\Controllers\Public\BookingController::class, 'selectBeds'])->name('booking.select-beds');
-Route::get('/booking/checkout', [App\Http\Controllers\Public\BookingController::class, 'checkout'])->name('booking.checkout');
-Route::post('/booking/process-payment', [App\Http\Controllers\Public\BookingController::class, 'processPayment'])->name('booking.process-payment');
-Route::get('/booking/confirmation/{booking}', [App\Http\Controllers\Public\BookingController::class, 'confirmation'])
-    ->name('booking.confirmation')
-    ->middleware('signed');
-Route::post('/booking/{booking}/advance/create-order', [App\Http\Controllers\Public\BookingController::class, 'createAdvanceOrder'])->name('booking.advance.create-order');
-Route::post('/booking/{booking}/advance/verify', [App\Http\Controllers\Public\BookingController::class, 'verifyAdvancePayment'])->name('booking.advance.verify');
+Route::get('/', fn () => redirect()->route('admin.login'))->name('home');
 
 // ============================================
 // ADMIN AUTH ROUTES

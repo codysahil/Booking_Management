@@ -48,11 +48,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // Create next month's rent charges on the 1st and flag unpaid ones as overdue daily.
         $schedule->command('charges:generate')->monthlyOn(1, '00:30');
         $schedule->command('charges:mark-overdue')->dailyAt('01:00');
-
-        // Free beds held by online bookings whose payment window expired unpaid.
-        if (class_exists(\App\Console\Commands\ReleaseExpiredBookings::class)) {
-            $schedule->command('bookings:release-expired')->everyFiveMinutes();
-        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

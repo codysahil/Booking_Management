@@ -18,11 +18,9 @@ class SettingsAndTeamTest extends TestCase
         $response = $this->actingAs($owner)->put(route('admin.settings.update'), [
             'hostel_name' => 'Sunrise Residency',
             'tagline' => 'A home away from home',
-            'min_advance' => 3000,
             'rent_due_day' => 5,
             'late_fee' => 100,
             'notice_period_days' => 30,
-            'online_payment_hold_minutes' => 30,
         ]);
 
         $response->assertRedirect();

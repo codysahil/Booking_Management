@@ -83,10 +83,6 @@ class RazorpayWebhookController extends Controller
             $razorpay = app(Razorpay::class);
             $order = $razorpay->fetchOrder($orderId);
 
-            if (($order->notes->purpose ?? null) === 'advance') {
-                return $this->handleAdvanceCaptured($order, $paymentData, $paymentId, $razorpay);
-            }
-
             $items = json_decode($order->notes->items ?? '[]', true) ?: [];
             $customerId = $order->notes->customer_id ?? null;
 
@@ -135,44 +131,6 @@ class RazorpayWebhookController extends Controller
 
             return response()->json(['error' => 'Processing failed'], 500);
         }
-    }
-
-    /**
-     * The booking-confirmation page's "pay the advance now" flow (Public\BookingController
-     * @createAdvanceOrder) uses notes shaped {purpose, booking_id, payment_id} instead of the
-     * {customer_id, items} shape the charges/dues flow uses above — settle it via the same
-     * PaymentRecorder::settleAdvance the browser callback uses, so a dropped connection after
-     * a successful payment still gets recorded instead of silently staying "pending" forever.
-     */
-    private function handleAdvanceCaptured(object $order, array $paymentData, string $paymentId, Razorpay $razorpay)
-    {
-        $paymentRowId = $order->notes->payment_id ?? null;
-
-        if (! $paymentRowId) {
-            Log::error('Missing payment_id in advance order notes', ['order_id' => $order->id]);
-
-            return response()->json(['error' => 'Invalid order data'], 400);
-        }
-
-        $payment = Payment::find($paymentRowId);
-
-        if (! $payment) {
-            Log::error('Payment not found for advance order', ['order_id' => $order->id, 'payment_id' => $paymentRowId]);
-
-            return response()->json(['error' => 'Payment not found'], 404);
-        }
-
-        $this->recorder->settleAdvance($payment, Razorpay::describeMethod($paymentData), [
-            'razorpay_payment_id' => $paymentId,
-            'razorpay_order_id' => $order->id,
-        ]);
-
-        Log::info('Webhook: advance payment processed successfully', [
-            'payment_id' => $payment->id,
-            'razorpay_payment_id' => $paymentId,
-        ]);
-
-        return response()->json(['status' => 'success']);
     }
 
     private function handlePaymentFailed(array $event)

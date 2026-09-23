@@ -92,14 +92,7 @@
                             <p class="text-sm font-semibold text-gray-900">{{ $booking->customer->name }}</p>
                             <p class="text-xs text-gray-500">{{ $booking->bed->room->branch->name }} · {{ $booking->booking_reference }}</p>
                         </div>
-                        @php
-                            $bookingStatusColors = [
-                                'pending_payment' => 'bg-amber-100 text-amber-800',
-                                'active' => 'bg-green-100 text-green-800',
-                                'cancelled' => 'bg-red-100 text-red-800',
-                            ];
-                        @endphp
-                        <span class="text-xs px-2 py-1 rounded-full {{ $bookingStatusColors[$booking->status] ?? 'bg-blue-100 text-blue-800' }}">
+                        <span class="text-xs px-2 py-1 rounded-full {{ $booking->status_color }}">
                             {{ $booking->status_label }}
                         </span>
                     </div>

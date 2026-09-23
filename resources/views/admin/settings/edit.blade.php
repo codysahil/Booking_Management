@@ -61,11 +61,6 @@
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Billing Rules</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Minimum Advance (₹) *</label>
-                        <input type="number" step="0.01" name="min_advance" required value="{{ old('min_advance', $settings['min_advance']) }}"
-                            class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
-                    </div>
-                    <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Rent Due Day (of month) *</label>
                         <input type="number" min="1" max="28" name="rent_due_day" required value="{{ old('rent_due_day', $settings['rent_due_day']) }}"
                             class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
@@ -79,12 +74,6 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Vacation Notice Period (days) *</label>
                         <input type="number" min="0" name="notice_period_days" required value="{{ old('notice_period_days', $settings['notice_period_days']) }}"
                             class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Online Booking Payment Window (minutes) *</label>
-                        <input type="number" min="5" max="180" name="online_payment_hold_minutes" required value="{{ old('online_payment_hold_minutes', $settings['online_payment_hold_minutes']) }}"
-                            class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
-                        <p class="text-xs text-gray-500 mt-1">How long a bed is held for an online booking before payment is required. Only applies once Razorpay is configured.</p>
                     </div>
                 </div>
             </div>

@@ -6,38 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Branch;
 use App\Models\Bed;
-use App\Models\Payment;
-use App\Services\PaymentRecorder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
-    public function __construct(private PaymentRecorder $recorder)
-    {
-    }
-
     public function index()
     {
         $customers = Customer::with(['bookings.bed.room.branch'])->latest()->get();
         return view('admin.customers.index', compact('customers'));
     }
 
-    public function create(Request $request)
+    public function create()
     {
         $branches = Branch::with([
             'rooms.beds' => function ($q) {
-                $q->whereIn('status', ['vacant', 'reserved']);
+                $q->where('status', 'vacant');
             }
         ])->get();
 
-        // Check if there's a booking_id (coming from bookings page)
-        $booking = null;
-        if ($request->has('booking_id')) {
-            $booking = \App\Models\Booking::with(['customer', 'bed.room.branch'])->find($request->booking_id);
-        }
-
-        return view('admin.customers.create', compact('branches', 'booking'));
+        return view('admin.customers.create', compact('branches'));
     }
 
     public function store(Request $request)
@@ -49,8 +37,6 @@ class CustomerController extends Controller
 
         try {
             $validated = $request->validate([
-                'customer_id' => 'nullable|exists:customers,id',
-                'booking_id' => 'nullable|exists:bookings,id',
                 'name' => 'required|string|max:255',
                 'phone' => 'required|string|max:20',
                 'email' => 'nullable|string|email|max:255',
@@ -61,7 +47,7 @@ class CustomerController extends Controller
                 'photo' => 'nullable|image|max:10240', // Increased to 10MB
                 'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240', // Increased to 10MB
                 'branch_id' => 'nullable|exists:branches,id', // Added for walk-in customers
-                'bed_id' => 'nullable|exists:beds,id',
+                'bed_id' => 'required|exists:beds,id',
                 'check_in_date' => 'required|date',
                 'stay_type' => 'required|in:permanent,day_basis',
                 'advance_amount' => 'required|numeric|min:0',
@@ -70,11 +56,6 @@ class CustomerController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Validation failed', ['errors' => $e->errors()]);
             return back()->withErrors($e->errors())->withInput();
-        }
-
-        // Validate bed_id is present when not updating existing booking
-        if (!$request->booking_id && !$request->bed_id) {
-            return back()->withErrors(['bed_id' => 'Please select a bed'])->withInput();
         }
 
         // Handle File Uploads BEFORE transaction (Cloudinary errors shouldn't abort DB transaction)
@@ -103,138 +84,61 @@ class CustomerController extends Controller
         }
 
         // Generate customer code BEFORE transaction (involves DB query)
-        $customerCode = null;
-        if (!$request->customer_id) {
-            $customerCode = $this->generateUniqueCustomerCode();
-            \Log::info('Generated customer code', ['customer_code' => $customerCode]);
-        }
+        $customerCode = $this->generateUniqueCustomerCode();
+        \Log::info('Generated customer code', ['customer_code' => $customerCode]);
 
         // Note: Removed transaction due to Neon PostgreSQL serverless connection pooling issues
         // Each operation will be atomic on its own
         try {
             \Log::info('Starting customer creation process');
 
-            // Update existing customer or create new
-            if ($request->customer_id) {
-                \Log::info('Updating existing customer', ['customer_id' => $request->customer_id]);
-                // Update existing customer from online booking
-                $customer = Customer::find($request->customer_id);
-                if (!$customer) {
-                    \Log::error('Customer not found for update', ['customer_id' => $request->customer_id]);
-                    return back()->withErrors(['error' => 'Customer not found'])->withInput();
-                }
-                $customer->update([
-                    'name' => $request->name,
-                    'phone' => $request->phone,
-                    'email' => $request->email,
-                    'dob' => $request->dob,
-                    'address' => $request->address,
-                    'guardian_phone' => $request->guardian_phone,
-                    'work_details' => $request->work_details,
-                    'photo_path' => $photoPath,
-                    'id_proof_path' => $proofPath,
-                    'password' => bcrypt($request->phone), // Update password to phone
-                ]);
-                \Log::info('Customer updated successfully', ['customer_id' => $customer->id]);
-            } else {
-                \Log::info('Creating new walk-in customer');
+            $customer = Customer::create([
+                'customer_code' => $customerCode,
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'password' => bcrypt($request->phone),
+                'dob' => $request->dob,
+                'address' => $request->address,
+                'guardian_phone' => $request->guardian_phone,
+                'work_details' => $request->work_details,
+                'photo_path' => $photoPath,
+                'id_proof_path' => $proofPath,
+            ]);
 
-                $customer = Customer::create([
-                    'customer_code' => $customerCode,
-                    'name' => $request->name,
-                    'phone' => $request->phone,
-                    'email' => $request->email,
-                    'password' => bcrypt($request->phone),
-                    'dob' => $request->dob,
-                    'address' => $request->address,
-                    'guardian_phone' => $request->guardian_phone,
-                    'work_details' => $request->work_details,
-                    'photo_path' => $photoPath,
-                    'id_proof_path' => $proofPath,
-                ]);
+            \Log::info('Customer created', ['customer_id' => $customer->id]);
 
-                \Log::info('Customer created', ['customer_id' => $customer->id]);
+            $bed = Bed::find($request->bed_id);
+            if (!$bed) {
+                \Log::error('Bed not found', ['bed_id' => $request->bed_id]);
+                throw new \Exception('Bed not found');
             }
-
-            // Handle booking
-            \Log::info('Starting booking creation', ['booking_id' => $request->booking_id, 'bed_id' => $request->bed_id]);
-            if ($request->booking_id) {
-                // Update existing booking. advance_paid is set below by whichever
-                // payment path actually applies (already paid / settling now / direct
-                // record) rather than blindly overwritten with whatever staff typed.
-                $booking = \App\Models\Booking::find($request->booking_id);
-                \Log::info('Updating existing booking', ['booking_id' => $booking->id]);
-                $booking->update([
-                    'status' => 'active',
-                    'check_in_date' => $request->check_in_date,
-                ]);
-                $bed = $booking->bed;
-            } else {
-                // Create new booking for walk-in
-                $bed = Bed::find($request->bed_id);
-                if (!$bed) {
-                    \Log::error('Bed not found', ['bed_id' => $request->bed_id]);
-                    throw new \Exception('Bed not found');
-                }
-                \Log::info('Creating new booking', ['bed_id' => $bed->id]);
-                $bookingReference = 'BK-' . strtoupper(\Str::random(8));
-                $booking = $customer->bookings()->create([
-                    'booking_reference' => $bookingReference,
-                    'bed_id' => $bed->id,
-                    'check_in_date' => $request->check_in_date,
-                    'status' => 'active',
-                    'advance_paid' => $request->advance_amount,
-                ]);
-                \Log::info('Booking created', ['booking_id' => $booking->id]);
-            }
+            \Log::info('Creating new booking', ['bed_id' => $bed->id]);
+            $bookingReference = 'BK-' . strtoupper(\Str::random(8));
+            $booking = $customer->bookings()->create([
+                'booking_reference' => $bookingReference,
+                'bed_id' => $bed->id,
+                'check_in_date' => $request->check_in_date,
+                'status' => 'active',
+                'advance_paid' => $request->advance_amount,
+            ]);
+            \Log::info('Booking created', ['booking_id' => $booking->id]);
 
             // Update bed status
             \Log::info('Updating bed status', ['bed_id' => $bed->id]);
-            $bed->update(['status' => 'occupied', 'reserved_until' => null]);
+            $bed->update(['status' => 'occupied']);
 
-            if ($request->booking_id) {
-                // The online booking flow records exactly one shared "Advance" payment
-                // for the whole booking group (booking_reference) — it may be attached
-                // to a *different* bed's Booking row than this one (see
-                // PaymentRecorder::settleAdvance). Look it up by the group, not by this
-                // specific booking, or every other bed in a multi-bed booking — and
-                // every booking already paid in full online — gets a duplicate payment
-                // recorded here.
-                $groupPayment = Payment::where('customer_id', $customer->id)
-                    ->where('payment_type', 'Advance')
-                    ->whereHas('booking', fn ($q) => $q->where('booking_reference', $booking->booking_reference))
-                    ->latest()
-                    ->first();
-
-                if ($groupPayment && $groupPayment->isPaid()) {
-                    \Log::info('Advance already settled online, skipping duplicate payment', ['payment_id' => $groupPayment->id]);
-                } elseif ($groupPayment) {
-                    \Log::info('Settling pending advance payment at check-in', ['payment_id' => $groupPayment->id]);
-                    $this->recorder->settleAdvance($groupPayment, $request->payment_method ?? 'cash', [], auth()->id());
-                } else {
-                    \Log::info('No advance payment found for booking, recording one directly');
-                    $this->recorder->recordDirect(
-                        $customer,
-                        (float) $request->advance_amount,
-                        'Advance',
-                        $request->payment_method ?? 'cash',
-                        ['booking_id' => $booking->id, 'recorded_by' => auth()->id()]
-                    );
-                    $booking->update(['advance_paid' => $request->advance_amount]);
-                }
-            } else {
-                \Log::info('Creating payment record');
-                $customer->payments()->create([
-                    'booking_id' => $booking->id,
-                    'amount' => $request->advance_amount,
-                    'payment_type' => 'Advance',
-                    'payment_method' => $request->payment_method ?? 'cash',
-                    'transaction_ref' => 'ADV-' . strtoupper(\Str::random(12)),
-                    'status' => 'paid',
-                    'paid_at' => now(),
-                    'recorded_by' => auth()->id(),
-                ]);
-            }
+            \Log::info('Creating payment record');
+            $customer->payments()->create([
+                'booking_id' => $booking->id,
+                'amount' => $request->advance_amount,
+                'payment_type' => 'Advance',
+                'payment_method' => $request->payment_method ?? 'cash',
+                'transaction_ref' => 'ADV-' . strtoupper(\Str::random(12)),
+                'status' => 'paid',
+                'paid_at' => now(),
+                'recorded_by' => auth()->id(),
+            ]);
             \Log::info('Payment record created');
 
             \Log::info('Customer creation completed successfully', ['customer_id' => $customer->id]);

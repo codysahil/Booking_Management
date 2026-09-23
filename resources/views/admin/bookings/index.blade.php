@@ -25,8 +25,6 @@
                     <select name="status"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         <option value="">All Status</option>
-                        <option value="pending_payment" {{ request('status') == 'pending_payment' ? 'selected' : '' }}>
-                            Awaiting Payment</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed
                         </option>
@@ -113,16 +111,8 @@
                                     {{ \Carbon\Carbon::parse($booking->check_in_date)->format('d M, Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @php
-                                        $statusColors = [
-                                            'pending_payment' => 'bg-amber-100 text-amber-800',
-                                            'active' => 'bg-green-100 text-green-800',
-                                            'completed' => 'bg-blue-100 text-blue-800',
-                                            'cancelled' => 'bg-red-100 text-red-800',
-                                        ];
-                                    @endphp
                                     <span
-                                        class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                        class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $booking->status_color }}">
                                         {{ $booking->status_label }}
                                     </span>
                                 </td>
@@ -130,30 +120,18 @@
                                     ₹{{ number_format($booking->advance_paid) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center space-x-2">
-                                        @if(in_array($booking->status, ['active', 'pending_payment']) && $booking->bed->status !== 'occupied')
-                                            <a href="{{ route('admin.customers.create', ['booking_id' => $booking->id]) }}"
-                                                class="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-200 transition font-medium"
-                                                @if($booking->status == 'pending_payment') title="Hasn't paid online yet — check in to settle in cash instead" @endif>
-                                                Check-In
-                                            </a>
-                                        @endif
-
-                                        <!-- Status Update Dropdown -->
-                                        <form action="{{ route('admin.bookings.update-status', $booking) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            @method('PUT')
-                                            <select name="status" onchange="this.form.submit()"
-                                                class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-primary-500">
-                                                @foreach(\App\Models\Booking::STATUSES as $value => $label)
-                                                    @if($value !== \App\Models\Booking::STATUS_PENDING_PAYMENT || $booking->status === \App\Models\Booking::STATUS_PENDING_PAYMENT)
-                                                        <option value="{{ $value }}" {{ $booking->status === $value ? 'selected' : '' }}>{{ $label }}</option>
-                                                    @endif
-                                                @endforeach
-                                            </select>
-                                        </form>
-                                    </div>
+                                    <!-- Status Update Dropdown -->
+                                    <form action="{{ route('admin.bookings.update-status', $booking) }}" method="POST"
+                                        class="inline">
+                                        @csrf
+                                        @method('PUT')
+                                        <select name="status" onchange="this.form.submit()"
+                                            class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-primary-500">
+                                            @foreach(\App\Models\Booking::STATUSES as $value => $label)
+                                                <option value="{{ $value }}" {{ $booking->status === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                    </form>
                                 </td>
                             </tr>
                         @empty
