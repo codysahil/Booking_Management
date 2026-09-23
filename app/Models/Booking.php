@@ -59,6 +59,17 @@ class Booking extends Model
         return self::STATUSES[$this->status] ?? ucfirst((string) $this->status);
     }
 
+    public function getStatusColorAttribute(): string
+    {
+        return match ($this->status) {
+            self::STATUS_PENDING_PAYMENT => 'bg-amber-100 text-amber-800',
+            self::STATUS_ACTIVE => 'bg-green-100 text-green-800',
+            self::STATUS_COMPLETED => 'bg-blue-100 text-blue-800',
+            self::STATUS_CANCELLED => 'bg-red-100 text-red-800',
+            default => 'bg-gray-100 text-gray-800',
+        };
+    }
+
     public function scopeAwaitingPayment($query)
     {
         return $query->where('status', self::STATUS_PENDING_PAYMENT);

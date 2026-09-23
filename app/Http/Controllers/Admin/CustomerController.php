@@ -6,11 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Branch;
 use App\Models\Bed;
+use App\Models\Payment;
+use App\Services\PaymentRecorder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
+    public function __construct(private PaymentRecorder $recorder)
+    {
+    }
+
     public function index()
     {
         $customers = Customer::with(['bookings.bed.room.branch'])->latest()->get();
@@ -153,13 +159,14 @@ class CustomerController extends Controller
             // Handle booking
             \Log::info('Starting booking creation', ['booking_id' => $request->booking_id, 'bed_id' => $request->bed_id]);
             if ($request->booking_id) {
-                // Update existing booking
+                // Update existing booking. advance_paid is set below by whichever
+                // payment path actually applies (already paid / settling now / direct
+                // record) rather than blindly overwritten with whatever staff typed.
                 $booking = \App\Models\Booking::find($request->booking_id);
                 \Log::info('Updating existing booking', ['booking_id' => $booking->id]);
                 $booking->update([
                     'status' => 'active',
                     'check_in_date' => $request->check_in_date,
-                    'advance_paid' => $request->advance_amount,
                 ]);
                 $bed = $booking->bed;
             } else {
@@ -185,23 +192,36 @@ class CustomerController extends Controller
             \Log::info('Updating bed status', ['bed_id' => $bed->id]);
             $bed->update(['status' => 'occupied', 'reserved_until' => null]);
 
-            // The online booking flow already created a pending "Advance" payment row
-            // for this booking — settle that one instead of creating a duplicate.
-            $pendingAdvance = $booking->payments()
-                ->where('payment_type', 'Advance')
-                ->where('status', 'pending')
-                ->first();
+            if ($request->booking_id) {
+                // The online booking flow records exactly one shared "Advance" payment
+                // for the whole booking group (booking_reference) — it may be attached
+                // to a *different* bed's Booking row than this one (see
+                // PaymentRecorder::settleAdvance). Look it up by the group, not by this
+                // specific booking, or every other bed in a multi-bed booking — and
+                // every booking already paid in full online — gets a duplicate payment
+                // recorded here.
+                $groupPayment = Payment::where('customer_id', $customer->id)
+                    ->where('payment_type', 'Advance')
+                    ->whereHas('booking', fn ($q) => $q->where('booking_reference', $booking->booking_reference))
+                    ->latest()
+                    ->first();
 
-            if ($pendingAdvance) {
-                \Log::info('Marking existing pending advance payment as paid', ['payment_id' => $pendingAdvance->id]);
-                $pendingAdvance->update([
-                    'amount' => $request->advance_amount,
-                    'payment_method' => $request->payment_method ?? 'cash',
-                    'transaction_ref' => 'ADV-' . strtoupper(\Str::random(12)),
-                    'status' => 'paid',
-                    'paid_at' => now(),
-                    'recorded_by' => auth()->id(),
-                ]);
+                if ($groupPayment && $groupPayment->isPaid()) {
+                    \Log::info('Advance already settled online, skipping duplicate payment', ['payment_id' => $groupPayment->id]);
+                } elseif ($groupPayment) {
+                    \Log::info('Settling pending advance payment at check-in', ['payment_id' => $groupPayment->id]);
+                    $this->recorder->settleAdvance($groupPayment, $request->payment_method ?? 'cash', [], auth()->id());
+                } else {
+                    \Log::info('No advance payment found for booking, recording one directly');
+                    $this->recorder->recordDirect(
+                        $customer,
+                        (float) $request->advance_amount,
+                        'Advance',
+                        $request->payment_method ?? 'cash',
+                        ['booking_id' => $booking->id, 'recorded_by' => auth()->id()]
+                    );
+                    $booking->update(['advance_paid' => $request->advance_amount]);
+                }
             } else {
                 \Log::info('Creating payment record');
                 $customer->payments()->create([

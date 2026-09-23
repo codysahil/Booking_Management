@@ -67,9 +67,11 @@ class MonthlyChargeController extends Controller
                 ->with(['customer', 'bed'])
                 ->get();
 
+            $dueDay = (int) setting('rent_due_day', 5);
+
             foreach ($activeBookings as $booking) {
                 // Check if charge already exists
-                $exists = MonthlyCharge::where('customer_id', $booking->customer_id)
+                $exists = MonthlyCharge::where('booking_id', $booking->id)
                     ->where('month_year', $month)
                     ->exists();
 
@@ -80,7 +82,7 @@ class MonthlyChargeController extends Controller
 
                 // Create monthly charge
                 $rentAmount = $booking->bed->monthly_rent;
-                $dueDate = Carbon::parse($month . '-05'); // Due on 5th of the month
+                $dueDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth()->day(min($dueDay, 28));
 
                 MonthlyCharge::create([
                     'customer_id' => $booking->customer_id,

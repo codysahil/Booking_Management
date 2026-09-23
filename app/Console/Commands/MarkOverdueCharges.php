@@ -19,15 +19,26 @@ class MarkOverdueCharges extends Command
 
     public function handle(): int
     {
-        $overdueCharges = MonthlyCharge::where('status', 'pending')
+        $lateFee = (float) setting('late_fee', 0);
+
+        $newlyOverdue = MonthlyCharge::where('status', 'pending')
             ->whereDate('due_date', '<', today())
-            ->update(['status' => 'overdue']);
+            ->get();
+
+        foreach ($newlyOverdue as $charge) {
+            $charge->update([
+                'status' => 'overdue',
+                'other_charges' => $charge->other_charges + $lateFee,
+                'total_amount' => $charge->total_amount + $lateFee,
+            ]);
+        }
 
         $overdueDues = Due::where('status', 'pending')
             ->whereDate('due_date', '<', today())
             ->count();
 
-        $this->info("Marked {$overdueCharges} monthly charge(s) as overdue. {$overdueDues} due(s) are past their due date (dues stay pending until paid).");
+        $feeNote = $lateFee > 0 ? " (+ ₹{$lateFee} late fee each)" : '';
+        $this->info("Marked {$newlyOverdue->count()} monthly charge(s) as overdue{$feeNote}. {$overdueDues} due(s) are past their due date (dues stay pending until paid).");
 
         return self::SUCCESS;
     }

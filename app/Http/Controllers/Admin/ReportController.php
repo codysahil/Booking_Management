@@ -266,7 +266,7 @@ class ReportController extends Controller
         $endDate = Carbon::create($year, $month, 1)->endOfMonth();
 
         $payments = Payment::with(['customer', 'monthlyCharge'])
-            ->where('status', 'completed')
+            ->successful()
             ->whereBetween('created_at', [$startDate, $endDate])
             ->orderBy('created_at', 'desc')
             ->get();

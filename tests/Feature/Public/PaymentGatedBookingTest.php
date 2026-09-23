@@ -154,4 +154,62 @@ class PaymentGatedBookingTest extends TestCase
         $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'paid', 'razorpay_payment_id' => 'pay_webhook_test']);
         $this->assertNull($bed->fresh()->reserved_until);
     }
+
+    /**
+     * A multi-bed booking creates one Booking row per bed but only one shared Advance
+     * payment, attached to just one of those bookings. Settling that payment must
+     * activate every bed in the group, not just the one it happens to reference —
+     * otherwise the other beds stay pending_payment and get auto-cancelled later even
+     * though the customer already paid for them.
+     */
+    public function test_settling_a_multi_bed_advance_payment_activates_every_bed_in_the_group()
+    {
+        $bedA = $this->makeBed();
+        $bedB = $this->makeBed();
+
+        $this->post(route('booking.select-beds'), ['bed_ids' => [$bedA->id, $bedB->id]]);
+
+        $this->post(route('booking.process-payment'), [
+            'bed_ids' => [$bedA->id, $bedB->id],
+            'name' => 'Group Booker',
+            'phone' => '9876500099',
+            'address' => 'Test Address',
+            'check_in_date' => now()->addDay()->format('Y-m-d'),
+            'payment_method' => 'upi',
+            'accept_terms' => '1',
+        ]);
+
+        $bookingA = Booking::where('bed_id', $bedA->id)->firstOrFail();
+        $bookingB = Booking::where('bed_id', $bedB->id)->firstOrFail();
+
+        $this->assertSame($bookingA->booking_reference, $bookingB->booking_reference);
+        $this->assertSame(Booking::STATUS_PENDING_PAYMENT, $bookingA->status);
+        $this->assertSame(Booking::STATUS_PENDING_PAYMENT, $bookingB->status);
+
+        // The single shared Advance payment is only ever attached to one of the two
+        // bookings (whichever the checkout loop created last) — settle it via that one.
+        $payment = Payment::where('payment_type', 'Advance')->latest()->firstOrFail();
+        $bookingWithPayment = $payment->booking;
+
+        $this->mock(Razorpay::class, function ($mock) {
+            $mock->shouldReceive('verifySignature')->once()->andReturn(null);
+            $mock->shouldReceive('fetchPayment')->once()->andReturn(
+                tap(\Mockery::mock(), fn ($m) => $m->shouldReceive('toArray')->andReturn(['method' => 'upi']))
+            );
+        });
+
+        $response = $this->postJson(route('booking.advance.verify', $bookingWithPayment), [
+            'razorpay_order_id' => 'order_group_test',
+            'razorpay_payment_id' => 'pay_group_test',
+            'razorpay_signature' => 'sig_group_test',
+        ]);
+
+        $response->assertJson(['success' => true]);
+
+        $this->assertSame(Booking::STATUS_ACTIVE, $bookingA->fresh()->status);
+        $this->assertSame(Booking::STATUS_ACTIVE, $bookingB->fresh()->status);
+        $this->assertNull($bedA->fresh()->reserved_until);
+        $this->assertNull($bedB->fresh()->reserved_until);
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'paid']);
+    }
 }

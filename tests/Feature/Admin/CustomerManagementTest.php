@@ -131,5 +131,70 @@ class CustomerManagementTest extends TestCase
         $this->assertDatabaseHas('beds', ['id' => $bed->id, 'status' => 'occupied', 'reserved_until' => null]);
         $this->assertDatabaseHas('payments', ['booking_id' => $booking->id, 'status' => 'paid', 'payment_method' => 'cash']);
         $this->assertSame(1, \App\Models\Payment::where('booking_id', $booking->id)->count());
+
+        // recorded_by must be set to the staff member — this is what tells
+        // PaymentRecorder::notifyStaff() not to ping staff about their own cash entry.
+        $this->assertNotNull(\App\Models\Payment::where('booking_id', $booking->id)->first()->recorded_by);
+    }
+
+    /**
+     * A multi-bed online booking shares one Advance payment across bookings, attached
+     * to only one of them. Physically checking in the *other* bed — the one the
+     * payment row isn't attached to, already settled online — must not create a
+     * second, duplicate payment.
+     */
+    public function test_admin_check_in_does_not_duplicate_payment_for_an_already_paid_multi_bed_booking()
+    {
+        $branch = Branch::create(['name' => 'Test Branch', 'address' => 'Test Address']);
+        $room = $branch->rooms()->create(['room_number' => '101', 'capacity' => 2, 'type' => 'AC', 'gender_allowed' => 'Female']);
+        $bedA = $room->beds()->create(['bed_number' => '101-A', 'monthly_rent' => 5000, 'status' => 'reserved']);
+        $bedB = $room->beds()->create(['bed_number' => '101-B', 'monthly_rent' => 5000, 'status' => 'reserved']);
+
+        $customer = Customer::create([
+            'customer_code' => 'SS-TEST-0002',
+            'name' => 'Group Booker',
+            'phone' => '9876500010',
+            'password' => bcrypt('9876500010'),
+            'dob' => now()->subYears(20),
+            'address' => 'Addr',
+            'guardian_phone' => '9876500010',
+        ]);
+
+        $bookingA = $customer->bookings()->create([
+            'booking_reference' => 'BK-GROUP01', 'bed_id' => $bedA->id, 'check_in_date' => now(),
+            'status' => 'active', 'advance_paid' => 5000,
+        ]);
+        $bookingB = $customer->bookings()->create([
+            'booking_reference' => 'BK-GROUP01', 'bed_id' => $bedB->id, 'check_in_date' => now(),
+            'status' => 'active', 'advance_paid' => 5000,
+        ]);
+
+        // The one shared Advance payment is attached to bookingA only, already paid —
+        // exactly what PaymentRecorder::settleAdvance() now produces for a group.
+        $customer->payments()->create([
+            'booking_id' => $bookingA->id, 'amount' => 10000, 'payment_type' => 'Advance',
+            'payment_method' => 'upi', 'transaction_ref' => 'PAY-GROUP01', 'status' => 'paid', 'paid_at' => now(),
+        ]);
+
+        // Staff physically check in bookingB — the bed the payment row is NOT attached to.
+        $response = $this->post(route('admin.customers.store'), [
+            'customer_id' => $customer->id,
+            'booking_id' => $bookingB->id,
+            'name' => $customer->name,
+            'phone' => $customer->phone,
+            'dob' => '2000-01-01',
+            'address' => '123 Main St',
+            'guardian_phone' => '1234567890',
+            'check_in_date' => now()->format('Y-m-d'),
+            'stay_type' => 'permanent',
+            'advance_amount' => 3000,
+            'payment_method' => 'cash',
+        ]);
+
+        $response->assertRedirect(route('admin.customers.index'));
+
+        $this->assertDatabaseHas('bookings', ['id' => $bookingB->id, 'status' => 'active']);
+        $this->assertDatabaseHas('beds', ['id' => $bedB->id, 'status' => 'occupied']);
+        $this->assertSame(1, \App\Models\Payment::where('customer_id', $customer->id)->where('payment_type', 'Advance')->count());
     }
 }

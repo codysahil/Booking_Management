@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class NotificationController extends Controller
 {
@@ -20,9 +21,15 @@ class NotificationController extends Controller
         $record = Auth::user()->notifications()->findOrFail($notification);
         $record->markAsRead();
 
-        return $request->has('url')
-            ? redirect($request->string('url'))
-            : back();
+        $url = $request->string('url')->toString();
+
+        // Only ever redirect to a same-site relative path — never a full URL or a
+        // protocol-relative "//host" one, which browsers treat as off-site too.
+        if ($url !== '' && Str::startsWith($url, '/') && ! Str::startsWith($url, '//')) {
+            return redirect($url);
+        }
+
+        return back();
     }
 
     public function markAllRead()

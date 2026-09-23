@@ -41,6 +41,8 @@ return new class extends Migration
             return;
         }
 
+        DB::table('bookings')->whereNotIn('status', ['active', 'completed', 'cancelled'])->update(['status' => 'cancelled']);
+
         Schema::table('bookings', function (Blueprint $table) {
             $table->enum('status', ['active', 'completed', 'cancelled'])->default('active')->change();
         });

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\PaymentReceived;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
@@ -55,12 +56,6 @@ class PaymentRecorder
         $items = [];
 
         foreach ($charges as $charge) {
-            $charge->update([
-                'status' => 'paid',
-                'paid_date' => $now,
-                'payment_method' => $method,
-                'transaction_id' => $reference,
-            ]);
             $items[] = [
                 'type' => 'charge',
                 'id' => $charge->id,
@@ -70,12 +65,6 @@ class PaymentRecorder
         }
 
         foreach ($dues as $due) {
-            $due->update([
-                'status' => 'paid',
-                'paid_date' => $now,
-                'payment_method' => $method,
-                'transaction_id' => $reference,
-            ]);
             $items[] = [
                 'type' => 'due',
                 'id' => $due->id,
@@ -84,26 +73,64 @@ class PaymentRecorder
             ];
         }
 
-        $payment = $customer->payments()->create([
-            'booking_id' => $charges->first()?->booking_id ?? $customer->bookings()->where('status', 'active')->value('id'),
-            'monthly_charge_id' => $charges->count() === 1 && $dues->isEmpty() ? $charges->first()->id : null,
-            'due_id' => $dues->count() === 1 && $charges->isEmpty() ? $dues->first()->id : null,
-            'amount' => collect($items)->sum('amount'),
-            'payment_type' => $this->describeType($charges, $dues),
-            'payment_method' => $method,
-            'transaction_ref' => $reference ?: 'CASH-' . $now->format('YmdHis'),
-            'razorpay_payment_id' => $extra['razorpay_payment_id'] ?? null,
-            'razorpay_order_id' => $extra['razorpay_order_id'] ?? null,
-            'status' => Payment::STATUS_PAID,
-            'paid_at' => $now,
-            'items' => $items,
-            'notes' => $extra['notes'] ?? null,
-            'recorded_by' => $extra['recorded_by'] ?? null,
-        ]);
+        // Create the ledger row before mutating charges/dues: a concurrent webhook and
+        // browser callback for the same Razorpay payment can both pass the lookup above
+        // (check-then-act), but only one can win the unique constraint on
+        // razorpay_payment_id — the loser returns the winner's row untouched instead of
+        // double-marking charges/dues paid.
+        try {
+            $payment = $customer->payments()->create([
+                'booking_id' => $charges->first()?->booking_id ?? $customer->bookings()->where('status', 'active')->value('id'),
+                'monthly_charge_id' => $charges->count() === 1 && $dues->isEmpty() ? $charges->first()->id : null,
+                'due_id' => $dues->count() === 1 && $charges->isEmpty() ? $dues->first()->id : null,
+                'amount' => collect($items)->sum('amount'),
+                'payment_type' => $this->describeType($charges, $dues),
+                'payment_method' => $method,
+                'transaction_ref' => $reference ?: 'CASH-' . $now->format('YmdHis'),
+                'razorpay_payment_id' => $extra['razorpay_payment_id'] ?? null,
+                'razorpay_order_id' => $extra['razorpay_order_id'] ?? null,
+                'status' => Payment::STATUS_PAID,
+                'paid_at' => $now,
+                'items' => $items,
+                'notes' => $extra['notes'] ?? null,
+                'recorded_by' => $extra['recorded_by'] ?? null,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (! empty($extra['razorpay_payment_id']) && $this->isUniqueViolation($e)) {
+                $existing = Payment::where('razorpay_payment_id', $extra['razorpay_payment_id'])->first();
+                if ($existing) {
+                    return $existing;
+                }
+            }
+            throw $e;
+        }
+
+        foreach ($charges as $charge) {
+            $charge->update([
+                'status' => 'paid',
+                'paid_date' => $now,
+                'payment_method' => $method,
+                'transaction_id' => $reference,
+            ]);
+        }
+
+        foreach ($dues as $due) {
+            $due->update([
+                'status' => 'paid',
+                'paid_date' => $now,
+                'payment_method' => $method,
+                'transaction_id' => $reference,
+            ]);
+        }
 
         $this->notifyStaff($payment);
 
         return $payment;
+    }
+
+    private function isUniqueViolation(\Illuminate\Database\QueryException $e): bool
+    {
+        return str_contains(strtolower($e->getMessage()), 'unique');
     }
 
     /** Record a one-off amount that is not tied to a charge or due (e.g. advance at check-in). */
@@ -126,39 +153,77 @@ class PaymentRecorder
 
     /**
      * Settle a pending online advance payment (the deposit on a not-yet-active online
-     * booking) and activate the booking it belongs to. Shared by the browser callback
-     * (Public\BookingController@verifyAdvancePayment) and the Razorpay webhook so the
-     * two paths can't record the same payment differently — whichever arrives first
-     * does the work; the other sees it's already paid and no-ops.
+     * booking) and activate the booking(s) it belongs to. Shared by the browser callback
+     * (Public\BookingController@verifyAdvancePayment), the Razorpay webhook, and admin
+     * check-in so all three paths can't record the same payment differently — whichever
+     * arrives first does the work; the others see it's already paid and no-op.
+     *
+     * A multi-bed online booking creates one Booking row per bed but only one shared
+     * Advance payment (tied to just one of those bookings) — settling it must activate
+     * every sibling booking in the group, not just the one the payment happens to
+     * reference, or the other beds are silently left pending and later auto-cancelled.
+     *
+     * $recordedBy identifies the staff member settling this in person (e.g. a cash
+     * check-in) — matching notifyStaff()'s "recorded_by set means don't ping staff
+     * about their own entry" convention. Leave it null for the online browser callback
+     * and webhook paths, which should notify staff.
      *
      * @param  array{razorpay_payment_id?: string, razorpay_order_id?: string}  $razorpayIds
      */
-    public function settleAdvance(Payment $payment, string $method, array $razorpayIds = []): Payment
+    public function settleAdvance(Payment $payment, string $method, array $razorpayIds = [], ?int $recordedBy = null): Payment
     {
-        if ($payment->isPaid()) {
+        return DB::transaction(function () use ($payment, $method, $razorpayIds, $recordedBy) {
+            // Re-fetch under a row lock so a concurrent webhook + browser callback (or a
+            // race with bookings:release-expired) for the same payment serialize instead
+            // of both proceeding.
+            $payment = Payment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
+
+            if ($payment->isPaid()) {
+                return $payment;
+            }
+
+            $payment->update(array_merge([
+                'payment_method' => $method,
+                'status' => Payment::STATUS_PAID,
+                'paid_at' => now(),
+                'recorded_by' => $recordedBy,
+            ], $razorpayIds));
+
+            $booking = $payment->booking;
+
+            if ($booking) {
+                $bookings = Booking::where('booking_reference', $booking->booking_reference)
+                    ->where('status', Booking::STATUS_PENDING_PAYMENT)
+                    ->lockForUpdate()
+                    ->with('bed')
+                    ->get();
+
+                if ($bookings->isNotEmpty()) {
+                    $advancePerBooking = round((float) $payment->amount / $bookings->count(), 2);
+
+                    foreach ($bookings as $groupBooking) {
+                        $groupBooking->update([
+                            'status' => Booking::STATUS_ACTIVE,
+                            'advance_paid' => $advancePerBooking,
+                        ]);
+
+                        $groupBooking->bed?->update(['reserved_until' => null]);
+                    }
+                } else {
+                    // Every booking in the group already left pending_payment (most likely
+                    // release-expired cancelled them just before this payment was confirmed).
+                    // The payment is still recorded as paid; staff need to reconcile manually.
+                    Log::warning('Advance payment settled but no pending_payment booking remained to activate', [
+                        'payment_id' => $payment->id,
+                        'booking_reference' => $booking->booking_reference,
+                    ]);
+                }
+            }
+
+            $this->notifyStaff($payment);
+
             return $payment;
-        }
-
-        $payment->update(array_merge([
-            'payment_method' => $method,
-            'status' => Payment::STATUS_PAID,
-            'paid_at' => now(),
-        ], $razorpayIds));
-
-        $booking = $payment->booking;
-
-        if ($booking) {
-            $booking->update([
-                'status' => Booking::STATUS_ACTIVE,
-                'advance_paid' => $payment->amount,
-            ]);
-
-            $booking->bed?->update(['reserved_until' => null]);
-        }
-
-        $this->notifyStaff($payment);
-
-        return $payment;
+        });
     }
 
     private function describeType(Collection $charges, Collection $dues): string

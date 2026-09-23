@@ -157,15 +157,8 @@
                                     <div class="flex-1">
                                         <div class="flex items-center gap-3 mb-3">
                                             <h3 class="text-lg font-bold text-gray-900">{{ $booking->bed->room->branch->name }}</h3>
-                                            @php
-                                                $statusColors = [
-                                                    'active' => 'bg-green-100 text-green-800',
-                                                    'paid' => 'bg-blue-100 text-blue-800',
-                                                    'cancelled' => 'bg-red-100 text-red-800',
-                                                ];
-                                            @endphp
-                                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                                {{ ucfirst($booking->status) }}
+                                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $booking->status_color }}">
+                                                {{ $booking->status_label }}
                                             </span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-4 text-sm">

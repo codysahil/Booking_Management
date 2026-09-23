@@ -102,7 +102,7 @@
                                     </svg>
                                     <div class="text-sm text-amber-800">
                                         <p class="font-bold mb-1">Payment will be collected at check-in</p>
-                                        <p>Advance amount: ₹{{ number_format($advance) }} (1 month rent or ₹3,000 minimum)</p>
+                                        <p>Advance amount: ₹{{ number_format($advance) }} (1 month rent or ₹{{ number_format(setting('min_advance', 3000)) }} minimum)</p>
                                     </div>
                                 </div>
                             </div>

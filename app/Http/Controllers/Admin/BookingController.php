@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class BookingController extends Controller
 {
@@ -46,17 +47,23 @@ class BookingController extends Controller
     public function updateStatus(Request $request, Booking $booking)
     {
         $request->validate([
-            'status' => 'required|in:pending_payment,active,completed,cancelled',
+            'status' => ['required', Rule::in(array_keys(Booking::STATUSES))],
         ]);
 
         $booking->update(['status' => $request->status]);
 
         // Update bed status based on booking status
-        if ($request->status === 'completed') {
+        if ($request->status === Booking::STATUS_COMPLETED) {
             $booking->update(['check_out_date' => $booking->check_out_date ?? now()]);
             $booking->bed->update(['status' => 'vacant', 'reserved_until' => null]);
-        } elseif ($request->status === 'cancelled') {
+        } elseif ($request->status === Booking::STATUS_CANCELLED) {
             $booking->bed->update(['status' => 'vacant', 'reserved_until' => null]);
+        } elseif ($request->status === Booking::STATUS_ACTIVE) {
+            // Moving out of pending_payment (e.g. staff confirming a cash/manual
+            // payment through this dropdown instead of the check-in flow) must also
+            // clear the payment hold, or the bed stays stuck at "reserved" forever —
+            // release-expired only looks at bookings still in pending_payment.
+            $booking->bed?->update(['reserved_until' => null]);
         }
 
         return back()->with('success', 'Booking status updated successfully!');

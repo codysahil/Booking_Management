@@ -146,17 +146,11 @@
                                             @method('PUT')
                                             <select name="status" onchange="this.form.submit()"
                                                 class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-primary-500">
-                                                @if($booking->status == 'pending_payment')
-                                                    <option value="pending_payment" selected>Awaiting Payment</option>
-                                                @endif
-                                                <option value="active" {{ $booking->status == 'active' ? 'selected' : '' }}>
-                                                    Active</option>
-                                                <option value="completed"
-                                                    {{ $booking->status == 'completed' ? 'selected' : '' }}>Completed
-                                                </option>
-                                                <option value="cancelled"
-                                                    {{ $booking->status == 'cancelled' ? 'selected' : '' }}>Cancelled
-                                                </option>
+                                                @foreach(\App\Models\Booking::STATUSES as $value => $label)
+                                                    @if($value !== \App\Models\Booking::STATUS_PENDING_PAYMENT || $booking->status === \App\Models\Booking::STATUS_PENDING_PAYMENT)
+                                                        <option value="{{ $value }}" {{ $booking->status === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                                    @endif
+                                                @endforeach
                                             </select>
                                         </form>
                                     </div>

@@ -21,15 +21,8 @@
                         <p class="text-gray-600">Booking Reference: <span class="font-bold text-primary-600">{{ $booking->booking_reference }}</span></p>
                     </div>
                     <div>
-                        @php
-                            $statusColors = [
-                                'active' => 'bg-green-100 text-green-800',
-                                'paid' => 'bg-blue-100 text-blue-800',
-                                'cancelled' => 'bg-red-100 text-red-800',
-                            ];
-                        @endphp
-                        <span class="px-4 py-2 rounded-full text-sm font-bold {{ $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
-                            {{ ucfirst($booking->status) }}
+                        <span class="px-4 py-2 rounded-full text-sm font-bold {{ $booking->status_color }}">
+                            {{ $booking->status_label }}
                         </span>
                     </div>
                 </div>

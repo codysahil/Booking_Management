@@ -113,10 +113,10 @@ class BookingController extends Controller
             return redirect()->route('home')->withErrors(['error' => 'Selected beds not found. Please try again.']);
         }
 
-        // Calculate advance: 1 month rent per bed OR ₹3,000 minimum
+        // Calculate advance: 1 month rent per bed OR the configured minimum
         $totalRent = $beds->sum('monthly_rent');
-        $advance = max($totalRent, 3000);
-        
+        $advance = max($totalRent, (float) setting('min_advance', 3000));
+
         \Log::info('Checkout page loaded', [
             'bed_count' => $beds->count(),
             'advance' => $advance,
@@ -156,7 +156,7 @@ class BookingController extends Controller
 
         // Calculate advance
         $totalRent = $beds->sum('monthly_rent');
-        $advance = max($totalRent, 3000);
+        $advance = max($totalRent, (float) setting('min_advance', 3000));
 
         // Atomically re-claim each bed so two customers can't check out with the same bed.
         // A bed is still claimable if it's vacant and either unreserved, its reservation

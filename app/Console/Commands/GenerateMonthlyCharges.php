@@ -30,7 +30,7 @@ class GenerateMonthlyCharges extends Command
         $skipped = 0;
 
         foreach ($activeBookings as $booking) {
-            $exists = MonthlyCharge::where('customer_id', $booking->customer_id)
+            $exists = MonthlyCharge::where('booking_id', $booking->id)
                 ->where('month_year', $month)
                 ->exists();
 

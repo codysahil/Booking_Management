@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Booking;
 use App\Models\Payment;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 /**
  * An online booking that requires payment (see Public\BookingController@processPayment)
@@ -20,23 +21,37 @@ class ReleaseExpiredBookings extends Command
 
     public function handle(): int
     {
-        $expired = Booking::awaitingPayment()
+        $expiredIds = Booking::awaitingPayment()
             ->whereHas('bed', fn ($q) => $q->where('reserved_until', '<', now()))
-            ->with('bed')
-            ->get();
+            ->pluck('id');
 
-        foreach ($expired as $booking) {
-            $booking->update(['status' => Booking::STATUS_CANCELLED]);
+        $released = 0;
 
-            $booking->bed?->update(['status' => 'vacant', 'reserved_until' => null]);
+        foreach ($expiredIds as $bookingId) {
+            // Lock the booking row so this can't race PaymentRecorder::settleAdvance()
+            // settling the payment (webhook or browser callback) at the same moment —
+            // whichever transaction commits first wins, the other sees the updated status.
+            DB::transaction(function () use ($bookingId, &$released) {
+                $booking = Booking::whereKey($bookingId)->lockForUpdate()->with('bed')->first();
 
-            Payment::where('booking_id', $booking->id)
-                ->where('payment_type', 'Advance')
-                ->where('status', Payment::STATUS_PENDING)
-                ->update(['status' => Payment::STATUS_FAILED]);
+                if (! $booking || $booking->status !== Booking::STATUS_PENDING_PAYMENT) {
+                    return;
+                }
+
+                $booking->update(['status' => Booking::STATUS_CANCELLED]);
+
+                $booking->bed?->update(['status' => 'vacant', 'reserved_until' => null]);
+
+                Payment::where('booking_id', $booking->id)
+                    ->where('payment_type', 'Advance')
+                    ->where('status', Payment::STATUS_PENDING)
+                    ->update(['status' => Payment::STATUS_FAILED]);
+
+                $released++;
+            });
         }
 
-        $this->info("Released {$expired->count()} expired, unpaid booking(s).");
+        $this->info("Released {$released} expired, unpaid booking(s).");
 
         return self::SUCCESS;
     }
