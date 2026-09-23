@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantViaRelationScope;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -10,6 +11,11 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Request extends Model
 {
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantViaRelationScope('customer'));
+    }
+
     public const TYPES = [
         'swap' => 'Room swap',
         'vacation' => 'Vacation notice',
@@ -86,4 +92,5 @@ class Request extends Model
             return null;
         }
     }
+
 }

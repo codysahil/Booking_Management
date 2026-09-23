@@ -10,16 +10,17 @@ use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Concerns\CreatesTenantContext;
 
 class EmployeeManagementTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesTenantContext;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->actingAs(User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]));
+        $this->loginAsStaff(['role' => User::ROLE_ADMIN, 'is_active' => true]);
     }
 
     public function test_admin_can_view_employee_list()

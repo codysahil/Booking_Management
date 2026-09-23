@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \App\Http\Middleware\AddNgrokHeaders::class,
+            \App\Http\Middleware\ResolveTenant::class,
         ]);
 
         $middleware->alias([

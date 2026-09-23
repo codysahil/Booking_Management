@@ -6,14 +6,17 @@ use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Tests\Concerns\CreatesTenantContext;
 use Tests\TestCase;
 
 class RequestWorkflowTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesTenantContext;
 
     private function makeCustomer(): Customer
     {
+        $this->bindTenant();
+
         return Customer::create([
             'customer_code' => 'SS-TEST-0001',
             'name' => 'Test Customer',
@@ -75,17 +78,17 @@ class RequestWorkflowTest extends TestCase
 
     public function test_admin_can_view_requests_index_and_notifications_centre()
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]);
+        $this->loginAsStaff(['role' => User::ROLE_ADMIN, 'is_active' => true]);
 
-        $this->actingAs($admin)->get(route('admin.requests.index'))->assertStatus(200);
-        $this->actingAs($admin)->get(route('admin.notifications.index'))->assertStatus(200);
+        $this->get(route('admin.requests.index'))->assertStatus(200);
+        $this->get(route('admin.notifications.index'))->assertStatus(200);
     }
 
     public function test_admin_dashboard_loads()
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]);
+        $this->loginAsStaff(['role' => User::ROLE_ADMIN, 'is_active' => true]);
 
-        $this->actingAs($admin)->get(route('admin.dashboard'))->assertStatus(200);
+        $this->get(route('admin.dashboard'))->assertStatus(200);
     }
 
     public function test_admin_can_respond_to_a_request_and_notify_the_resident()
@@ -99,9 +102,10 @@ class RequestWorkflowTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]);
+        // Reuses the same tenant makeCustomer() already bound, so this admin can see the request.
+        $this->loginAsStaff(['role' => User::ROLE_ADMIN, 'is_active' => true]);
 
-        $response = $this->actingAs($admin)->put(route('admin.requests.update', $request), [
+        $response = $this->put(route('admin.requests.update', $request), [
             'status' => 'completed',
             'admin_response' => 'We have spoken to the other residents.',
         ]);

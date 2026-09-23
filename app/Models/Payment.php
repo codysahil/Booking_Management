@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantViaRelationScope;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -45,6 +46,8 @@ class Payment extends Model
 
     protected static function booted(): void
     {
+        static::addGlobalScope(new TenantViaRelationScope('customer'));
+
         static::created(function (Payment $payment) {
             if (! $payment->receipt_number && $payment->isPaid()) {
                 $payment->assignReceiptNumber();

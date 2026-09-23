@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantViaRelationScope;
 use Illuminate\Database\Eloquent\Model;
 
 class Bed extends Model
@@ -11,6 +12,11 @@ class Bed extends Model
     protected $casts = [
         'reserved_until' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantViaRelationScope('room.branch'));
+    }
 
     public function room()
     {

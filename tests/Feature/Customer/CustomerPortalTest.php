@@ -4,12 +4,13 @@ namespace Tests\Feature\Customer;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Tests\Concerns\CreatesTenantContext;
 use Tests\TestCase;
 use App\Models\Customer;
 
 class CustomerPortalTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesTenantContext;
 
     public function test_customer_can_view_login_page()
     {
@@ -19,6 +20,8 @@ class CustomerPortalTest extends TestCase
 
     public function test_customer_can_login()
     {
+        $this->bindTenant();
+
         $customer = Customer::create([
             'customer_code' => 'CUST-001',
             'name' => 'Test Customer',
@@ -41,6 +44,8 @@ class CustomerPortalTest extends TestCase
 
     public function test_customer_can_view_dashboard()
     {
+        $this->bindTenant();
+
         $customer = Customer::create([
             'customer_code' => 'CUST-001',
             'name' => 'Test Customer',

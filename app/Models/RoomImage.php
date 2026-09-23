@@ -2,11 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantViaRelationScope;
 use Illuminate\Database\Eloquent\Model;
 
 class RoomImage extends Model
 {
     protected $fillable = ['room_id', 'image_path', 'order'];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantViaRelationScope('room.branch'));
+    }
 
     public function room()
     {

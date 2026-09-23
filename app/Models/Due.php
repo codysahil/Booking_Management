@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantViaRelationScope;
 use Illuminate\Database\Eloquent\Model;
 
 class Due extends Model
 {
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantViaRelationScope('customer'));
+    }
+
     public const TYPES = [
         'fine' => 'Fine',
         'eb' => 'Electricity (EB)',
@@ -53,4 +59,5 @@ class Due extends Model
     {
         return $this->status === 'paid';
     }
+
 }

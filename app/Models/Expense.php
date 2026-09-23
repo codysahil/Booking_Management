@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class Expense extends Model
 {
+    use BelongsToTenant;
+
     public const CATEGORIES = [
         'Food & Groceries',
         'Staff Salary',
@@ -29,6 +32,7 @@ class Expense extends Model
     ];
 
     protected $fillable = [
+        'tenant_id',
         'branch_id',
         'category',
         'amount',

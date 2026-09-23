@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantViaRelationScope;
 use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantViaRelationScope('customer'));
+    }
+
     /** A trusted walk-in — a real, current stay. */
     public const STATUS_ACTIVE = 'active';
 

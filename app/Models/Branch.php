@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class Branch extends Model
 {
-    protected $fillable = ['name', 'address', 'google_map_url'];
+    use BelongsToTenant;
+
+    protected $fillable = ['tenant_id', 'name', 'address', 'google_map_url'];
 
     public function rooms()
     {

@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 /** A notice from the office shown on residents' dashboards. */
 class Announcement extends Model
 {
-    protected $fillable = ['title', 'body', 'branch_id', 'is_pinned', 'expires_on', 'created_by'];
+    use BelongsToTenant;
+
+    protected $fillable = ['tenant_id', 'title', 'body', 'branch_id', 'is_pinned', 'expires_on', 'created_by'];
 
     protected $casts = [
         'is_pinned' => 'boolean',

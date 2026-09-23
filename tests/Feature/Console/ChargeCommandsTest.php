@@ -8,14 +8,17 @@ use App\Models\Customer;
 use App\Models\MonthlyCharge;
 use App\Models\Room;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\CreatesTenantContext;
 use Tests\TestCase;
 
 class ChargeCommandsTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesTenantContext;
 
     private function makeActiveBooking(): array
     {
+        $this->bindTenant();
+
         $branch = Branch::create(['name' => 'Branch 1', 'address' => 'Addr']);
         $room = Room::create(['branch_id' => $branch->id, 'room_number' => '101', 'capacity' => 2, 'type' => 'AC', 'gender_allowed' => 'Female']);
         $bed = Bed::create(['room_id' => $room->id, 'bed_number' => '101-A', 'monthly_rent' => 6000, 'status' => 'occupied']);

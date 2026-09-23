@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantViaRelationScope;
 use Illuminate\Database\Eloquent\Model;
 
 class MonthlyCharge extends Model
 {
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantViaRelationScope('customer'));
+    }
+
     protected $fillable = [
         'customer_id',
         'booking_id',
@@ -66,4 +72,5 @@ class MonthlyCharge extends Model
         return $this->status === 'overdue'
             || ($this->status === 'pending' && $this->due_date && $this->due_date->endOfDay()->isPast());
     }
+
 }

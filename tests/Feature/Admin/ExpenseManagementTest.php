@@ -6,17 +6,18 @@ use App\Models\Branch;
 use App\Models\Expense;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\CreatesTenantContext;
 use Tests\TestCase;
 
 class ExpenseManagementTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesTenantContext;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->actingAs(User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]));
+        $this->loginAsStaff(['role' => User::ROLE_ADMIN, 'is_active' => true]);
     }
 
     public function test_admin_can_view_expenses_index()

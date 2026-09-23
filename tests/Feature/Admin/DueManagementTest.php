@@ -6,11 +6,12 @@ use App\Models\Customer;
 use App\Models\Due;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\CreatesTenantContext;
 use Tests\TestCase;
 
 class DueManagementTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesTenantContext;
 
     private function makeCustomer(): Customer
     {
@@ -29,7 +30,7 @@ class DueManagementTest extends TestCase
     {
         parent::setUp();
 
-        $this->actingAs(User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]));
+        $this->loginAsStaff(['role' => User::ROLE_ADMIN, 'is_active' => true]);
     }
 
     public function test_admin_can_add_a_due_to_a_customer()

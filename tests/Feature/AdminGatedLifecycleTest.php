@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\Room;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\CreatesTenantContext;
 use Tests\TestCase;
 
 /**
@@ -17,10 +18,12 @@ use Tests\TestCase;
  */
 class AdminGatedLifecycleTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, CreatesTenantContext;
 
     private function makeCheckedInCustomer(): array
     {
+        $this->bindTenant();
+
         $branch = Branch::create(['name' => 'Test Branch', 'address' => 'Test Address']);
         $room = $branch->rooms()->create(['room_number' => '101', 'capacity' => 2, 'type' => 'AC', 'gender_allowed' => 'Female']);
         $bed = $room->beds()->create(['bed_number' => '101-A', 'monthly_rent' => 5000, 'status' => 'occupied']);
