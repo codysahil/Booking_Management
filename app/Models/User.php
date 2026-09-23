@@ -36,6 +36,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'is_super_admin',
     ];
 
     /**
@@ -59,6 +60,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_super_admin' => 'boolean',
         ];
     }
 
@@ -70,6 +72,11 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->isStaff() && $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_super_admin;
     }
 
     public function getRoleLabelAttribute(): string

@@ -10,6 +10,9 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            \Illuminate\Support\Facades\Route::middleware('web')->group(__DIR__.'/../routes/super_admin.php');
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
@@ -19,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsStaff::class,
+            'super_admin' => \App\Http\Middleware\EnsureUserIsSuperAdmin::class,
         ]);
 
         // Payment gateways post server-to-server without a CSRF token.
@@ -28,15 +32,23 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Send unauthenticated visitors to the right login screen.
         $middleware->redirectGuestsTo(function (Request $request) {
-            return $request->is('customer', 'customer/*')
-                ? route('customer.login')
+            if ($request->is('customer', 'customer/*')) {
+                return route('customer.login');
+            }
+
+            return $request->is('super-admin', 'super-admin/*')
+                ? route('super-admin.login')
                 : route('admin.login');
         });
 
         // Logged-in visitors hitting a guest-only page go to their dashboard.
         $middleware->redirectUsersTo(function (Request $request) {
-            return $request->is('customer', 'customer/*')
-                ? route('customer.dashboard')
+            if ($request->is('customer', 'customer/*')) {
+                return route('customer.dashboard');
+            }
+
+            return $request->is('super-admin', 'super-admin/*')
+                ? route('super-admin.dashboard')
                 : route('admin.dashboard');
         });
     })
