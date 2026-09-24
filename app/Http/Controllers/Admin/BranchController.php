@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\Branch;
 use Illuminate\Http\Request;
 
@@ -52,6 +53,14 @@ class BranchController extends Controller
 
     public function destroy(Branch $branch)
     {
+        $hasActiveBooking = Booking::where('status', Booking::STATUS_ACTIVE)
+            ->whereHas('bed.room', fn ($q) => $q->where('branch_id', $branch->id))
+            ->exists();
+
+        if ($hasActiveBooking) {
+            return back()->with('error', 'Cannot delete this branch — it still has residents checked in. Vacate them first.');
+        }
+
         $branch->delete();
         return redirect()->route('admin.branches.index')->with('success', 'Branch deleted successfully.');
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bed;
+use App\Models\Booking;
 use App\Models\Room;
 use Illuminate\Http\Request;
 
@@ -33,6 +34,10 @@ class BedController extends Controller
 
     public function destroy(Bed $bed)
     {
+        if ($bed->bookings()->where('status', Booking::STATUS_ACTIVE)->exists()) {
+            return back()->with('error', 'Cannot delete this bed — a resident is currently checked in. Vacate them first.');
+        }
+
         $bed->delete();
         return back()->with('success', 'Bed deleted successfully.');
     }

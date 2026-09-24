@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\Room;
 use App\Models\RoomImage;
 use App\Models\Branch;
@@ -86,6 +87,14 @@ class RoomController extends Controller
 
     public function destroy(Room $room)
     {
+        $hasActiveBooking = Booking::where('status', Booking::STATUS_ACTIVE)
+            ->whereHas('bed', fn ($q) => $q->where('room_id', $room->id))
+            ->exists();
+
+        if ($hasActiveBooking) {
+            return back()->with('error', 'Cannot delete this room — it still has a resident checked in. Vacate them first.');
+        }
+
         $room->delete();
         return redirect()->route('admin.rooms.index')->with('success', 'Room deleted successfully.');
     }
