@@ -102,11 +102,18 @@
                     <span class="text-lg font-medium">Total Amount to Pay:</span>
                     <span class="text-3xl font-bold" id="totalAmount">₹0</span>
                 </div>
-                <button type="submit" id="payButton" disabled
-                    class="w-full bg-white text-primary-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    Proceed to Payment
-                </button>
-                <p class="text-sm text-white/80 mt-3 text-center">Secure payment powered by Razorpay</p>
+                @if($onlinePaymentsEnabled)
+                    <button type="submit" id="payButton" disabled
+                        class="w-full bg-white text-primary-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        Proceed to Payment
+                    </button>
+                    <p class="text-sm text-white/80 mt-3 text-center">Secure payment powered by Razorpay</p>
+                @else
+                    <div class="bg-white/10 rounded-lg px-4 py-3 text-center">
+                        <p class="font-medium">Online payment isn't available right now.</p>
+                        <p class="text-sm text-white/80 mt-1">Please pay at the office — cash and other methods are recorded there.</p>
+                    </div>
+                @endif
             </div>
             @endif
         </form>

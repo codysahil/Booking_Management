@@ -18,6 +18,14 @@ return new class extends Migration
 
     public function up(): void
     {
+        $hasExistingData = collect(self::TENANT_TABLES)->contains(fn ($table) => DB::table($table)->exists());
+
+        if (! $hasExistingData) {
+            // Fresh install (a new dev environment, CI, or a fresh deploy of this
+            // template) — nothing to backfill, so don't create a phantom tenant.
+            return;
+        }
+
         $hostelName = DB::table('settings')->where('key', 'hostel_name')->value('value')
             ?: config('hostel.defaults.hostel_name', 'My Hostel');
 

@@ -16,8 +16,10 @@ php artisan storage:link 2>/dev/null || true
 # Run migrations (includes monthly_charges and dues tables)
 php artisan migrate --force
 
-# Run seeders
-php artisan db:seed --force
+# Seeding is deliberately NOT run automatically here — this is a live
+# multi-tenant database now; auto-seeding demo data on every deploy would
+# inject a fake tenant into production. Onboard real hostels through the
+# Super Admin panel; run `php artisan db:seed` by hand only for local dev.
 
 # Start the server
 php artisan serve --host=0.0.0.0 --port=${PORT:-8000}

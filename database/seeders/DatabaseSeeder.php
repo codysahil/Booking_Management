@@ -2,23 +2,25 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+/**
+ * For local development only — creates one demo tenant with a full set of
+ * realistic data. Deliberately NOT run automatically on deploy: seeding a
+ * live multi-tenant database with demo data on every deploy would inject a
+ * fake tenant into production. Run by hand when you want a demo/dev dataset:
+ * `php artisan db:seed`.
+ *
+ * Deliberately does NOT use WithoutModelEvents — tenant_id auto-stamping
+ * (BelongsToTenant) and Payment's receipt-number assignment both depend on
+ * model events firing during create().
+ */
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call([
-            AdminSeeder::class,
-            BranchSeeder::class,
-            HeroSliderSeeder::class,
+            DemoDataSeeder::class,
         ]);
     }
 }

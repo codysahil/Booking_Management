@@ -16,9 +16,10 @@ class DashboardController extends Controller
 
         $announcements = Announcement::visibleTo($customer)->limit(5)->get();
 
-        // Get pending monthly charges (Rent + EB)
+        // Get pending monthly charges (Rent + EB) — overdue is still owed, and more
+        // urgent than pending, so a resident checking their own balance must see it too.
         $pendingCharges = $customer->monthlyCharges()
-            ->where('status', 'pending')
+            ->whereIn('status', ['pending', 'overdue'])
             ->orderBy('month_year', 'desc')
             ->get();
         

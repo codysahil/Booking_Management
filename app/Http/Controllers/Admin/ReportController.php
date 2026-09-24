@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Branch;
 use App\Models\Room;
+use App\Models\Due;
 use App\Models\Expense;
 use App\Models\MonthlyCharge;
 use App\Models\Payment;
@@ -244,15 +245,26 @@ class ReportController extends Controller
         ];
     }
 
+    /** Everything still owed to the hostel — unpaid rent (pending or overdue) plus unpaid fines/dues. */
     private function getPendingDues($branch_id = null)
     {
-        return MonthlyCharge::where('status', 'pending')
-            ->when($branch_id, function($q) use ($branch_id) {
-                $q->whereHas('customer.bookings.bed.room', function($q2) use ($branch_id) {
+        $pendingCharges = MonthlyCharge::whereIn('status', ['pending', 'overdue'])
+            ->when($branch_id, function ($q) use ($branch_id) {
+                $q->whereHas('customer.bookings.bed.room', function ($q2) use ($branch_id) {
                     $q2->where('branch_id', $branch_id);
                 });
             })
             ->sum('total_amount');
+
+        $pendingDues = Due::where('status', 'pending')
+            ->when($branch_id, function ($q) use ($branch_id) {
+                $q->whereHas('customer.bookings.bed.room', function ($q2) use ($branch_id) {
+                    $q2->where('branch_id', $branch_id);
+                });
+            })
+            ->sum('amount');
+
+        return $pendingCharges + $pendingDues;
     }
 
     public function export(Request $request)

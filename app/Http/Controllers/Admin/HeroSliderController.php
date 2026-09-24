@@ -29,7 +29,7 @@ class HeroSliderController extends Controller
             'order' => 'nullable|integer',
         ]);
 
-        $imagePath = $request->file('image')->store('sliders');
+        $imagePath = $request->file('image')->store('sliders'); // Uses Cloudinary in production, see RAILWAY_STORAGE_SOLUTION.md
 
         HeroSlider::create([
             'image_path' => $imagePath,
@@ -68,7 +68,7 @@ class HeroSliderController extends Controller
             if ($slider->image_path) {
                 Storage::delete($slider->image_path);
             }
-            $data['image_path'] = $request->file('image')->store('sliders');
+            $data['image_path'] = $request->file('image')->store('sliders'); // Uses Cloudinary in production
         }
 
         $slider->update($data);
