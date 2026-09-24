@@ -10,6 +10,14 @@ class AuthController extends Controller
 {
     public function showLoginForm()
     {
+        // Only skip the form for someone already signed in as a super admin —
+        // a tenant admin/manager may hold an active session under the same
+        // guard, and sending them to the super-admin dashboard would just
+        // 404 them there instead of ever showing this page.
+        if (Auth::check() && Auth::user()->isSuperAdmin()) {
+            return redirect()->route('super-admin.dashboard');
+        }
+
         return view('super-admin.auth.login');
     }
 
@@ -19,6 +27,13 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
+
+        // A tenant admin/customer session already active in this browser (or
+        // request) may have bound a tenant into the container via
+        // ResolveTenant — the super admin has no tenant at all, so that
+        // binding must not scope this lookup or Auth::attempt will never
+        // find them, even with the right credentials.
+        app()->forgetInstance('currentTenantId');
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();

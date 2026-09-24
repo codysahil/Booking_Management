@@ -12,6 +12,16 @@ class AuthController extends Controller
 {
     public function showLoginForm()
     {
+        // Only skip the form for someone already signed in as staff here — a
+        // different tenant's admin/manager, a customer, or a super admin may
+        // hold an active session under the same guard, and sending them to
+        // this tenant's dashboard would either 404 them (super admin) or show
+        // the wrong tenant's data, instead of ever letting them reach this
+        // form to switch accounts.
+        if (Auth::check() && Auth::user()->isStaff()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         return view('admin.auth.login');
     }
 
@@ -21,6 +31,13 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
+
+        // A different tenant's (or the super admin's) session already active
+        // in this browser may have bound a tenant into the container via
+        // ResolveTenant — that must not scope this lookup, or logging into a
+        // different account than the one already signed in would wrongly
+        // fail with "credentials do not match".
+        app()->forgetInstance('currentTenantId');
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();

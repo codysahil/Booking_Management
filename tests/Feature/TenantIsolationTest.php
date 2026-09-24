@@ -153,4 +153,34 @@ class TenantIsolationTest extends TestCase
         $response->assertViewHas('recentBookings', fn ($bookings) => $bookings->pluck('id')->all() === [$tenantB['booking']->id]);
         $response->assertDontSee($tenantA['customer']->name);
     }
+
+    /**
+     * ResolveTenant binds the currently-logged-in user's tenant into the
+     * container on every request. If that binding isn't cleared before a
+     * fresh login attempt, Auth::attempt's lookup for a DIFFERENT tenant's
+     * admin gets wrongly scoped to the tenant already active in the browser
+     * and always reports "credentials do not match" — even with the right
+     * password.
+     */
+    public function test_a_tenant_as_admin_session_does_not_block_logging_into_a_different_tenants_admin_account()
+    {
+        $tenantA = Tenant::factory()->create(['name' => 'Alpha']);
+        $tenantB = Tenant::factory()->create(['name' => 'Beta']);
+
+        $adminA = User::factory()->create([
+            'tenant_id' => $tenantA->id, 'role' => User::ROLE_ADMIN, 'is_active' => true,
+        ]);
+        $adminB = User::factory()->create([
+            'tenant_id' => $tenantB->id, 'role' => User::ROLE_ADMIN, 'is_active' => true,
+            'password' => bcrypt('tenant-b-secret'),
+        ]);
+
+        $response = $this->actingAs($adminA)->post(route('admin.login'), [
+            'email' => $adminB->email,
+            'password' => 'tenant-b-secret',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticatedAs($adminB);
+    }
 }

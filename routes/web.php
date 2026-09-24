@@ -18,10 +18,16 @@ Route::get('/', fn () => redirect()->route('admin.login'))->name('home');
 // ADMIN AUTH ROUTES
 // ============================================
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Guest routes (not logged in)
+    // Login is deliberately NOT behind the blanket 'guest' middleware: it only
+    // checks whether any web-guard user is logged in at all, so a different
+    // tenant's admin (or a super admin) with an active session would get
+    // bounced straight to this tenant's dashboard instead of ever seeing the
+    // form. Admin\AuthController::showLoginForm() does the identity-aware
+    // check itself.
+    Route::get('/login', [App\Http\Controllers\Admin\AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [App\Http\Controllers\Admin\AuthController::class, 'login'])->middleware('throttle:5,1');
+
     Route::middleware('guest')->group(function () {
-        Route::get('/login', [App\Http\Controllers\Admin\AuthController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [App\Http\Controllers\Admin\AuthController::class, 'login'])->middleware('throttle:5,1');
         Route::get('/forgot-password', [App\Http\Controllers\Admin\AuthController::class, 'showForgotPasswordForm'])->name('password.request');
         Route::post('/forgot-password', [App\Http\Controllers\Admin\AuthController::class, 'sendResetLink'])->name('password.email');
         Route::get('/reset-password/{token}', [App\Http\Controllers\Admin\AuthController::class, 'showResetPasswordForm'])->name('password.reset');

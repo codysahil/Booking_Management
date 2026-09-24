@@ -20,6 +20,12 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // A staff or different-tenant customer session already active in this
+        // browser may have bound a tenant into the container via
+        // ResolveTenant — that must not scope this lookup, or logging in here
+        // could wrongly fail to find an otherwise-valid account.
+        app()->forgetInstance('currentTenantId');
+
         // Try to login with customer_code and check if active
         if (Auth::guard('customer')->attempt([
             'customer_code' => $request->customer_code,

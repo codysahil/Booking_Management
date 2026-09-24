@@ -65,4 +65,32 @@ class SuperAdminAccessTest extends TestCase
         $response->assertSessionHasErrors('email');
         $this->assertGuest();
     }
+
+    /**
+     * The generic 'guest' middleware only checks "is anyone logged in under
+     * the web guard" — a tenant admin's own active session would trip that
+     * check and get bounced to the super-admin dashboard, which then 404s
+     * them there too (not a super admin), leaving no way to ever reach this
+     * form to switch identities.
+     */
+    public function test_a_tenants_admin_with_an_active_session_can_still_reach_and_use_the_super_admin_login()
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]);
+        $superAdmin = User::factory()->create([
+            'tenant_id' => null,
+            'is_super_admin' => true,
+            'is_active' => false,
+            'password' => bcrypt('super-secret-1'),
+        ]);
+
+        $this->actingAs($admin)->get(route('super-admin.login'))->assertOk();
+
+        $response = $this->actingAs($admin)->post(route('super-admin.login'), [
+            'email' => $superAdmin->email,
+            'password' => 'super-secret-1',
+        ]);
+
+        $response->assertRedirect(route('super-admin.dashboard'));
+        $this->assertAuthenticatedAs($superAdmin);
+    }
 }
