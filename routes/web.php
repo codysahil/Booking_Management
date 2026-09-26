@@ -19,6 +19,16 @@ Route::post('/webhook/razorpay/subscriptions', [App\Http\Controllers\Webhook\Raz
 Route::get('/', fn () => redirect()->route('admin.login'))->name('home');
 
 // ============================================
+// LEGAL — public, no auth required (Razorpay/compliance need these reachable
+// without logging in). Cover both subscription billing and resident payments.
+// ============================================
+Route::prefix('legal')->name('legal.')->group(function () {
+    Route::view('/terms', 'legal.terms')->name('terms');
+    Route::view('/privacy', 'legal.privacy')->name('privacy');
+    Route::view('/refund-policy', 'legal.refund-policy')->name('refund-policy');
+});
+
+// ============================================
 // ADMIN AUTH ROUTES
 // ============================================
 Route::prefix('admin')->name('admin.')->group(function () {

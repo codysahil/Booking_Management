@@ -115,6 +115,12 @@
                 </div>
             </div>
         </div>
+
+        <p class="text-center text-gray-400 text-xs mt-6 space-x-3">
+            <a href="{{ route('legal.terms') }}" class="hover:text-gray-600">Terms</a>
+            <a href="{{ route('legal.privacy') }}" class="hover:text-gray-600">Privacy</a>
+            <a href="{{ route('legal.refund-policy') }}" class="hover:text-gray-600">Refunds</a>
+        </p>
     </div>
 </body>
 </html>
