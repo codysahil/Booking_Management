@@ -27,6 +27,7 @@
                 <div class="flex items-center gap-4 text-sm">
                     <a href="{{ route('super-admin.dashboard') }}" class="hover:text-slate-300 transition">Dashboard</a>
                     <a href="{{ route('super-admin.tenants.index') }}" class="hover:text-slate-300 transition">Hostels</a>
+                    <a href="{{ route('super-admin.plans.index') }}" class="hover:text-slate-300 transition">Plans</a>
                     <form method="POST" action="{{ route('super-admin.logout') }}">
                         @csrf
                         <button type="submit" class="hover:text-slate-300 transition">Logout</button>

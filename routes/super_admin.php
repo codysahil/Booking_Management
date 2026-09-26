@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\SuperAdmin\AuthController;
 use App\Http\Controllers\SuperAdmin\DashboardController;
+use App\Http\Controllers\SuperAdmin\PlanController;
+use App\Http\Controllers\SuperAdmin\SubscriptionController;
 use App\Http\Controllers\SuperAdmin\TenantController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,5 +24,11 @@ Route::prefix('super-admin')->name('super-admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::resource('tenants', TenantController::class)->except(['destroy']);
+
+        Route::resource('plans', PlanController::class)->except(['show', 'destroy']);
+
+        Route::put('/tenants/{tenant}/subscription/plan', [SubscriptionController::class, 'assignPlan'])->name('tenants.subscription.assign-plan');
+        Route::post('/tenants/{tenant}/subscription/razorpay', [SubscriptionController::class, 'startRazorpaySubscription'])->name('tenants.subscription.start-razorpay');
+        Route::put('/tenants/{tenant}/subscription', [SubscriptionController::class, 'update'])->name('tenants.subscription.update');
     });
 });

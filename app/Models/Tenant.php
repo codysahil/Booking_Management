@@ -72,6 +72,11 @@ class Tenant extends Model
         return $this->hasMany(Announcement::class);
     }
 
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;

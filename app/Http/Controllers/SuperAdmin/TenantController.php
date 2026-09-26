@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -60,12 +61,17 @@ class TenantController extends Controller
             'is_active' => true,
         ]);
 
+        Subscription::create([
+            'tenant_id' => $tenant->id,
+            'status' => Subscription::STATUS_TRIALING,
+        ]);
+
         return redirect()->route('super-admin.tenants.show', $tenant)->with('success', "{$tenant->name} is set up — share the admin login with the owner.");
     }
 
     public function show(Tenant $tenant)
     {
-        $tenant->load('users');
+        $tenant->load('users', 'subscription.plan');
 
         return view('super-admin.tenants.show', compact('tenant'));
     }

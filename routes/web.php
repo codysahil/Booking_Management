@@ -9,6 +9,10 @@ Route::post('/webhook/razorpay', [App\Http\Controllers\Webhook\RazorpayWebhookCo
     ->name('webhook.razorpay')
     ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
+Route::post('/webhook/razorpay/subscriptions', [App\Http\Controllers\Webhook\RazorpaySubscriptionWebhookController::class, 'handle'])
+    ->name('webhook.razorpay.subscriptions')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
 // ============================================
 // ROOT — this is a private management platform, not a public storefront.
 // ============================================
@@ -48,7 +52,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // ============================================
 // ADMIN ROUTES (Protected)
 // ============================================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'subscription'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     // Branch & Room Management

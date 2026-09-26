@@ -38,6 +38,53 @@ class Razorpay
         return $this->api()->order->fetch($orderId);
     }
 
+    /**
+     * Creates the matching Plan on Razorpay's side for a locally-defined
+     * Plan — a one-time setup step, done once when the super admin creates
+     * or first attaches billing to a Plan. amountInRupees is per billing
+     * cycle (e.g. the monthly price for a 'monthly' plan).
+     */
+    public function createPlan(string $name, float $amountInRupees, string $interval): object
+    {
+        return $this->api()->plan->create([
+            'period' => $interval === 'yearly' ? 'yearly' : 'monthly',
+            'interval' => 1,
+            'item' => [
+                'name' => $name,
+                'amount' => (int) round($amountInRupees * 100), // paise
+                'currency' => 'INR',
+            ],
+        ]);
+    }
+
+    /**
+     * Starts a subscription mandate for one tenant against an already
+     * Razorpay-linked Plan. total_count is a large but finite cycle count —
+     * Razorpay Subscriptions requires one — since this bills indefinitely
+     * until cancelled, not for a fixed term. Returns an entity carrying a
+     * short_url: a hosted Razorpay page where the hostel owner authorizes
+     * the recurring mandate (UPI Autopay / e-mandate / saved card).
+     */
+    public function createSubscription(string $razorpayPlanId, array $notes = []): object
+    {
+        return $this->api()->subscription->create([
+            'plan_id' => $razorpayPlanId,
+            'total_count' => 120, // 10 years of cycles; renews automatically until cancelled
+            'quantity' => 1,
+            'notes' => $notes,
+        ]);
+    }
+
+    public function fetchSubscription(string $subscriptionId): object
+    {
+        return $this->api()->subscription->fetch($subscriptionId);
+    }
+
+    public function cancelSubscription(string $subscriptionId, bool $cancelAtCycleEnd = false): object
+    {
+        return $this->api()->subscription->fetch($subscriptionId)->cancel(['cancel_at_cycle_end' => $cancelAtCycleEnd ? 1 : 0]);
+    }
+
     public function fetchPayment(string $paymentId)
     {
         return $this->api()->payment->fetch($paymentId);

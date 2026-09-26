@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsStaff::class,
             'super_admin' => \App\Http\Middleware\EnsureUserIsSuperAdmin::class,
+            'subscription' => \App\Http\Middleware\EnsureSubscriptionActive::class,
         ]);
 
         // Payment gateways post server-to-server without a CSRF token.
@@ -61,6 +62,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Create next month's rent charges on the 1st and flag unpaid ones as overdue daily.
         $schedule->command('charges:generate')->monthlyOn(1, '00:30');
         $schedule->command('charges:mark-overdue')->dailyAt('01:00');
+
+        if (class_exists(\App\Console\Commands\ExpirePastDueSubscriptions::class)) {
+            $schedule->command('subscriptions:expire-past-due')->dailyAt('01:30');
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

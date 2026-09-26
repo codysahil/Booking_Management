@@ -3,6 +3,7 @@
 namespace Tests\Feature\SuperAdmin;
 
 use App\Models\Branch;
+use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -54,6 +55,7 @@ class TenantCreationTest extends TestCase
         $response->assertRedirect(route('super-admin.tenants.show', $tenant));
 
         $this->assertDatabaseHas('tenants', ['name' => 'Sunrise PG', 'status' => 'active']);
+        $this->assertDatabaseHas('subscriptions', ['tenant_id' => $tenant->id, 'status' => Subscription::STATUS_TRIALING]);
 
         $admin = User::where('email', 'ravi-admin@example.com')->firstOrFail();
         $this->assertSame($tenant->id, $admin->tenant_id);

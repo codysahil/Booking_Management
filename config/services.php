@@ -39,6 +39,10 @@ return [
         'key' => env('RAZORPAY_KEY'),
         'secret' => env('RAZORPAY_SECRET'),
         'webhook_secret' => env('RAZORPAY_WEBHOOK_SECRET'),
+        // Separate secret for the platform-subscriptions webhook (tenant billing) —
+        // kept apart from the one above (residents' own due/charge payments), a
+        // different concern with its own blast radius.
+        'subscription_webhook_secret' => env('RAZORPAY_SUBSCRIPTION_WEBHOOK_SECRET'),
     ],
 
 ];

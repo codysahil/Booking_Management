@@ -10,7 +10,9 @@ use App\Models\Employee;
 use App\Models\Expense;
 use App\Models\HeroSlider;
 use App\Models\MonthlyCharge;
+use App\Models\Plan;
 use App\Models\Room;
+use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -66,6 +68,7 @@ class DemoDataSeeder extends Seeder
         $customers = $this->seedCustomersAndBookings($branch1, $branch2, $admin);
         $this->seedChargesAndDues($customers);
         $this->seedRequests($customers, $admin);
+        $this->seedBillingPlanAndSubscription($tenant);
 
         $this->command->info("Demo tenant '{$tenant->name}' seeded (slug: {$tenant->slug}).");
         $this->command->info("Admin login: admin@nestaypg.in / admin123");
@@ -279,5 +282,22 @@ class DemoDataSeeder extends Seeder
         $customers[1]->requests()->create(['type' => 'complaint', 'subject' => 'Noisy neighbours', 'description' => 'Loud music after 11pm.', 'status' => 'approved', 'admin_response' => 'Spoken to the resident concerned.', 'handled_by' => $admin->id, 'resolved_at' => now()->subDay()]);
         $customers[2]->requests()->create(['type' => 'vacation', 'subject' => 'Moving out next month', 'preferred_date' => now()->addDays(35), 'status' => 'pending']);
         $customers[3]->requests()->create(['type' => 'swap', 'subject' => 'Room swap request', 'description' => 'Would like a quieter room.', 'status' => 'rejected', 'admin_response' => 'No alternate bed currently available.', 'handled_by' => $admin->id, 'resolved_at' => now()->subDays(2)]);
+    }
+
+    /** Demo tenant shows a real, active-looking subscription — not the 'internal' status reserved for the platform owner's own account. */
+    private function seedBillingPlanAndSubscription(Tenant $tenant): void
+    {
+        $plan = Plan::firstOrCreate(
+            ['slug' => 'standard-monthly'],
+            ['name' => 'Standard', 'price' => 1999, 'billing_interval' => Plan::INTERVAL_MONTHLY, 'is_active' => true],
+        );
+
+        Subscription::create([
+            'tenant_id' => $tenant->id,
+            'plan_id' => $plan->id,
+            'status' => Subscription::STATUS_ACTIVE,
+            'current_period_start' => now()->subDays(10),
+            'current_period_end' => now()->addDays(20),
+        ]);
     }
 }
