@@ -10,6 +10,23 @@ class Customer extends Authenticatable
 {
     use Notifiable, BelongsToTenant;
 
+    public const VERIFICATION_PENDING = 'pending';
+
+    public const VERIFICATION_SUBMITTED = 'submitted';
+
+    public const VERIFICATION_VERIFIED = 'verified';
+
+    public const VERIFICATION_REJECTED = 'rejected';
+
+    public const VERIFICATION_STATUSES = [
+        self::VERIFICATION_PENDING => 'Not submitted',
+        self::VERIFICATION_SUBMITTED => 'Submitted to police',
+        self::VERIFICATION_VERIFIED => 'Verified',
+        self::VERIFICATION_REJECTED => 'Rejected',
+    ];
+
+    public const ID_PROOF_TYPES = ['Aadhaar Card', 'Passport', 'Voter ID', 'Driving Licence'];
+
     protected $fillable = [
         'tenant_id',
         'customer_code',
@@ -23,6 +40,12 @@ class Customer extends Authenticatable
         'work_details',
         'photo_path',
         'id_proof_path',
+        'id_proof_type',
+        'id_proof_number',
+        'police_verification_status',
+        'police_verification_submitted_at',
+        'police_verification_verified_at',
+        'police_verification_notes',
         'is_active'
     ];
 
@@ -31,7 +54,24 @@ class Customer extends Authenticatable
     protected $casts = [
         'dob' => 'date',
         'is_active' => 'boolean',
+        'police_verification_submitted_at' => 'datetime',
+        'police_verification_verified_at' => 'datetime',
     ];
+
+    public function getVerificationStatusLabelAttribute(): string
+    {
+        return self::VERIFICATION_STATUSES[$this->police_verification_status] ?? ucfirst((string) $this->police_verification_status);
+    }
+
+    public function getVerificationStatusColorAttribute(): string
+    {
+        return match ($this->police_verification_status) {
+            self::VERIFICATION_SUBMITTED => 'bg-blue-100 text-blue-800',
+            self::VERIFICATION_VERIFIED => 'bg-green-100 text-green-800',
+            self::VERIFICATION_REJECTED => 'bg-red-100 text-red-800',
+            default => 'bg-gray-100 text-gray-800',
+        };
+    }
 
     public function bookings()
     {

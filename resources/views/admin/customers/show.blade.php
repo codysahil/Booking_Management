@@ -275,27 +275,72 @@
                         </div>
                     </div>
 
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Documents</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">ID Proof</label>
-                            @if($customer->id_proof_path)
-                                <a href="{{ $customer->safe_id_proof_url }}" target="_blank"
-                                    class="mt-2 inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
-                                    <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                        </path>
-                                    </svg>
-                                    View Document
-                                </a>
-                            @else
-                                <span class="text-gray-400 text-sm">Not Uploaded</span>
-                            @endif
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">ID Proof &amp; Police Verification</h3>
+                    <div class="mb-4">
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded Document</label>
+                        @if($customer->id_proof_path)
+                            <a href="{{ $customer->safe_id_proof_url }}" target="_blank"
+                                class="mt-2 inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                                <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                    </path>
+                                </svg>
+                                View Document
+                            </a>
+                        @else
+                            <span class="text-gray-400 text-sm block mt-1">Not Uploaded</span>
+                        @endif
+                    </div>
+
+                    <div class="rounded-xl border-2 border-gray-100 bg-gray-50 p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full {{ $customer->verification_status_color }}">
+                                {{ $customer->verification_status_label }}
+                            </span>
+                            <a href="{{ route('admin.customers.police-verification.print', $customer) }}" target="_blank"
+                                class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a1 1 0 001-1v-4a1 1 0 00-1-1H9a1 1 0 00-1 1v4a1 1 0 001 1zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                Print Verification Form
+                            </a>
                         </div>
+
+                        <form method="POST" action="{{ route('admin.customers.police-verification.update', $customer) }}" class="space-y-4">
+                            @csrf
+                            @method('PATCH')
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <x-form.select name="id_proof_type" label="ID Proof Type">
+                                    <option value="">Select type</option>
+                                    @foreach (\App\Models\Customer::ID_PROOF_TYPES as $type)
+                                        <option value="{{ $type }}" @selected(old('id_proof_type', $customer->id_proof_type) === $type)>{{ $type }}</option>
+                                    @endforeach
+                                </x-form.select>
+                                <x-form.input name="id_proof_number" label="ID Proof Number" :value="$customer->id_proof_number" placeholder="e.g. XXXX-XXXX-XXXX" />
+                            </div>
+                            <x-form.select name="police_verification_status" label="Verification Status" required>
+                                @foreach (\App\Models\Customer::VERIFICATION_STATUSES as $value => $label)
+                                    <option value="{{ $value }}" @selected(old('police_verification_status', $customer->police_verification_status) === $value)>{{ $label }}</option>
+                                @endforeach
+                            </x-form.select>
+                            <x-form.textarea name="police_verification_notes" label="Notes" :rows="2" placeholder="e.g. Station name, form reference number">{{ old('police_verification_notes', $customer->police_verification_notes) }}</x-form.textarea>
+                            <x-form.button label="Save Verification Details" loading-label="Saving…" />
+                        </form>
+
+                        @if($customer->police_verification_submitted_at || $customer->police_verification_verified_at)
+                            <p class="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-200">
+                                @if($customer->police_verification_submitted_at)
+                                    Submitted {{ $customer->police_verification_submitted_at->format('d M, Y') }}.
+                                @endif
+                                @if($customer->police_verification_verified_at)
+                                    Verified {{ $customer->police_verification_verified_at->format('d M, Y') }}.
+                                @endif
+                            </p>
+                        @endif
                     </div>
                 </div>
             </div>

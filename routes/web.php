@@ -84,6 +84,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'subscripti
     // Customer & Employee Management
     Route::resource('customers', App\Http\Controllers\Admin\CustomerController::class);
     Route::patch('/customers/{customer}/deactivate', [App\Http\Controllers\Admin\CustomerController::class, 'deactivate'])->name('customers.deactivate');
+    Route::patch('/customers/{customer}/police-verification', [App\Http\Controllers\Admin\CustomerController::class, 'updatePoliceVerification'])->name('customers.police-verification.update');
+    Route::get('/customers/{customer}/police-verification/print', [App\Http\Controllers\Admin\CustomerController::class, 'printPoliceVerification'])->name('customers.police-verification.print');
     Route::resource('employees', App\Http\Controllers\Admin\EmployeeController::class);
 
     // Bookings Management

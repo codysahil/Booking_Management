@@ -290,6 +290,54 @@ class CustomerController extends Controller
     }
 
     /**
+     * Record or update a resident's ID proof details and police
+     * verification/registration status.
+     */
+    public function updatePoliceVerification(Request $request, Customer $customer)
+    {
+        $validated = $request->validate([
+            'id_proof_type' => 'nullable|string|max:50',
+            'id_proof_number' => 'nullable|string|max:50',
+            'police_verification_status' => 'required|in:' . implode(',', array_keys(Customer::VERIFICATION_STATUSES)),
+            'police_verification_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $timestamps = [];
+        if ($validated['police_verification_status'] === Customer::VERIFICATION_SUBMITTED && ! $customer->police_verification_submitted_at) {
+            $timestamps['police_verification_submitted_at'] = now();
+        }
+        if ($validated['police_verification_status'] === Customer::VERIFICATION_VERIFIED && ! $customer->police_verification_verified_at) {
+            $timestamps['police_verification_verified_at'] = now();
+            $timestamps['police_verification_submitted_at'] = $customer->police_verification_submitted_at ?? now();
+        }
+
+        $customer->update(array_merge([
+            'id_proof_type' => $validated['id_proof_type'] ?? null,
+            'id_proof_number' => $validated['id_proof_number'] ?? null,
+            'police_verification_status' => $validated['police_verification_status'],
+            'police_verification_notes' => $validated['police_verification_notes'] ?? null,
+        ], $timestamps));
+
+        return redirect()->route('admin.customers.show', $customer)->with('success', 'Police verification details updated.');
+    }
+
+    /**
+     * A printable tenant-verification form pre-filled with the resident's
+     * details — the paperwork a PG/hostel owner hands to (or files with)
+     * the local police station.
+     */
+    public function printPoliceVerification(Customer $customer)
+    {
+        $customer->load(['bookings' => fn ($q) => $q->latest('check_in_date')->with('bed.room.branch')]);
+
+        return view('admin.customers.police-verification-print', [
+            'customer' => $customer,
+            'booking' => $customer->bookings->first(),
+            'backUrl' => route('admin.customers.show', $customer),
+        ]);
+    }
+
+    /**
      * Generate a unique random customer code
      * Format: SS-XXXX-XXXX (where X is alphanumeric)
      */
