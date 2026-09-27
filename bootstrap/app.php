@@ -15,10 +15,23 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [
-            \App\Http\Middleware\AddNgrokHeaders::class,
-            \App\Http\Middleware\ResolveTenant::class,
-        ]);
+        // ResolveTenant must run BEFORE implicit route-model binding (SubstituteBindings),
+        // not after. SubstituteBindings is part of the 'web' group's own default array; a
+        // plain append() would run our tenant-binding after it, so every route-bound
+        // tenant-owned model (Customer, Branch, ...) would resolve with no tenant scope
+        // applied yet — TenantScope silently no-ops with nothing bound, letting a request
+        // load ANY tenant's row by id before ResolveTenant (moments later) rebinds the
+        // container to the acting admin's own tenant. Removing SubstituteBindings from its
+        // default slot and re-appending it after our own middleware puts binding back where
+        // it belongs: after the tenant (and the authenticated user) are both known.
+        $middleware->web(
+            remove: [\Illuminate\Routing\Middleware\SubstituteBindings::class],
+            append: [
+                \App\Http\Middleware\AddNgrokHeaders::class,
+                \App\Http\Middleware\ResolveTenant::class,
+                \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            ],
+        );
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsStaff::class,

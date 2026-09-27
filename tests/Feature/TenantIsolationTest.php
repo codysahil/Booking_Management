@@ -84,6 +84,17 @@ class TenantIsolationTest extends TestCase
         $admin = User::factory()->create(['tenant_id' => $tenantB['tenant']->id, 'role' => User::ROLE_ADMIN, 'is_active' => true]);
         $this->actingAs($admin);
 
+        // makeTenantWithData() binds currentTenantId as a side effect of creating each
+        // tenant's fixtures (via CreatesTenantContext::bindTenant()). Left in place, that
+        // residual binding — which happens to equal tenant B's own id here, since Beta was
+        // created last — would make every request below coincidentally already tenant-scoped
+        // before the real middleware pipeline ever runs, masking a genuine IDOR: implicit
+        // route-model binding (SubstituteBindings) used to run before ResolveTenant, so with
+        // nothing bound yet, TenantScope/TenantViaRelationScope silently no-op and any id
+        // resolves regardless of tenant. Clearing it here forces each request to prove the
+        // real request pipeline — not test setup — is what enforces the isolation.
+        app()->forgetInstance('currentTenantId');
+
         // Direct tenant_id column models
         $this->get(route('admin.customers.show', $tenantA['customer']))->assertNotFound();
         $this->get(route('admin.branches.edit', $tenantA['branch']))->assertNotFound();
