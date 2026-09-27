@@ -5,59 +5,41 @@
         <h1 class="text-2xl font-display font-bold text-gray-900 mb-6">New plan</h1>
 
         @if ($errors->any())
-            <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
+            <div class="form-card-enter form-field-error mb-6 bg-red-50 border-2 border-red-200 rounded-xl p-4 text-sm text-red-800">
                 @foreach ($errors->all() as $error)
                     <p>{{ $error }}</p>
                 @endforeach
             </div>
         @endif
 
-        <form method="POST" action="{{ route('super-admin.plans.store') }}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+        <form method="POST" action="{{ route('super-admin.plans.store') }}" x-data="{ submitting: false }" @submit="submitting = true">
             @csrf
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Plan name *</label>
-                <input type="text" name="name" required value="{{ old('name') }}" placeholder="e.g. Standard"
-                    class="w-full border-gray-300 rounded-lg focus:ring-slate-500 focus:border-slate-500">
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Price (₹) *</label>
-                    <input type="number" name="price" min="1" step="1" required value="{{ old('price') }}"
-                        class="w-full border-gray-300 rounded-lg focus:ring-slate-500 focus:border-slate-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Billing interval *</label>
-                    <select name="billing_interval" required class="w-full border-gray-300 rounded-lg focus:ring-slate-500 focus:border-slate-500">
-                        @foreach (\App\Models\Plan::INTERVALS as $value => $label)
-                            <option value="{{ $value }}" @selected(old('billing_interval') === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500">Limits below are optional — leave blank for unlimited.</p>
-            <div class="grid grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Max branches</label>
-                    <input type="number" name="max_branches" min="1" value="{{ old('max_branches') }}"
-                        class="w-full border-gray-300 rounded-lg focus:ring-slate-500 focus:border-slate-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Max beds</label>
-                    <input type="number" name="max_beds" min="1" value="{{ old('max_beds') }}"
-                        class="w-full border-gray-300 rounded-lg focus:ring-slate-500 focus:border-slate-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Max staff</label>
-                    <input type="number" name="max_staff" min="1" value="{{ old('max_staff') }}"
-                        class="w-full border-gray-300 rounded-lg focus:ring-slate-500 focus:border-slate-500">
-                </div>
-            </div>
 
-            <div class="flex justify-end gap-3 pt-2">
-                <a href="{{ route('super-admin.plans.index') }}" class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</a>
-                <button type="submit" class="px-8 py-3 bg-slate-900 text-white rounded-lg font-bold hover:bg-slate-800 transition">
-                    Create plan
-                </button>
+            <x-form.card accent="slate">
+                <div class="space-y-4">
+                    <x-form.input name="name" label="Plan name" required placeholder="e.g. Standard" accent="slate" />
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <x-form.input name="price" label="Price (₹)" type="number" min="1" step="1" required accent="slate" />
+                        <x-form.select name="billing_interval" label="Billing interval" required accent="slate">
+                            @foreach (\App\Models\Plan::INTERVALS as $value => $label)
+                                <option value="{{ $value }}" @selected(old('billing_interval') === $value)>{{ $label }}</option>
+                            @endforeach
+                        </x-form.select>
+                    </div>
+
+                    <p class="text-xs text-gray-500">Limits below are optional — leave blank for unlimited.</p>
+                    <div class="grid grid-cols-3 gap-4">
+                        <x-form.input name="max_branches" label="Max branches" type="number" min="1" accent="slate" />
+                        <x-form.input name="max_beds" label="Max beds" type="number" min="1" accent="slate" />
+                        <x-form.input name="max_staff" label="Max staff" type="number" min="1" accent="slate" />
+                    </div>
+                </div>
+            </x-form.card>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <x-form.link-button :href="route('super-admin.plans.index')">Cancel</x-form.link-button>
+                <x-form.button label="Create plan" loading-label="Creating…" accent="slate" />
             </div>
         </form>
     </div>

@@ -3,102 +3,84 @@
 @section('header', 'Add New Room')
 
 @section('content')
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">
-        <form action="{{ route('admin.rooms.store') }}" method="POST" enctype="multipart/form-data">
+    <div class="max-w-2xl mx-auto">
+        <form action="{{ route('admin.rooms.store') }}" method="POST" enctype="multipart/form-data"
+            class="space-y-6" x-data="{ submitting: false }" @submit="submitting = true">
             @csrf
-            <div class="mb-4">
-                <label for="branch_id" class="block text-sm font-medium text-gray-700">Branch</label>
-                <select name="branch_id" id="branch_id"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                    required>
-                    @foreach($branches as $branch)
-                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                    @endforeach
-                </select>
-            </div>
 
-            <div class="mb-4">
-                <label for="room_number" class="block text-sm font-medium text-gray-700">Room Number</label>
-                <input type="text" name="room_number" id="room_number"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                    required>
-            </div>
+            <x-form.card title="Room Details" description="Which branch this room belongs to and its basic setup">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                </x-slot:icon>
 
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="capacity" class="block text-sm font-medium text-gray-700">Capacity</label>
-                    <input type="number" name="capacity" id="capacity" min="1"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                        required>
+                <div class="space-y-5">
+                    <x-form.select name="branch_id" label="Branch" required>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                        @endforeach
+                    </x-form.select>
+
+                    <x-form.input name="room_number" label="Room Number" required placeholder="e.g. 101" />
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <x-form.input name="capacity" label="Capacity" type="number" min="1" required />
+                        <x-form.select name="type" label="Type" required>
+                            <option value="Non-AC">Non-AC</option>
+                            <option value="AC">AC</option>
+                        </x-form.select>
+                    </div>
+
+                    <x-form.select name="gender_allowed" label="Gender Allowed" required>
+                        <option value="Any">Any</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </x-form.select>
                 </div>
-                <div>
-                    <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
-                    <select name="type" id="type"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                        required>
-                        <option value="Non-AC">Non-AC</option>
-                        <option value="AC">AC</option>
-                    </select>
-                </div>
-            </div>
+            </x-form.card>
 
-            <div class="mb-4">
-                <label for="gender_allowed" class="block text-sm font-medium text-gray-700">Gender Allowed</label>
-                <select name="gender_allowed" id="gender_allowed"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                    required>
-                    <option value="Any">Any</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
-            </div>
+            <x-form.card title="Room Images" description="Up to 5 images, max 1MB each" :delay="80">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </x-slot:icon>
 
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Room Images</label>
-                <input type="file" name="images[]" id="images" accept="image/*" multiple
-                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
-                <p class="text-xs text-gray-500 mt-1">Select multiple images at once (Hold Ctrl/Cmd) or add one by one. Max: 1MB per image, 5 images total</p>
-                
-                <div id="file-count" class="mt-2 text-sm text-primary-600 font-medium hidden"></div>
-                <div id="error-message" class="mt-2 text-sm text-red-600 font-medium hidden"></div>
+                <label for="images" class="group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 px-4 py-8 text-center transition-all duration-200 hover:border-teal-300 hover:bg-teal-50/30">
+                    <svg class="h-8 w-8 text-gray-400 transition-transform duration-200 group-hover:scale-110 group-hover:text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 12v9m0-9l-3 3m3-3l3 3"></path>
+                    </svg>
+                    <span class="text-sm font-medium text-teal-600">Click to upload <span class="text-gray-500 font-normal">or drag and drop</span></span>
+                    <input type="file" name="images[]" id="images" accept="image/*" multiple class="sr-only">
+                </label>
+                <p class="mt-1.5 text-xs text-gray-500">Select multiple images at once (hold Ctrl/Cmd) or add one by one.</p>
+
+                <div id="file-count" class="mt-3 text-sm text-teal-600 font-medium hidden"></div>
+                <div id="error-message" class="form-field-error mt-3 text-sm text-rose-600 font-medium hidden"></div>
                 <div id="image-preview" class="mt-4 grid grid-cols-3 gap-3 hidden"></div>
-            </div>
+            </x-form.card>
 
-            <div class="flex justify-end">
-                <a href="{{ route('admin.rooms.index') }}"
-                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-300">Cancel</a>
-                <button type="submit" id="submit-btn" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">Save
-                    Room</button>
+            <div class="flex justify-end gap-3">
+                <x-form.link-button :href="route('admin.rooms.index')">Cancel</x-form.link-button>
+                <x-form.button label="Save Room" loading-label="Saving…" />
             </div>
         </form>
     </div>
 
     <script>
-        console.log('Script loaded');
-        
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded');
-            
             const imageInput = document.getElementById('images');
             const preview = document.getElementById('image-preview');
             const fileCount = document.getElementById('file-count');
             const errorMessage = document.getElementById('error-message');
             let accumulatedFiles = [];
-            
+
             const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
             const MAX_FILES = 5;
-            
-            if (!imageInput) {
-                console.error('Image input not found');
-                return;
-            }
-            
+
+            if (!imageInput) return;
+
             imageInput.addEventListener('change', function(e) {
                 const newFiles = Array.from(e.target.files);
-                console.log('New files selected:', newFiles.length);
                 errorMessage.classList.add('hidden');
-                
-                // Validate files
+
                 for (let file of newFiles) {
                     if (file.size > MAX_FILE_SIZE) {
                         errorMessage.textContent = `${file.name} is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Max 1MB per image.`;
@@ -106,8 +88,7 @@
                         return;
                     }
                 }
-                
-                // Add new files to accumulated list (avoid duplicates)
+
                 newFiles.forEach(file => {
                     if (!accumulatedFiles.some(f => f.name === file.name && f.size === file.size)) {
                         if (accumulatedFiles.length < MAX_FILES) {
@@ -115,45 +96,42 @@
                         }
                     }
                 });
-                
+
                 if (accumulatedFiles.length >= MAX_FILES) {
                     errorMessage.textContent = `Maximum ${MAX_FILES} images allowed.`;
                     errorMessage.classList.remove('hidden');
                 }
-                
-                console.log('Total accumulated:', accumulatedFiles.length);
-                
-                // Update file input with all accumulated files
+
                 const dt = new DataTransfer();
                 accumulatedFiles.forEach(file => dt.items.add(file));
                 imageInput.files = dt.files;
-                
+
                 renderPreviews();
             });
-            
+
             function renderPreviews() {
                 preview.innerHTML = '';
-                
+
                 if (accumulatedFiles.length > 0) {
                     fileCount.textContent = `${accumulatedFiles.length} image${accumulatedFiles.length > 1 ? 's' : ''} selected`;
                     fileCount.classList.remove('hidden');
                     preview.classList.remove('hidden');
-                    
+
                     accumulatedFiles.forEach((file, index) => {
                         if (file.type.startsWith('image/')) {
                             const reader = new FileReader();
                             reader.onload = function(event) {
                                 const div = document.createElement('div');
-                                div.className = 'relative group';
+                                div.className = 'relative group animate-[form-fade-up_0.3s_ease-out_both]';
                                 div.innerHTML = `
-                                    <img src="${event.target.result}" class="w-full h-24 object-cover rounded-lg border-2 border-primary-300">
-                                    <span class="absolute top-1 left-1 bg-primary-600 text-white text-xs px-2 py-0.5 rounded-full shadow">#${index + 1}</span>
-                                    <button type="button" onclick="removeNewImage(${index})" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition">
+                                    <img src="${event.target.result}" class="w-full h-24 object-cover rounded-xl border-2 border-teal-200 shadow-sm transition-transform duration-200 group-hover:scale-[1.03]">
+                                    <span class="absolute top-1.5 left-1.5 bg-teal-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">#${index + 1}</span>
+                                    <button type="button" onclick="removeNewImage(${index})" class="absolute top-1.5 right-1.5 bg-rose-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-150 hover:scale-110">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                         </svg>
                                     </button>
-                                    <span class="absolute bottom-1 left-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 py-0.5 rounded truncate">${file.name}</span>
+                                    <span class="absolute bottom-1.5 left-1.5 right-1.5 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded-md truncate">${file.name}</span>
                                 `;
                                 preview.appendChild(div);
                             };
@@ -165,7 +143,7 @@
                     fileCount.classList.add('hidden');
                 }
             }
-            
+
             window.removeNewImage = function(index) {
                 accumulatedFiles.splice(index, 1);
                 const dt = new DataTransfer();

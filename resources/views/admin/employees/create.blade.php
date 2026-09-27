@@ -4,122 +4,53 @@
 
 @section('content')
     <div class="max-w-4xl mx-auto">
-        <form action="{{ route('admin.employees.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.employees.store') }}" method="POST" enctype="multipart/form-data"
+            class="space-y-6" x-data="{ submitting: false }" @submit="submitting = true">
             @csrf
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-                <div class="p-6 border-b border-gray-100 bg-gray-50">
-                    <h3 class="text-lg font-medium text-gray-900">Employee Details</h3>
-                </div>
-                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input type="text" name="name" required
-                            class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                        <select name="role" required
-                            class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
-                            <option value="">-- Select Role --</option>
-                            <option value="Manager">Manager</option>
-                            <option value="Warden">Warden</option>
-                            <option value="Cook">Cook</option>
-                            <option value="Security">Security</option>
-                            <option value="Cleaner">Cleaner</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                        <input type="text" name="phone" required
-                            class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Assigned Branch</label>
-                        <select name="branch_id" required
-                            class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
-                            <option value="">-- Select Branch --</option>
-                            @foreach($branches as $branch)
-                                <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+            <x-form.card title="Employee Details">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </x-slot:icon>
+
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <x-form.input name="name" label="Full Name" required />
+                    <x-form.select name="role" label="Role" required>
+                        <option value="">Select role</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Warden">Warden</option>
+                        <option value="Cook">Cook</option>
+                        <option value="Security">Security</option>
+                        <option value="Cleaner">Cleaner</option>
+                    </x-form.select>
+                    <x-form.input name="phone" label="Phone Number" required />
+                    <x-form.select name="branch_id" label="Assigned Branch" required>
+                        <option value="">Select branch</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                        @endforeach
+                    </x-form.select>
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                        <textarea name="address" rows="3" required
-                            class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500"></textarea>
+                        <x-form.textarea name="address" label="Address" :rows="3" required />
                     </div>
                 </div>
-            </div>
+            </x-form.card>
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-                <div class="p-6 border-b border-gray-100 bg-gray-50">
-                    <h3 class="text-lg font-medium text-gray-900">Documents</h3>
-                </div>
-                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Employee Photo</label>
-                        <input type="file" name="photo" accept="image/*" id="photo-input"
-                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
-                        <div id="photo-preview" class="mt-4 hidden">
-                            <img src="" alt="Preview" class="w-full max-w-xs rounded-lg border-2 border-primary-200">
-                            <p class="text-xs text-primary-600 mt-2">Photo Preview</p>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">ID Proof</label>
-                        <input type="file" name="proof" id="proof-input"
-                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
-                        <div id="proof-preview" class="mt-4 hidden">
-                            <img src="" alt="Preview" class="w-full max-w-xs rounded-lg border-2 border-primary-200">
-                            <p class="text-xs text-primary-600 mt-2">Document Preview</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <x-form.card title="Documents" description="Optional — can be added later" :delay="80">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </x-slot:icon>
 
-            <div class="flex justify-end">
-                <a href="{{ route('admin.employees.index') }}"
-                    class="bg-white py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 mr-3">
-                    Cancel
-                </a>
-                <button type="submit"
-                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                    Save Employee
-                </button>
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <x-form.file-input name="photo" label="Employee Photo" accept="image/*" />
+                    <x-form.file-input name="proof" label="ID Proof" accept="image/*,.pdf" />
+                </div>
+            </x-form.card>
+
+            <div class="flex justify-end gap-3">
+                <x-form.link-button :href="route('admin.employees.index')">Cancel</x-form.link-button>
+                <x-form.button label="Save Employee" loading-label="Saving…" />
             </div>
         </form>
     </div>
-
-    <script>
-        document.getElementById('photo-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('photo-preview');
-                    preview.querySelector('img').src = e.target.result;
-                    preview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        document.getElementById('proof-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('proof-preview');
-                    preview.querySelector('img').src = e.target.result;
-                    preview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            } else if (file && file.type === 'application/pdf') {
-                const preview = document.getElementById('proof-preview');
-                preview.innerHTML = '<p class="text-sm text-gray-600">PDF file selected: ' + file.name + '</p>';
-                preview.classList.remove('hidden');
-            }
-        });
-    </script>
 @endsection

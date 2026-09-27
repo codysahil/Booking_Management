@@ -3,35 +3,27 @@
 @section('header', 'Edit Branch')
 
 @section('content')
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">
-        <form action="{{ route('admin.branches.update', $branch) }}" method="POST">
+    <div class="max-w-2xl mx-auto">
+        <form action="{{ route('admin.branches.update', $branch) }}" method="POST" class="space-y-6"
+            x-data="{ submitting: false }" @submit="submitting = true">
             @csrf
             @method('PUT')
-            <div class="mb-4">
-                <label for="name" class="block text-sm font-medium text-gray-700">Branch Name</label>
-                <input type="text" name="name" id="name" value="{{ $branch->name }}"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                    required>
-            </div>
 
-            <div class="mb-4">
-                <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
-                <textarea name="address" id="address" rows="3"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                    required>{{ $branch->address }}</textarea>
-            </div>
+            <x-form.card title="Branch Details">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2M5 21h2m0 0h10M5 21v-4a1 1 0 011-1h1m8 5v-4a1 1 0 00-1-1h-1m-4 5v-3"/></svg>
+                </x-slot:icon>
 
-            <div class="mb-4">
-                <label for="google_map_url" class="block text-sm font-medium text-gray-700">Google Map URL</label>
-                <input type="url" name="google_map_url" id="google_map_url" value="{{ $branch->google_map_url }}"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
-            </div>
+                <div class="space-y-5">
+                    <x-form.input name="name" label="Branch Name" required :value="$branch->name" />
+                    <x-form.textarea name="address" label="Address" :rows="3" required :value="$branch->address" />
+                    <x-form.input name="google_map_url" label="Google Map URL" type="url" :value="$branch->google_map_url" />
+                </div>
+            </x-form.card>
 
-            <div class="flex justify-end">
-                <a href="{{ route('admin.branches.index') }}"
-                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-300">Cancel</a>
-                <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">Update
-                    Branch</button>
+            <div class="flex justify-end gap-3">
+                <x-form.link-button :href="route('admin.branches.index')">Cancel</x-form.link-button>
+                <x-form.button label="Update Branch" loading-label="Saving…" />
             </div>
         </form>
     </div>

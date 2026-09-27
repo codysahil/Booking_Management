@@ -3,47 +3,33 @@
 @section('header', 'Add Team Member')
 
 @section('content')
-    <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8">
-        <form method="POST" action="{{ route('admin.team.store') }}" class="space-y-6">
+    <div class="max-w-2xl mx-auto">
+        <form method="POST" action="{{ route('admin.team.store') }}" x-data="{ submitting: false }" @submit="submitting = true">
             @csrf
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Name *</label>
-                <input type="text" name="name" required value="{{ old('name') }}"
-                    class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
-                @error('name') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
-                <input type="email" name="email" required value="{{ old('email') }}"
-                    class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
-                @error('email') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Role *</label>
-                <select name="role" required class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
-                    @foreach (\App\Models\User::ROLES as $value => $label)
-                        <option value="{{ $value }}">{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Password *</label>
-                    <input type="password" name="password" required
-                        class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
-                    @error('password') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+            <x-form.card title="Team Member">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-4a4 4 0 10-8 0 4 4 0 008 0zm6 4a4 4 0 10-8 0 4 4 0 008 0z"/></svg>
+                </x-slot:icon>
+
+                <div class="space-y-5">
+                    <x-form.input name="name" label="Name" required />
+                    <x-form.input name="email" label="Email" type="email" required />
+                    <x-form.select name="role" label="Role" required>
+                        @foreach (\App\Models\User::ROLES as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </x-form.select>
+
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <x-form.input name="password" label="Password" type="password" required />
+                        <x-form.input name="password_confirmation" label="Confirm Password" type="password" required />
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Confirm Password *</label>
-                    <input type="password" name="password_confirmation" required
-                        class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
-                </div>
-            </div>
-            <div class="flex gap-3">
-                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition shadow-lg">
-                    Add Team Member
-                </button>
-                <a href="{{ route('admin.team.index') }}" class="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition">Cancel</a>
+            </x-form.card>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <x-form.link-button :href="route('admin.team.index')">Cancel</x-form.link-button>
+                <x-form.button label="Add Team Member" loading-label="Adding…" />
             </div>
         </form>
     </div>

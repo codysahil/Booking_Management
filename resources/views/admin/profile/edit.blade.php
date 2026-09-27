@@ -1,95 +1,52 @@
 @extends('layouts.admin')
 
+@section('header', 'Profile Settings')
+
 @section('content')
-<div class="p-4 sm:p-6 lg:p-8">
-    <div class="mb-6">
-        <h1 class="text-2xl font-display font-bold text-gray-900">Profile Settings</h1>
-        <p class="text-gray-600 mt-1">Manage your account details and password</p>
-    </div>
+<div>
+    <p class="text-gray-500 -mt-2 mb-6">Manage your account details and password</p>
 
     @if (session('success'))
-        <div class="mb-6 bg-green-50 border-2 border-green-200 rounded-xl p-4">
+        <div class="form-card-enter mb-6 bg-green-50 border-2 border-green-200 rounded-xl p-4">
             <p class="text-green-800 text-sm font-medium">{{ session('success') }}</p>
         </div>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Profile Information -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 class="text-lg font-bold text-gray-900 mb-6">Profile Information</h2>
-            
-            <form method="POST" action="{{ route('admin.profile.update') }}">
-                @csrf
-                @method('PUT')
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <form method="POST" action="{{ route('admin.profile.update') }}" x-data="{ submitting: false }" @submit="submitting = true">
+            @csrf
+            @method('PUT')
+
+            <x-form.card title="Profile Information">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </x-slot:icon>
 
                 <div class="space-y-4">
-                    <div>
-                        <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                        <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" required
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-0 transition-colors">
-                        @error('name')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                        <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-0 transition-colors">
-                        @error('email')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <button type="submit"
-                        class="w-full bg-gradient-to-r from-teal-500 via-cyan-500 to-violet-500 text-white py-3 px-6 rounded-xl font-bold hover:from-teal-600 hover:via-cyan-600 hover:to-violet-600 transition-all duration-300 shadow-lg hover:shadow-xl">
-                        Update Profile
-                    </button>
+                    <x-form.input name="name" label="Full Name" required :value="$user->name" />
+                    <x-form.input name="email" label="Email Address" type="email" required :value="$user->email" />
+                    <x-form.button label="Update Profile" loading-label="Saving…" class="w-full justify-center" />
                 </div>
-            </form>
-        </div>
+            </x-form.card>
+        </form>
 
-        <!-- Change Password -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 class="text-lg font-bold text-gray-900 mb-6">Change Password</h2>
-            
-            <form method="POST" action="{{ route('admin.profile.password') }}">
-                @csrf
-                @method('PUT')
+        <form method="POST" action="{{ route('admin.profile.password') }}" x-data="{ submitting: false }" @submit="submitting = true">
+            @csrf
+            @method('PUT')
+
+            <x-form.card title="Change Password" :delay="60">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                </x-slot:icon>
 
                 <div class="space-y-4">
-                    <div>
-                        <label for="current_password" class="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
-                        <input type="password" name="current_password" id="current_password" required
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-0 transition-colors">
-                        @error('current_password')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
-                        <input type="password" name="password" id="password" required
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-0 transition-colors">
-                        @error('password')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                        <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
-                    </div>
-
-                    <div>
-                        <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">Confirm New Password</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" required
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-0 transition-colors">
-                    </div>
-
-                    <button type="submit"
-                        class="w-full bg-gradient-to-r from-violet-500 via-cyan-500 to-teal-500 text-white py-3 px-6 rounded-xl font-bold hover:from-violet-600 hover:via-cyan-600 hover:to-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl">
-                        Update Password
-                    </button>
+                    <x-form.input name="current_password" label="Current Password" type="password" required />
+                    <x-form.input name="password" label="New Password" type="password" required hint="Minimum 8 characters" />
+                    <x-form.input name="password_confirmation" label="Confirm New Password" type="password" required />
+                    <x-form.button label="Update Password" loading-label="Saving…" class="w-full justify-center" />
                 </div>
-            </form>
-        </div>
+            </x-form.card>
+        </form>
     </div>
 </div>
 @endsection

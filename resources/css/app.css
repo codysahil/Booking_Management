@@ -10,3 +10,35 @@
         overflow: hidden;
     }
 }
+
+/* Form design system: card entrance, field errors, and button feedback used
+   across every create/edit form (see resources/views/components/form/*). */
+@layer utilities {
+    @keyframes form-fade-up {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes form-shake {
+        10%, 90% { transform: translateX(-1px); }
+        20%, 80% { transform: translateX(2px); }
+        30%, 50%, 70% { transform: translateX(-4px); }
+        40%, 60% { transform: translateX(4px); }
+    }
+
+    .form-card-enter {
+        animation: form-fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .form-field-error {
+        animation: form-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .form-card-enter, .form-field-error {
+        animation: none !important;
+    }
+}
+
+[x-cloak] { display: none !important; }

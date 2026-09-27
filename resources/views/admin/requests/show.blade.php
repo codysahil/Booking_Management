@@ -53,27 +53,29 @@
             @endif
         </div>
 
-        <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Respond</h3>
-            <form method="POST" action="{{ route('admin.requests.update', $residentRequest) }}" class="space-y-4">
-                @csrf
-                @method('PUT')
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-                    <select name="status" class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">
+        <form method="POST" action="{{ route('admin.requests.update', $residentRequest) }}" x-data="{ submitting: false }" @submit="submitting = true">
+            @csrf
+            @method('PUT')
+            <x-form.card title="Respond">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-6l-4 4v-4z"/></svg>
+                </x-slot:icon>
+
+                <div class="space-y-5">
+                    <x-form.select name="status" label="Status">
                         @foreach (\App\Models\Request::STATUSES as $value => $label)
                             <option value="{{ $value }}" {{ $residentRequest->status == $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </x-form.select>
+
+                    <x-form.textarea name="admin_response" label="Response to resident" :rows="4" :value="$residentRequest->admin_response"
+                        hint="Emailed to the resident if they have an email on file." />
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Response to resident (emailed if they have an email on file)</label>
-                    <textarea name="admin_response" rows="4" class="w-full border-gray-300 rounded-xl focus:ring-primary-500 focus:border-primary-500">{{ old('admin_response', $residentRequest->admin_response) }}</textarea>
+
+                <div class="mt-6 flex justify-end">
+                    <x-form.button label="Save & Notify Resident" loading-label="Saving…" />
                 </div>
-                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition shadow-lg">
-                    Save & Notify Resident
-                </button>
-            </form>
-        </div>
+            </x-form.card>
+        </form>
     </div>
 @endsection

@@ -1,264 +1,103 @@
 @extends('layouts.admin')
 
+@section('header', 'New Customer Entry')
+
 @section('content')
-    <div class="p-6">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">New Customer Entry</h1>
-                <p class="text-gray-600 mt-1">Add walk-in customer with full details</p>
-            </div>
-            <a href="{{ route('admin.customers.index') }}"
-                class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-                    </path>
-                </svg>
-                Back
-            </a>
-        </div>
-
-        <!-- Customer Entry Form -->
-        <form action="{{ route('admin.customers.store') }}" method="POST" enctype="multipart/form-data"
-            class="space-y-6">
-            @csrf
-
-            @if ($errors->any())
-                <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
-                    <h3 class="text-red-800 font-bold mb-2">Please fix the following errors:</h3>
-                    <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <!-- Personal Information -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                    Personal Information
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Full Name -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-                        <input type="text" name="name" required
-                            value="{{ old('name') }}"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('name')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Date of Birth -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
-                        <input type="date" name="dob" required value="{{ old('dob') }}"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('dob')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Phone Number -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
-                        <input type="tel" name="phone" required pattern="[0-9]{10}" maxlength="10"
-                            value="{{ old('phone') }}"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('phone')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Guardian Phone -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Guardian/Parent Phone *</label>
-                        <input type="tel" name="guardian_phone" required pattern="[0-9]{10}" maxlength="10"
-                            value="{{ old('guardian_phone') }}"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('guardian_phone')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Email -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
-                        <input type="email" name="email" value="{{ old('email') }}"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('email')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Address -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Permanent Address *</label>
-                        <textarea name="address" rows="3" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('address') }}</textarea>
-                        @error('address')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Work Details -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Work/Study Details (Optional)</label>
-                        <textarea name="work_details" rows="2" placeholder="e.g., Software Engineer at ABC Company, Student at XYZ College"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('work_details') }}</textarea>
-                        @error('work_details')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-            </div>
-
-            <!-- Document Uploads -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                        </path>
-                    </svg>
-                    Document Uploads
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Photo Upload -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Customer Photo *</label>
-                        <input type="file" name="photo" accept="image/*" id="photo-input"
-                            class="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <p class="text-xs text-gray-500 mt-2">Upload a clear passport-size photo (Max: 2MB)</p>
-                        @error('photo')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                        <div id="photo-preview" class="mt-4 hidden">
-                            <img src="" alt="Preview" class="w-full max-w-xs rounded-lg border-2 border-primary-200">
-                            <p class="text-xs text-primary-600 mt-2">Photo Preview</p>
-                        </div>
-                    </div>
-
-                    <!-- ID Proof Upload -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">ID Proof *</label>
-                        <input type="file" name="id_proof" accept=".pdf,.jpg,.jpeg,.png" id="proof-input"
-                            class="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <p class="text-xs text-gray-500 mt-2">Aadhar/PAN/Driving License (Max: 2MB)</p>
-                        @error('id_proof')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                        <div id="proof-preview" class="mt-4 hidden">
-                            <img src="" alt="Preview" class="w-full max-w-xs rounded-lg border-2 border-primary-200">
-                            <p class="text-xs text-primary-600 mt-2">Document Preview</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Booking Details -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                        </path>
-                    </svg>
-                    Booking & Payment Details
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Branch Selection -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Branch *</label>
-                        <select name="branch_id" id="branch_select" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            <option value="">Choose a branch</option>
-                            @foreach ($branches as $branch)
-                                <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Bed Selection -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Bed *</label>
-                        <select name="bed_id" id="bed_select" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            <option value="">First select a branch</option>
-                        </select>
-                    </div>
-
-                    <!-- Check-in Date -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Check-in Date *</label>
-                        <input type="date" name="check_in_date" required
-                            value="{{ old('check_in_date', date('Y-m-d')) }}"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('check_in_date')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Stay Type -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Stay Type *</label>
-                        <select name="stay_type" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            <option value="permanent">Permanent</option>
-                            <option value="day_basis">Day Basis</option>
-                        </select>
-                        @error('stay_type')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Advance Amount -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Advance Amount (₹) *</label>
-                        <input type="number" name="advance_amount" required min="0" step="0.01"
-                            value="{{ old('advance_amount', 3000) }}"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('advance_amount')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Payment Method -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method *</label>
-                        <select name="payment_method" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            <option value="cash">Cash</option>
-                            <option value="upi">UPI</option>
-                            <option value="card">Card</option>
-                            <option value="bank_transfer">Bank Transfer</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Submit Buttons -->
-            <div class="flex justify-end gap-4">
-                <a href="{{ route('admin.customers.index') }}"
-                    class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                    Cancel
-                </a>
-                <button type="submit"
-                    class="px-8 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-lg font-bold hover:from-primary-700 hover:to-secondary-700 transition shadow-lg">
-                    Add Customer & Assign Bed
-                </button>
-            </div>
-        </form>
+    <div class="mb-2 -mt-2 flex items-start justify-between gap-4">
+        <p class="text-gray-500">Add a walk-in customer with full details</p>
+        <a href="{{ route('admin.customers.index') }}"
+            class="inline-flex items-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-all hover:border-gray-300 hover:bg-gray-50">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back
+        </a>
     </div>
+
+    <form action="{{ route('admin.customers.store') }}" method="POST" enctype="multipart/form-data"
+        class="space-y-6 mt-6" x-data="{ submitting: false }" @submit="submitting = true">
+        @csrf
+
+        @if ($errors->any())
+            <div class="form-card-enter form-field-error rounded-xl border-2 border-rose-200 bg-rose-50 p-4">
+                <h3 class="font-bold text-rose-800 mb-2 text-sm">Please fix the following errors:</h3>
+                <ul class="list-disc list-inside text-rose-700 text-sm space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <x-form.card title="Personal Information">
+            <x-slot:icon>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </x-slot:icon>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <x-form.input name="name" label="Full Name" required />
+                <x-form.input name="dob" label="Date of Birth" type="date" required />
+                <x-form.input name="phone" label="Phone Number" type="tel" required pattern="[0-9]{10}" maxlength="10" />
+                <x-form.input name="guardian_phone" label="Guardian/Parent Phone" type="tel" required pattern="[0-9]{10}" maxlength="10" />
+                <x-form.input name="email" label="Email (optional)" type="email" />
+                <div class="md:col-span-2">
+                    <x-form.textarea name="address" label="Permanent Address" :rows="3" required />
+                </div>
+                <div class="md:col-span-2">
+                    <x-form.textarea name="work_details" label="Work/Study Details (optional)" :rows="2" placeholder="e.g. Software Engineer at ABC Company, Student at XYZ College" />
+                </div>
+            </div>
+        </x-form.card>
+
+        <x-form.card title="Document Uploads" :delay="80">
+            <x-slot:icon>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </x-slot:icon>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <x-form.file-input name="photo" label="Customer Photo *" accept="image/*" hint="A clear passport-size photo (max 2MB)" />
+                <x-form.file-input name="id_proof" label="ID Proof *" accept=".pdf,.jpg,.jpeg,.png" hint="Aadhar/PAN/Driving License (max 2MB)" />
+            </div>
+        </x-form.card>
+
+        <x-form.card title="Booking & Payment Details" :delay="160">
+            <x-slot:icon>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            </x-slot:icon>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <x-form.select name="branch_id" id="branch_select" label="Select Branch" required>
+                    <option value="">Choose a branch</option>
+                    @foreach ($branches as $branch)
+                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                    @endforeach
+                </x-form.select>
+
+                <x-form.select name="bed_id" id="bed_select" label="Select Bed" required>
+                    <option value="">First select a branch</option>
+                </x-form.select>
+
+                <x-form.input name="check_in_date" label="Check-in Date" type="date" required :value="old('check_in_date', date('Y-m-d'))" />
+
+                <x-form.select name="stay_type" label="Stay Type" required>
+                    <option value="permanent">Permanent</option>
+                    <option value="day_basis">Day Basis</option>
+                </x-form.select>
+
+                <x-form.input name="advance_amount" label="Advance Amount (₹)" type="number" min="0" step="0.01" required :value="old('advance_amount', 3000)" />
+
+                <x-form.select name="payment_method" label="Payment Method" required>
+                    <option value="cash">Cash</option>
+                    <option value="upi">UPI</option>
+                    <option value="card">Card</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                </x-form.select>
+            </div>
+        </x-form.card>
+
+        <div class="flex justify-end gap-3">
+            <x-form.link-button :href="route('admin.customers.index')">Cancel</x-form.link-button>
+            <x-form.button label="Add Customer & Assign Bed" loading-label="Saving…" />
+        </div>
+    </form>
 
     <script>
         // Branch and Bed Selection for Walk-ins
@@ -285,40 +124,6 @@
                         }
                     });
                 }
-            }
-        });
-    </script>
-
-    <script>
-        // Photo preview
-        document.getElementById('photo-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('photo-preview');
-                    preview.querySelector('img').src = e.target.result;
-                    preview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // ID Proof preview
-        document.getElementById('proof-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('proof-preview');
-                    preview.querySelector('img').src = e.target.result;
-                    preview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            } else if (file && file.type === 'application/pdf') {
-                const preview = document.getElementById('proof-preview');
-                preview.innerHTML = '<p class="text-sm text-gray-600">PDF file selected: ' + file.name + '</p>';
-                preview.classList.remove('hidden');
             }
         });
     </script>

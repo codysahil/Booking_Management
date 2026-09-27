@@ -1,80 +1,56 @@
 @extends('layouts.admin')
 
+@section('header', 'Edit Slider Image')
+
 @section('content')
-<div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Edit Slider Image</h1>
-            <a href="{{ route('admin.sliders.index') }}" class="text-gray-600 hover:text-gray-800">
-                ← Back to Sliders
-            </a>
-        </div>
+        <form action="{{ route('admin.sliders.update', $slider) }}" method="POST" enctype="multipart/form-data"
+            x-data="{ submitting: false }" @submit="submitting = true">
+            @csrf
+            @method('PUT')
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <form action="{{ route('admin.sliders.update', $slider) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
+            <x-form.card title="Slider Image">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </x-slot:icon>
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">Current Image</label>
-                    <img src="{{ $slider->image_url }}" alt="{{ $slider->title }}" class="w-full h-64 object-cover rounded-lg border-2 border-gray-200 mb-2">
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">Replace Image (Optional)</label>
-                    <input type="file" name="image" accept="image/*"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 @error('image') border-red-500 @enderror"
-                        onchange="previewImage(event)">
-                    @error('image')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                    <p class="text-sm text-gray-500 mt-1">Leave empty to keep current image</p>
-                    
-                    <div id="imagePreview" class="mt-4 hidden">
-                        <img id="preview" class="w-full h-64 object-cover rounded-lg border-2 border-gray-200">
+                <div class="space-y-5">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Current Image</p>
+                        <img src="{{ $slider->image_url }}" alt="{{ $slider->title }}" class="w-full h-56 object-cover rounded-xl border-2 border-gray-200 shadow-sm">
                     </div>
-                </div>
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">Title (Optional)</label>
-                    <input type="text" name="title" value="{{ old('title', $slider->title) }}"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 @error('title') border-red-500 @enderror">
-                    @error('title')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Replace Image (optional)</label>
+                        <label for="image" class="group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed {{ $errors->has('image') ? 'border-rose-300 bg-rose-50/30' : 'border-gray-200 hover:border-teal-300 hover:bg-teal-50/30' }} px-4 py-6 text-center transition-all duration-200">
+                            <svg class="h-7 w-7 text-gray-400 transition-transform duration-200 group-hover:scale-110 group-hover:text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 12v9m0-9l-3 3m3-3l3 3"></path>
+                            </svg>
+                            <span class="text-sm font-medium text-teal-600">Click to upload <span class="text-gray-500 font-normal">or drag and drop</span></span>
+                            <input type="file" name="image" id="image" accept="image/*" class="sr-only" onchange="previewImage(event)">
+                        </label>
+                        <p class="mt-1.5 text-xs text-gray-500">Leave empty to keep the current image.</p>
+                        @error('image')
+                            <p class="form-field-error mt-1.5 text-xs font-medium text-rose-600">{{ $message }}</p>
+                        @enderror
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">Description (Optional)</label>
-                    <textarea name="description" rows="3"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 @error('description') border-red-500 @enderror">{{ old('description', $slider->description) }}</textarea>
-                    @error('description')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+                        <div id="imagePreview" class="mt-4 hidden">
+                            <img id="preview" class="w-full h-56 object-cover rounded-xl border-2 border-teal-200 shadow-sm">
+                        </div>
+                    </div>
 
-                <div class="mb-6">
-                    <label class="block text-gray-700 font-semibold mb-2">Display Order</label>
-                    <input type="number" name="order" value="{{ old('order', $slider->order) }}" min="0"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 @error('order') border-red-500 @enderror">
-                    @error('order')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                    <p class="text-sm text-gray-500 mt-1">Lower numbers appear first</p>
+                    <x-form.input name="title" label="Title (optional)" :value="$slider->title" />
+                    <x-form.textarea name="description" label="Description (optional)" :rows="3" :value="$slider->description" />
+                    <x-form.input name="order" label="Display Order" type="number" min="0" :value="$slider->order" hint="Lower numbers appear first" />
                 </div>
+            </x-form.card>
 
-                <div class="flex gap-4">
-                    <button type="submit" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-lg transition">
-                        Update Slider Image
-                    </button>
-                    <a href="{{ route('admin.sliders.index') }}" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 rounded-lg text-center transition">
-                        Cancel
-                    </a>
-                </div>
-            </form>
-        </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <x-form.link-button :href="route('admin.sliders.index')">Cancel</x-form.link-button>
+                <x-form.button label="Update Slider Image" loading-label="Saving…" />
+            </div>
+        </form>
     </div>
-</div>
 
 <script>
 function previewImage(event) {
