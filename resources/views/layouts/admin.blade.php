@@ -83,6 +83,13 @@
                     </svg>
                     <span>Customers</span>
                 </a>
+                <a href="{{ route('admin.intake-applications.index') }}"
+                    class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 hover:text-teal-600 transition-all duration-200 {{ request()->routeIs('admin.intake-applications.*') ? 'bg-gradient-to-r from-teal-50 to-cyan-50 text-teal-600 font-semibold' : '' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span>Applications</span>
+                </a>
                 <a href="{{ route('admin.charges.index') }}"
                     class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 hover:text-teal-600 transition-all duration-200 {{ request()->routeIs('admin.charges.*') ? 'bg-gradient-to-r from-teal-50 to-cyan-50 text-teal-600 font-semibold' : '' }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

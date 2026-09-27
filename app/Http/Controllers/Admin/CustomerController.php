@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Branch;
 use App\Models\Bed;
+use App\Models\IntakeApplication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,7 +18,7 @@ class CustomerController extends Controller
         return view('admin.customers.index', compact('customers'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $branches = Branch::with([
             'rooms.beds' => function ($q) {
@@ -25,7 +26,11 @@ class CustomerController extends Controller
             }
         ])->get();
 
-        return view('admin.customers.create', compact('branches'));
+        $intake = $request->filled('intake')
+            ? IntakeApplication::where('status', IntakeApplication::STATUS_PENDING)->find($request->integer('intake'))
+            : null;
+
+        return view('admin.customers.create', compact('branches', 'intake'));
     }
 
     public function store(Request $request)
@@ -52,15 +57,23 @@ class CustomerController extends Controller
                 'stay_type' => 'required|in:permanent,day_basis',
                 'advance_amount' => 'required|numeric|min:0',
                 'payment_method' => 'nullable|string', // Added payment_method
+                'intake_id' => 'nullable|integer',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Validation failed', ['errors' => $e->errors()]);
             return back()->withErrors($e->errors())->withInput();
         }
 
+        // An application submitted through the hostel's public self-registration
+        // link (see Public\IntakeController) may already have a photo/ID on file —
+        // reused below when the admin doesn't upload a fresh one.
+        $intake = $request->filled('intake_id')
+            ? IntakeApplication::where('status', IntakeApplication::STATUS_PENDING)->find($request->integer('intake_id'))
+            : null;
+
         // Handle File Uploads BEFORE transaction (Cloudinary errors shouldn't abort DB transaction)
-        $photoPath = null;
-        $proofPath = null;
+        $photoPath = $intake?->photo_path;
+        $proofPath = $intake?->id_proof_path;
 
         try {
             if ($request->hasFile('photo')) {
@@ -79,8 +92,8 @@ class CustomerController extends Controller
                 'has_cloudinary' => !empty(config('filesystems.disks.cloudinary.cloud_name'))
             ]);
             // Continue without files instead of failing
-            $photoPath = null;
-            $proofPath = null;
+            $photoPath = $intake?->photo_path;
+            $proofPath = $intake?->id_proof_path;
         }
 
         // Generate customer code BEFORE transaction (involves DB query)
@@ -140,6 +153,14 @@ class CustomerController extends Controller
                 'recorded_by' => auth()->id(),
             ]);
             \Log::info('Payment record created');
+
+            if ($intake) {
+                $intake->update([
+                    'status' => IntakeApplication::STATUS_CONVERTED,
+                    'customer_id' => $customer->id,
+                    'reviewed_at' => now(),
+                ]);
+            }
 
             \Log::info('Customer creation completed successfully', ['customer_id' => $customer->id]);
             return redirect()->route('admin.customers.index')->with('success', 'Customer check-in completed successfully!');

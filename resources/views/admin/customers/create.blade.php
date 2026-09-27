@@ -16,6 +16,17 @@
         class="space-y-6 mt-6" x-data="{ submitting: false }" @submit="submitting = true">
         @csrf
 
+        @if ($intake)
+            <input type="hidden" name="intake_id" value="{{ $intake->id }}">
+            <div class="form-card-enter rounded-xl border-2 border-teal-200 bg-teal-50 p-4 text-sm text-teal-800">
+                <span class="font-semibold">Pre-filled from an online application</span> submitted {{ $intake->created_at->diffForHumans() }}.
+                Review the details below before confirming check-in.
+                @if($intake->photo_path || $intake->id_proof_path)
+                    Their uploaded {{ $intake->photo_path && $intake->id_proof_path ? 'photo and ID proof are' : ($intake->photo_path ? 'photo is' : 'ID proof is') }} already on file — leave the field(s) below blank to keep them.
+                @endif
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="form-card-enter form-field-error rounded-xl border-2 border-rose-200 bg-rose-50 p-4">
                 <h3 class="font-bold text-rose-800 mb-2 text-sm">Please fix the following errors:</h3>
@@ -33,16 +44,16 @@
             </x-slot:icon>
 
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <x-form.input name="name" label="Full Name" required />
-                <x-form.input name="dob" label="Date of Birth" type="date" required />
-                <x-form.input name="phone" label="Phone Number" type="tel" required pattern="[0-9]{10}" maxlength="10" />
-                <x-form.input name="guardian_phone" label="Guardian/Parent Phone" type="tel" required pattern="[0-9]{10}" maxlength="10" />
-                <x-form.input name="email" label="Email (optional)" type="email" />
+                <x-form.input name="name" label="Full Name" required :value="$intake->name ?? null" />
+                <x-form.input name="dob" label="Date of Birth" type="date" required :value="optional($intake ?? null)->dob?->format('Y-m-d')" />
+                <x-form.input name="phone" label="Phone Number" type="tel" required pattern="[0-9]{10}" maxlength="10" :value="$intake->phone ?? null" />
+                <x-form.input name="guardian_phone" label="Guardian/Parent Phone" type="tel" required pattern="[0-9]{10}" maxlength="10" :value="$intake->guardian_phone ?? null" />
+                <x-form.input name="email" label="Email (optional)" type="email" :value="$intake->email ?? null" />
                 <div class="md:col-span-2">
-                    <x-form.textarea name="address" label="Permanent Address" :rows="3" required />
+                    <x-form.textarea name="address" label="Permanent Address" :rows="3" required :value="$intake->address ?? null" />
                 </div>
                 <div class="md:col-span-2">
-                    <x-form.textarea name="work_details" label="Work/Study Details (optional)" :rows="2" placeholder="e.g. Software Engineer at ABC Company, Student at XYZ College" />
+                    <x-form.textarea name="work_details" label="Work/Study Details (optional)" :rows="2" placeholder="e.g. Software Engineer at ABC Company, Student at XYZ College" :value="$intake->work_details ?? null" />
                 </div>
             </div>
         </x-form.card>
@@ -67,7 +78,7 @@
                 <x-form.select name="branch_id" id="branch_select" label="Select Branch" required>
                     <option value="">Choose a branch</option>
                     @foreach ($branches as $branch)
-                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                        <option value="{{ $branch->id }}" @selected(($intake->branch_id ?? null) == $branch->id)>{{ $branch->name }}</option>
                     @endforeach
                 </x-form.select>
 
@@ -126,5 +137,9 @@
                 }
             }
         });
+
+        if (branchSelect.value) {
+            branchSelect.dispatchEvent(new Event('change'));
+        }
     </script>
 @endsection

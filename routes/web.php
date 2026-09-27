@@ -29,6 +29,16 @@ Route::prefix('legal')->name('legal.')->group(function () {
 });
 
 // ============================================
+// SELF-REGISTRATION — a hostel's public, no-login intake link. Anyone with
+// the link (found via Admin → Intake Applications) can apply; an admin
+// reviews and converts each application to a real check-in.
+// ============================================
+Route::prefix('register')->name('register.')->group(function () {
+    Route::get('/{tenant:slug}', [App\Http\Controllers\Public\IntakeController::class, 'create'])->name('create');
+    Route::post('/{tenant:slug}', [App\Http\Controllers\Public\IntakeController::class, 'store'])->name('store')->middleware('throttle:5,1');
+});
+
+// ============================================
 // ADMIN AUTH ROUTES
 // ============================================
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -86,6 +96,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'subscripti
     Route::patch('/customers/{customer}/deactivate', [App\Http\Controllers\Admin\CustomerController::class, 'deactivate'])->name('customers.deactivate');
     Route::patch('/customers/{customer}/police-verification', [App\Http\Controllers\Admin\CustomerController::class, 'updatePoliceVerification'])->name('customers.police-verification.update');
     Route::get('/customers/{customer}/police-verification/print', [App\Http\Controllers\Admin\CustomerController::class, 'printPoliceVerification'])->name('customers.police-verification.print');
+
+    // Intake Applications (self-registration submissions awaiting review)
+    Route::get('/intake-applications', [App\Http\Controllers\Admin\IntakeApplicationController::class, 'index'])->name('intake-applications.index');
+    Route::get('/intake-applications/{intakeApplication}', [App\Http\Controllers\Admin\IntakeApplicationController::class, 'show'])->name('intake-applications.show');
+    Route::patch('/intake-applications/{intakeApplication}/reject', [App\Http\Controllers\Admin\IntakeApplicationController::class, 'reject'])->name('intake-applications.reject');
     Route::resource('employees', App\Http\Controllers\Admin\EmployeeController::class);
 
     // Bookings Management
