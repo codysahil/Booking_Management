@@ -224,40 +224,62 @@ class CustomerController extends Controller
     }
 
     /**
-     * Deactivate/Vacate a customer
+     * Deactivate/Vacate a customer — also settles their security deposit
+     * (advance_paid doubles as the deposit in this app's convention): any
+     * outstanding dues/charges and an optional damage deduction come off it
+     * first, and whatever's left is the refund owed.
      */
-    public function deactivate(Customer $customer)
+    public function deactivate(Request $request, Customer $customer)
     {
+        $activeBooking = $customer->bookings()->where('status', 'active')->first();
+
+        $deposit = (float) ($activeBooking->advance_paid ?? 0);
+        $outstanding = $customer->monthlyCharges()->unpaid()->sum('total_amount')
+            + $customer->dues()->where('status', 'pending')->sum('amount');
+
+        $validated = $request->validate([
+            'deposit_deduction_amount' => ['nullable', 'numeric', 'min:0', 'max:' . max($deposit - $outstanding, 0)],
+            'deposit_deduction_reason' => 'nullable|string|max:500|required_with:deposit_deduction_amount',
+        ]);
+
+        $deduction = (float) ($validated['deposit_deduction_amount'] ?? 0);
+        $refund = max($deposit - $outstanding - $deduction, 0);
+
         // Note: Removed DB transaction due to Neon PostgreSQL serverless connection pooling issues
         try {
             // Get active booking and free up the bed
-            $activeBooking = $customer->bookings()->where('status', 'active')->first();
-            
             if ($activeBooking) {
                 // Update booking status to completed
                 $activeBooking->update([
                     'status' => 'completed',
                     'check_out_date' => now(),
+                    'deposit_deduction_amount' => $deduction > 0 ? $deduction : null,
+                    'deposit_deduction_reason' => $validated['deposit_deduction_reason'] ?? null,
+                    'deposit_refund_amount' => $refund,
+                    'settled_at' => now(),
                 ]);
-                
+
                 // Free up the bed
                 $activeBooking->bed->update(['status' => 'vacant']);
             }
-            
+
             // Deactivate customer (keeps the record but prevents login)
             $customer->update([
                 'is_active' => false,
             ]);
-            
+
             \Log::info('Customer vacated', [
                 'customer_id' => $customer->id,
                 'customer_code' => $customer->customer_code,
                 'booking_id' => $activeBooking?->id,
+                'deposit_refund_amount' => $refund,
             ]);
-            
+
+            $refundNote = $activeBooking ? " Deposit settled — ₹{$refund} refund due." : '';
+
             return redirect()->route('admin.customers.index')
-                ->with('success', "Customer {$customer->name} ({$customer->customer_code}) has been vacated successfully. The bed is now available.");
-                
+                ->with('success', "Customer {$customer->name} ({$customer->customer_code}) has been vacated successfully. The bed is now available.{$refundNote}");
+
         } catch (\Exception $e) {
             \Log::error('Customer deactivation failed', [
                 'customer_id' => $customer->id,

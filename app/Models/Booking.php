@@ -32,13 +32,20 @@ class Booking extends Model
         'check_in_date',
         'check_out_date',
         'status',
-        'advance_paid'
+        'advance_paid',
+        'deposit_deduction_amount',
+        'deposit_deduction_reason',
+        'deposit_refund_amount',
+        'settled_at',
     ];
 
     protected $casts = [
         'check_in_date' => 'date',
         'check_out_date' => 'date',
         'advance_paid' => 'decimal:2',
+        'deposit_deduction_amount' => 'decimal:2',
+        'deposit_refund_amount' => 'decimal:2',
+        'settled_at' => 'datetime',
     ];
 
     public function customer()

@@ -23,11 +23,15 @@
                     Edit Customer
                 </a>
                 @if($customer->is_active)
-                <form method="POST" action="{{ route('admin.customers.deactivate', $customer) }}" 
-                    onsubmit="return confirm('Are you sure you want to deactivate this customer? This will:\n- Mark customer as vacated\n- Free up their bed\n- Disable their login\n\nThis action cannot be undone.')">
-                    @csrf
-                    @method('PATCH')
-                    <button type="submit"
+                @php $activeBooking = $customer->bookings->firstWhere('status', 'active'); @endphp
+                <div x-data="{
+                    open: false,
+                    deposit: {{ (float) ($activeBooking->advance_paid ?? 0) }},
+                    outstanding: {{ (float) $pendingAmount }},
+                    deduction: 0,
+                    get refund() { return Math.max(this.deposit - this.outstanding - (parseFloat(this.deduction) || 0), 0) },
+                }">
+                    <button type="button" @click="open = true"
                         class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -36,7 +40,38 @@
                         </svg>
                         Vacate Customer
                     </button>
-                </form>
+
+                    <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" x-transition.opacity>
+                        <div @click.outside="open = false" x-show="open" x-transition
+                            class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                            <h3 class="font-display text-lg font-bold text-gray-900">Vacate {{ $customer->name }}</h3>
+                            <p class="mt-1 text-sm text-gray-500">This frees their bed and disables their login. Settle their security deposit below — this cannot be undone.</p>
+
+                            <form method="POST" action="{{ route('admin.customers.deactivate', $customer) }}" class="mt-5 space-y-4">
+                                @csrf
+                                @method('PATCH')
+
+                                <div class="space-y-2 rounded-xl bg-gray-50 p-4 text-sm">
+                                    <div class="flex justify-between"><span class="text-gray-500">Deposit paid</span><span class="font-semibold text-gray-900">₹<span x-text="deposit.toLocaleString('en-IN')"></span></span></div>
+                                    <div class="flex justify-between"><span class="text-gray-500">Outstanding dues &amp; charges</span><span class="font-semibold text-rose-600">− ₹<span x-text="outstanding.toLocaleString('en-IN')"></span></span></div>
+                                </div>
+
+                                <x-form.input name="deposit_deduction_amount" label="Deduction (damage, cleaning, etc.)" type="number" min="0" step="0.01" x-model="deduction" placeholder="0" />
+                                <x-form.textarea name="deposit_deduction_reason" label="Deduction reason" :rows="2" placeholder="Only needed if deducting something" />
+
+                                <div class="flex items-center justify-between rounded-xl bg-teal-50 p-4">
+                                    <span class="text-sm font-semibold text-gray-700">Refund due to resident</span>
+                                    <span class="text-xl font-bold text-teal-700">₹<span x-text="refund.toLocaleString('en-IN')"></span></span>
+                                </div>
+
+                                <div class="flex justify-end gap-3 pt-2">
+                                    <button type="button" @click="open = false" class="rounded-xl border-2 border-gray-200 bg-white px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50">Cancel</button>
+                                    <button type="submit" class="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-red-700">Confirm &amp; Vacate</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 @else
                 <span class="inline-flex items-center px-4 py-2 bg-gray-400 text-white rounded-lg">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,6 +177,20 @@
                             <div class="col-span-2 text-red-500 font-medium">No active booking found.</div>
                         @endif
                     </div>
+
+                    @if(($booking ?? null)?->settled_at)
+                        <div class="mb-8 rounded-xl border-2 border-gray-100 bg-gray-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Deposit Settlement — {{ $booking->settled_at->format('d M, Y') }}</p>
+                            <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+                                <div><span class="text-gray-500">Deposit</span><p class="font-semibold text-gray-900">₹{{ number_format($booking->advance_paid) }}</p></div>
+                                <div><span class="text-gray-500">Deducted</span><p class="font-semibold text-rose-600">₹{{ number_format($booking->deposit_deduction_amount ?? 0) }}</p></div>
+                                <div class="col-span-2 sm:col-span-1"><span class="text-gray-500">Refunded</span><p class="font-semibold text-teal-700">₹{{ number_format($booking->deposit_refund_amount ?? 0) }}</p></div>
+                                @if($booking->deposit_deduction_reason)
+                                    <div class="col-span-2 sm:col-span-4"><span class="text-gray-500">Reason</span><p class="text-gray-700">{{ $booking->deposit_deduction_reason }}</p></div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
 
                     @if($customer->bookings->isNotEmpty())
                         <!-- Rent Increase Section -->
