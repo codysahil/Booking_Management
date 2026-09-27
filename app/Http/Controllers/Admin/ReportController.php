@@ -141,45 +141,68 @@ class ReportController extends Controller
             ->sum('amount');
     }
 
+    /** One query for the whole 12-month window instead of 12 separate sum() queries. */
     private function getMonthlyRevenue($branch_id = null)
     {
+        $windowStart = now()->subMonths(11)->startOfMonth();
+
+        $payments = Payment::whereIn('status', ['completed', 'success', 'paid'])
+            ->where('created_at', '>=', $windowStart)
+            ->when($branch_id, function ($q) use ($branch_id) {
+                $q->whereHas('customer.bookings.bed.room', function ($q2) use ($branch_id) {
+                    $q2->where('branch_id', $branch_id);
+                });
+            })
+            ->get(['amount', 'created_at']);
+
+        $revenueByMonth = $payments->groupBy(fn ($payment) => $payment->created_at->format('Y-m'))
+            ->map(fn ($group) => $group->sum('amount'));
+
         $data = [];
         for ($i = 11; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $revenue = Payment::whereIn('status', ['completed', 'success', 'paid'])
-                ->whereYear('created_at', $date->year)
-                ->whereMonth('created_at', $date->month)
-                ->when($branch_id, function($q) use ($branch_id) {
-                    $q->whereHas('customer.bookings.bed.room', function($q2) use ($branch_id) {
-                        $q2->where('branch_id', $branch_id);
-                    });
-                })
-                ->sum('amount');
-            
+
             $data[] = [
                 'month' => $date->format('M Y'),
-                'revenue' => $revenue
+                'revenue' => $revenueByMonth->get($date->format('Y-m'), 0),
             ];
         }
+
         return $data;
     }
 
+    /**
+     * One query for every branch instead of one Payment query per branch.
+     * Attribution matches the original whereHas semantics exactly: a payment
+     * counts toward every branch among the customer's bookings, not just one.
+     */
     private function getRevenueByBranch($startDate, $endDate)
     {
-        return Branch::withCount(['rooms'])->get()->map(function($branch) use ($startDate, $endDate) {
-            $revenue = Payment::whereIn('status', ['completed', 'success', 'paid'])
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->whereHas('customer.bookings.bed.room', function($q) use ($branch) {
-                    $q->where('branch_id', $branch->id);
-                })
-                ->sum('amount');
-            
-            return [
-                'name' => $branch->name,
-                'revenue' => $revenue,
-                'rooms' => $branch->rooms_count
-            ];
-        });
+        $branches = Branch::withCount(['rooms'])->get();
+
+        $payments = Payment::whereIn('status', ['completed', 'success', 'paid'])
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->with('customer.bookings.bed.room')
+            ->get(['id', 'customer_id', 'amount']);
+
+        $revenueByBranchId = [];
+
+        foreach ($payments as $payment) {
+            $branchIds = $payment->customer?->bookings
+                ->pluck('bed.room.branch_id')
+                ->filter()
+                ->unique() ?? collect();
+
+            foreach ($branchIds as $branchId) {
+                $revenueByBranchId[$branchId] = ($revenueByBranchId[$branchId] ?? 0) + $payment->amount;
+            }
+        }
+
+        return $branches->map(fn ($branch) => [
+            'name' => $branch->name,
+            'revenue' => $revenueByBranchId[$branch->id] ?? 0,
+            'rooms' => $branch->rooms_count,
+        ]);
     }
 
     private function getOccupancyData($branch_id = null)

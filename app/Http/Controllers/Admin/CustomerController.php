@@ -170,7 +170,11 @@ class CustomerController extends Controller
         $customer->load(['bookings.bed.room.branch', 'payments', 'requests', 'dues' => function ($q) {
             $q->latest('due_date');
         }]);
-        return view('admin.customers.show', compact('customer'));
+
+        $pendingAmount = $customer->monthlyCharges()->unpaid()->sum('total_amount')
+            + $customer->dues()->where('status', 'pending')->sum('amount');
+
+        return view('admin.customers.show', compact('customer', 'pendingAmount'));
     }
 
     public function edit(Customer $customer)

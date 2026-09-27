@@ -80,12 +80,15 @@
                     </div>
 
                     <!-- Remember Me -->
-                    <div class="flex items-center">
-                        <input type="checkbox" name="remember" id="remember"
-                            class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                        <label for="remember" class="ml-2 text-sm text-gray-700">
-                            Remember me
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="remember" id="remember"
+                                class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-700">Remember me</span>
                         </label>
+                        <a href="{{ route('customer.password.request') }}" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                            Forgot password?
+                        </a>
                     </div>
 
                     <!-- Submit Button -->

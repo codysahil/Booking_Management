@@ -103,6 +103,16 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        'customers' => [
+            'provider' => 'customers',
+            // Separate table from the staff broker above — sharing one keyed
+            // only by email would let a resident and a staff member who
+            // happen to share an email address collide on the same token row.
+            'table' => 'customer_password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
     ],
 
     /*

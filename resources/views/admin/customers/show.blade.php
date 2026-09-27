@@ -88,9 +88,23 @@
                         </div>
                     </div>
 
-                    <div class="mt-8 w-full">
-
-                    </div>
+                    @php
+                        $reminderMessage = $pendingAmount > 0
+                            ? "Hi {$customer->name}, this is a reminder that ₹" . number_format($pendingAmount) . " is due for your stay at " . setting('hostel_name') . ". Please clear it at your earliest convenience. Thank you!"
+                            : "Hi {$customer->name}, this is " . setting('hostel_name') . ".";
+                        $customerWaLink = whatsapp_link($customer->phone, $reminderMessage);
+                    @endphp
+                    @if ($customerWaLink)
+                        <div class="mt-8 w-full">
+                            <a href="{{ $customerWaLink }}" target="_blank" rel="noopener"
+                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#25D366] text-white rounded-lg font-medium text-sm hover:opacity-90 transition">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 004.74 1.21h.005c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.87 9.87 0 0012.04 2zm5.8 14.05c-.24.68-1.4 1.3-1.93 1.38-.5.08-1.12.11-1.8-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.2 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.83 2 .9 2.14.07.15.12.32.02.52-.1.2-.15.32-.3.49-.14.17-.3.38-.43.5-.15.15-.3.31-.13.6.17.3.75 1.24 1.62 2.01 1.11.99 2.05 1.3 2.35 1.44.3.15.47.13.65-.07.18-.2.75-.87.95-1.17.2-.3.4-.25.66-.15.27.1 1.7.8 1.99.95.29.15.48.22.55.34.07.13.07.72-.17 1.4z"/>
+                                </svg>
+                                {{ $pendingAmount > 0 ? 'Send Rent Reminder' : 'Message on WhatsApp' }}
+                            </a>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="md:w-2/3 p-8">

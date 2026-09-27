@@ -148,6 +148,11 @@ Route::prefix('customer')->name('customer.')->group(function () {
     Route::post('login', [App\Http\Controllers\Customer\AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::post('logout', [App\Http\Controllers\Customer\AuthController::class, 'logout'])->name('logout');
 
+    Route::get('forgot-password', [App\Http\Controllers\Customer\AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('forgot-password', [App\Http\Controllers\Customer\AuthController::class, 'sendResetLink'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('reset-password/{token}', [App\Http\Controllers\Customer\AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('reset-password', [App\Http\Controllers\Customer\AuthController::class, 'resetPassword'])->name('password.update');
+
     Route::middleware('auth:customer')->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
         Route::get('bookings/{booking}', [App\Http\Controllers\Customer\DashboardController::class, 'showBooking'])->name('bookings.show');
