@@ -14,6 +14,7 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gradient-to-r from-teal-50 to-cyan-50">
                 <tr>
@@ -48,5 +49,6 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     </div>
 @endsection

@@ -41,6 +41,7 @@
         <div class="px-6 py-4 border-b border-gray-100">
             <h3 class="font-bold text-gray-900">Expenses by Category</h3>
         </div>
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
@@ -63,5 +64,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 @endsection
