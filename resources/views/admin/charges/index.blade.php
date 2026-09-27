@@ -71,7 +71,12 @@
                     <td class="px-6 py-4 text-sm text-gray-900">
                         {{ \Carbon\Carbon::parse($charge->month_year)->format('M Y') }}
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">₹{{ number_format($charge->rent_amount, 2) }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        ₹{{ number_format($charge->rent_amount, 2) }}
+                        @if($charge->is_prorated)
+                            <span class="ml-1 px-1.5 py-0.5 text-xs font-semibold rounded bg-amber-100 text-amber-800" title="Check-in on {{ $charge->booking->check_in_date->format('d M') }} — prorated for a partial first month">Prorated</span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4 text-sm text-gray-900">₹{{ number_format($charge->eb_amount, 2) }}</td>
                     <td class="px-6 py-4 text-sm text-gray-900">₹{{ number_format($charge->other_charges, 2) }}</td>
                     <td class="px-6 py-4 text-sm font-semibold text-gray-900">₹{{ number_format($charge->total_amount, 2) }}</td>

@@ -7,6 +7,33 @@ use Illuminate\Database\Eloquent\Model;
 
 class MonthlyCharge extends Model
 {
+    /**
+     * A resident's rent for their check-in month should only cover the days
+     * they actually stayed, not the full month. Every later month is a full
+     * month by definition (they're only removed from billing by vacating,
+     * which doesn't generate new charges) — so this only ever prorates the
+     * one month that matches the booking's own check-in date.
+     */
+    public static function isProratedMonth(Booking $booking, string $month): bool
+    {
+        $checkIn = $booking->check_in_date;
+
+        return $checkIn && $checkIn->format('Y-m') === $month && $checkIn->day > 1;
+    }
+
+    public static function proratedRentAmount(Booking $booking, string $month, float $fullRent): float
+    {
+        if (! self::isProratedMonth($booking, $month)) {
+            return $fullRent;
+        }
+
+        $checkIn = $booking->check_in_date;
+        $daysInMonth = $checkIn->daysInMonth;
+        $daysStayed = $daysInMonth - $checkIn->day + 1;
+
+        return round($fullRent * $daysStayed / $daysInMonth, 2);
+    }
+
     protected static function booted(): void
     {
         static::addGlobalScope(new TenantViaRelationScope('customer'));
@@ -17,6 +44,7 @@ class MonthlyCharge extends Model
         'booking_id',
         'month_year',
         'rent_amount',
+        'is_prorated',
         'eb_amount',
         'other_charges',
         'other_charges_description',
@@ -32,6 +60,7 @@ class MonthlyCharge extends Model
         'due_date' => 'date',
         'paid_date' => 'date',
         'rent_amount' => 'decimal:2',
+        'is_prorated' => 'boolean',
         'eb_amount' => 'decimal:2',
         'other_charges' => 'decimal:2',
         'total_amount' => 'decimal:2',

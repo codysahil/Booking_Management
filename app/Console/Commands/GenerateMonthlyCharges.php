@@ -46,13 +46,14 @@ class GenerateMonthlyCharges extends Command
                     continue;
                 }
 
-                $rentAmount = $booking->bed->monthly_rent;
+                $rentAmount = MonthlyCharge::proratedRentAmount($booking, $month, (float) $booking->bed->monthly_rent);
 
                 MonthlyCharge::create([
                     'customer_id' => $booking->customer_id,
                     'booking_id' => $booking->id,
                     'month_year' => $month,
                     'rent_amount' => $rentAmount,
+                    'is_prorated' => MonthlyCharge::isProratedMonth($booking, $month),
                     'eb_amount' => 0,
                     'other_charges' => 0,
                     'total_amount' => $rentAmount,

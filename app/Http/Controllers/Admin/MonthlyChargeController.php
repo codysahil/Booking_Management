@@ -80,8 +80,8 @@ class MonthlyChargeController extends Controller
                     continue;
                 }
 
-                // Create monthly charge
-                $rentAmount = $booking->bed->monthly_rent;
+                // Create monthly charge — prorated if this is the resident's own check-in month.
+                $rentAmount = MonthlyCharge::proratedRentAmount($booking, $month, (float) $booking->bed->monthly_rent);
                 $dueDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth()->day(min($dueDay, 28));
 
                 MonthlyCharge::create([
@@ -89,6 +89,7 @@ class MonthlyChargeController extends Controller
                     'booking_id' => $booking->id,
                     'month_year' => $month,
                     'rent_amount' => $rentAmount,
+                    'is_prorated' => MonthlyCharge::isProratedMonth($booking, $month),
                     'eb_amount' => 0, // Admin will add EB separately
                     'other_charges' => 0,
                     'total_amount' => $rentAmount,

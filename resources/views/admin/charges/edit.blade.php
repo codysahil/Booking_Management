@@ -22,6 +22,12 @@
                 <div><span class="text-gray-400">Month</span><p class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($charge->month_year)->format('F Y') }}</p></div>
             </div>
 
+            @if($charge->is_prorated)
+                <div class="mb-6 rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
+                    <span class="font-semibold">Prorated charge.</span> This resident checked in on {{ $charge->booking->check_in_date->format('d M, Y') }}, so the rent below only covers the remaining days of that month — not a mistake to correct to the full rent.
+                </div>
+            @endif
+
             <div class="space-y-5">
                 <x-form.input name="rent_amount" label="Rent Amount" type="number" step="0.01" required :value="$charge->rent_amount" />
                 <x-form.input name="eb_amount" label="Electricity Bill (EB) Amount" type="number" step="0.01" required :value="$charge->eb_amount"

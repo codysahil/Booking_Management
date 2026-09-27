@@ -40,10 +40,13 @@ class ChargeCommandsTest extends TestCase
             'guardian_phone' => '9876543211',
         ]);
 
+        // Check-in is safely in the past (not "this month") so charges generated
+        // for the current month are a normal full month, not the resident's own
+        // prorated first month — see ChargeProrationTest for that coverage.
         $booking = $customer->bookings()->create([
             'booking_reference' => $bookingRef,
             'bed_id' => $bed->id,
-            'check_in_date' => now(),
+            'check_in_date' => now()->subMonths(2),
             'status' => 'active',
             'advance_paid' => 6000,
         ]);
