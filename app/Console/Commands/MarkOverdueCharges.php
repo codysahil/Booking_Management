@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Due;
 use App\Models\MonthlyCharge;
+use App\Models\Tenant;
 use Illuminate\Console\Command;
 
 /**
@@ -19,26 +20,38 @@ class MarkOverdueCharges extends Command
 
     public function handle(): int
     {
-        $lateFee = (float) setting('late_fee', 0);
+        $totalOverdue = 0;
+        $totalOverdueDues = 0;
 
-        $newlyOverdue = MonthlyCharge::where('status', 'pending')
-            ->whereDate('due_date', '<', today())
-            ->get();
+        // Bound per tenant, not once globally — a scheduled run has no tenant
+        // bound at all, and each hostel has its own late_fee setting.
+        foreach (Tenant::all() as $tenant) {
+            app()->instance('currentTenantId', $tenant->id);
 
-        foreach ($newlyOverdue as $charge) {
-            $charge->update([
-                'status' => 'overdue',
-                'other_charges' => $charge->other_charges + $lateFee,
-                'total_amount' => $charge->total_amount + $lateFee,
-            ]);
+            $lateFee = (float) setting('late_fee', 0);
+
+            $newlyOverdue = MonthlyCharge::where('status', 'pending')
+                ->whereDate('due_date', '<', today())
+                ->get();
+
+            foreach ($newlyOverdue as $charge) {
+                $charge->update([
+                    'status' => 'overdue',
+                    'other_charges' => $charge->other_charges + $lateFee,
+                    'total_amount' => $charge->total_amount + $lateFee,
+                ]);
+            }
+
+            $totalOverdue += $newlyOverdue->count();
+
+            $totalOverdueDues += Due::where('status', 'pending')
+                ->whereDate('due_date', '<', today())
+                ->count();
         }
 
-        $overdueDues = Due::where('status', 'pending')
-            ->whereDate('due_date', '<', today())
-            ->count();
+        app()->forgetInstance('currentTenantId');
 
-        $feeNote = $lateFee > 0 ? " (+ ₹{$lateFee} late fee each)" : '';
-        $this->info("Marked {$newlyOverdue->count()} monthly charge(s) as overdue{$feeNote}. {$overdueDues} due(s) are past their due date (dues stay pending until paid).");
+        $this->info("Marked {$totalOverdue} monthly charge(s) as overdue. {$totalOverdueDues} due(s) are past their due date (dues stay pending until paid).");
 
         return self::SUCCESS;
     }

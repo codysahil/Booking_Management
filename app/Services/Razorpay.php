@@ -2,15 +2,31 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
+use Illuminate\Support\Facades\Crypt;
 use Razorpay\Api\Api;
 
 /**
  * Thin wrapper around the Razorpay SDK so controllers stay simple and tests
  * can swap it out without hitting the network.
+ *
+ * Two entirely separate concerns share this one class, and must never be
+ * mixed up:
+ *  - Platform billing (createPlan/createSubscription/fetchSubscription/
+ *    cancelSubscription, and isConfigured()/api()) always uses THIS
+ *    platform's own Razorpay account (config/services.php) — this is the
+ *    money hostels pay US for their subscription.
+ *  - Resident due-payments (createOrder/fetchOrder/verifySignature/
+ *    fetchPayment, and residentPaymentsConfigured()/tenantApi()) uses the
+ *    CURRENTLY-BOUND TENANT's own Razorpay account when the hostel has
+ *    connected one (Settings → Payment Gateway), falling back to the
+ *    platform account otherwise — this is rent residents pay THEIR hostel,
+ *    which must land in that hostel's own bank account, not ours.
  */
 class Razorpay
 {
     private ?Api $api = null;
+    private ?Api $tenantApiInstance = null;
 
     public function isConfigured(): bool
     {
@@ -22,10 +38,41 @@ class Razorpay
         return $this->api ??= new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
     }
 
+    /** The key id a hostel's resident-facing checkout should use — their own if connected, else the platform's. */
+    public function tenantKeyId(): ?string
+    {
+        return Setting::get('razorpay_key_id') ?: config('services.razorpay.key');
+    }
+
+    private function tenantKeySecret(): ?string
+    {
+        $encrypted = Setting::get('razorpay_key_secret');
+
+        if (filled($encrypted)) {
+            try {
+                return Crypt::decryptString($encrypted);
+            } catch (\Exception) {
+                // Ciphertext from a different APP_KEY, or corrupted — fall through to the platform default.
+            }
+        }
+
+        return config('services.razorpay.secret');
+    }
+
+    public function residentPaymentsConfigured(): bool
+    {
+        return filled($this->tenantKeyId()) && filled($this->tenantKeySecret());
+    }
+
+    private function tenantApi(): Api
+    {
+        return $this->tenantApiInstance ??= new Api($this->tenantKeyId(), $this->tenantKeySecret());
+    }
+
     /** @param array<string, scalar> $notes */
     public function createOrder(float $amountInRupees, string $receipt, array $notes = [])
     {
-        return $this->api()->order->create([
+        return $this->tenantApi()->order->create([
             'receipt' => substr($receipt, 0, 40),
             'amount' => (int) round($amountInRupees * 100), // paise
             'currency' => 'INR',
@@ -35,7 +82,7 @@ class Razorpay
 
     public function fetchOrder(string $orderId)
     {
-        return $this->api()->order->fetch($orderId);
+        return $this->tenantApi()->order->fetch($orderId);
     }
 
     /**
@@ -87,13 +134,13 @@ class Razorpay
 
     public function fetchPayment(string $paymentId)
     {
-        return $this->api()->payment->fetch($paymentId);
+        return $this->tenantApi()->payment->fetch($paymentId);
     }
 
     /** @param array{razorpay_order_id: string, razorpay_payment_id: string, razorpay_signature: string} $attributes */
     public function verifySignature(array $attributes): void
     {
-        $this->api()->utility->verifyPaymentSignature($attributes);
+        $this->tenantApi()->utility->verifyPaymentSignature($attributes);
     }
 
     /** Human-friendly method name from a Razorpay payment entity (array form). */

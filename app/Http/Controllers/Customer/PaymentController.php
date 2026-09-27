@@ -33,7 +33,7 @@ class PaymentController extends Controller
             ->orderBy('due_date', 'asc')
             ->get();
 
-        $onlinePaymentsEnabled = $this->razorpay->isConfigured();
+        $onlinePaymentsEnabled = $this->razorpay->residentPaymentsConfigured();
 
         return view('customer.payments.index', compact('pendingCharges', 'pendingDues', 'onlinePaymentsEnabled'));
     }
@@ -50,7 +50,7 @@ class PaymentController extends Controller
 
         $customer = Auth::guard('customer')->user();
 
-        if (! $this->razorpay->isConfigured()) {
+        if (! $this->razorpay->residentPaymentsConfigured()) {
             return back()->withErrors(['error' => 'Online payments are not available right now. Please pay at the office.']);
         }
 
@@ -97,7 +97,7 @@ class PaymentController extends Controller
                 'customer' => $customer,
                 'totalAmount' => $totalAmount,
                 'items' => $items,
-                'razorpayKey' => config('services.razorpay.key'),
+                'razorpayKey' => $this->razorpay->tenantKeyId(),
             ]);
         } catch (\Exception $e) {
             Log::error('Razorpay order creation failed', [

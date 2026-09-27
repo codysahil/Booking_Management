@@ -28,6 +28,12 @@ return [
         'late_fee' => 0,
         'notice_period_days' => 30,
 
+        // Payment gateway — this hostel's own Razorpay account for resident
+        // due-payments. key_id is safe to expose (it's also used client-side
+        // in the checkout widget); key_secret is never stored here or shown
+        // back in the UI — see App\Services\Razorpay and Admin\SettingsController.
+        'razorpay_key_id' => null,
+
         // Receipts
         'gstin' => null,
         'receipt_footer' => 'This is a computer-generated receipt and does not need a signature.',

@@ -28,10 +28,24 @@ class Setting extends Model
         return self::CACHE_KEY . ':' . $tenantId;
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @return array<string, mixed>
+     *
+     * With no tenant bound (a console command, webhook, or the super admin's
+     * own actor — none of which belong to any one tenant), TenantScope
+     * no-ops and a plain query would return an unpredictable mix of every
+     * tenant's rows. Returning just the config defaults in that case is the
+     * only safe option — reading "some other hostel's settings" is never
+     * correct, and became a real risk once payment gateway credentials
+     * started living in this same table.
+     */
     public static function allValues(): array
     {
         $defaults = config('hostel.defaults', []);
+
+        if (! App::bound('currentTenantId')) {
+            return $defaults;
+        }
 
         try {
             $stored = Cache::rememberForever(self::cacheKey(), function () {
@@ -57,6 +71,12 @@ class Setting extends Model
     /** @param array<string, mixed> $values */
     public static function putMany(array $values): void
     {
+        if (! App::bound('currentTenantId')) {
+            // Same reasoning as allValues(): with no tenant bound, updateOrCreate()'s
+            // lookup by key alone could match and overwrite a different tenant's row.
+            throw new \RuntimeException('Setting::putMany() called with no tenant bound.');
+        }
+
         foreach ($values as $key => $value) {
             static::query()->updateOrCreate(['key' => $key], ['value' => $value]);
         }

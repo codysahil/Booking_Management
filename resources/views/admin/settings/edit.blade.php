@@ -54,7 +54,32 @@
                 </div>
             </x-form.card>
 
-            <x-form.card title="Receipts & Policies" :delay="180">
+            <x-form.card title="Payment Gateway" description="Connect your own Razorpay account so resident rent payments land directly in your bank account" :delay="180">
+                <x-slot:icon>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </x-slot:icon>
+
+                <div class="mb-5 flex items-start gap-3 rounded-xl border-2 border-blue-100 bg-blue-50 p-4">
+                    <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <p class="text-sm text-blue-900">
+                        <strong>Important:</strong> until you connect your own Razorpay account, any online rent payments residents make may be collected through the platform's own account instead of yours. Connect your keys from
+                        <a href="https://dashboard.razorpay.com/app/keys" target="_blank" rel="noopener" class="underline font-medium">Settings → API Keys</a>
+                        in your own Razorpay dashboard so payments land directly in your bank account.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <x-form.input name="razorpay_key_id" label="Key ID" :value="$settings['razorpay_key_id']" placeholder="rzp_live_••••••••••" />
+                    <div>
+                        <x-form.input name="razorpay_key_secret" label="Key Secret" type="password" placeholder="{{ $hasRazorpaySecret ? '•••••••••••••••• (configured)' : 'rzp_live_••••••••••' }}"
+                            :hint="$hasRazorpaySecret ? 'A secret is already saved — leave blank to keep it, or type a new one to replace it.' : 'Never shown again after saving, for security — only whether one is set.'" />
+                    </div>
+                </div>
+            </x-form.card>
+
+            <x-form.card title="Receipts & Policies" :delay="240">
                 <x-slot:icon>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </x-slot:icon>
