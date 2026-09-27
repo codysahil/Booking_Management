@@ -71,6 +71,40 @@ class DepositSettlementTest extends TestCase
         $this->assertNotNull($booking->settled_at);
     }
 
+    /**
+     * The real vacate modal's Alpine x-model always submits a literal "0" for an
+     * untouched deduction field (not an empty string) — required_with treats "0"
+     * as present, which used to reject every ordinary no-deduction vacate. This
+     * reproduces exactly what the browser actually sends.
+     */
+    public function test_vacating_with_a_zero_deduction_amount_and_no_reason_succeeds()
+    {
+        [$customer, , $booking, $owner] = $this->makeCheckedInCustomer(5000);
+
+        $response = $this->actingAs($owner)->patch(route('admin.customers.deactivate', $customer), [
+            'deposit_deduction_amount' => '0',
+            'deposit_deduction_reason' => '',
+        ]);
+
+        $response->assertRedirect(route('admin.customers.index'));
+        $response->assertSessionDoesntHaveErrors();
+        $this->assertFalse($customer->fresh()->is_active);
+        $this->assertEquals(5000.00, $booking->fresh()->deposit_refund_amount);
+    }
+
+    /** A real (> 0) deduction still requires a reason. */
+    public function test_a_nonzero_deduction_without_a_reason_is_still_rejected()
+    {
+        [$customer, , , $owner] = $this->makeCheckedInCustomer(5000);
+
+        $response = $this->actingAs($owner)->patch(route('admin.customers.deactivate', $customer), [
+            'deposit_deduction_amount' => 500,
+        ]);
+
+        $response->assertSessionHasErrors('deposit_deduction_reason');
+        $this->assertTrue($customer->fresh()->is_active);
+    }
+
     public function test_outstanding_dues_and_charges_come_off_the_deposit_before_refund()
     {
         [$customer, , $booking, $owner] = $this->makeCheckedInCustomer(5000);

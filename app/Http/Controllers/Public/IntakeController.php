@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\IntakeApplication;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * A hostel's public, no-login self-registration link (see the "register"
@@ -42,7 +43,9 @@ class IntakeController extends Controller
             'address' => 'required|string',
             'guardian_phone' => 'required|string|max:20',
             'work_details' => 'nullable|string',
-            'branch_id' => 'nullable|exists:branches,id',
+            // Plain exists:branches,id would run a raw query-builder check that bypasses
+            // Branch's tenant scope, letting a submission reference another tenant's branch.
+            'branch_id' => ['nullable', Rule::exists('branches', 'id')->where('tenant_id', $tenant->id)],
             'preferred_move_in_date' => 'nullable|date',
             'photo' => 'nullable|image|max:10240',
             'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',

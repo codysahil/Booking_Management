@@ -71,29 +71,36 @@ class CustomerController extends Controller
             ? IntakeApplication::where('status', IntakeApplication::STATUS_PENDING)->find($request->integer('intake_id'))
             : null;
 
-        // Handle File Uploads BEFORE transaction (Cloudinary errors shouldn't abort DB transaction)
+        // Handle File Uploads BEFORE transaction (Cloudinary errors shouldn't abort DB transaction).
+        // Each upload is attempted independently so a failure on one file can never discard a
+        // fresh upload that already succeeded on the other.
         $photoPath = $intake?->photo_path;
         $proofPath = $intake?->id_proof_path;
 
-        try {
-            if ($request->hasFile('photo')) {
+        if ($request->hasFile('photo')) {
+            try {
                 \Log::info('Attempting photo upload');
                 $photoPath = $request->file('photo')->store('customers/photos', 'public');
                 \Log::info('Photo uploaded', ['path' => $photoPath]);
+            } catch (\Exception $e) {
+                \Log::warning('Photo upload failed, continuing without it', [
+                    'error' => $e->getMessage(),
+                    'has_cloudinary' => !empty(config('filesystems.disks.cloudinary.cloud_name'))
+                ]);
             }
-            if ($request->hasFile('id_proof')) {
+        }
+
+        if ($request->hasFile('id_proof')) {
+            try {
                 \Log::info('Attempting ID proof upload');
                 $proofPath = $request->file('id_proof')->store('customers/proofs', 'public');
                 \Log::info('ID proof uploaded', ['path' => $proofPath]);
+            } catch (\Exception $e) {
+                \Log::warning('ID proof upload failed, continuing without it', [
+                    'error' => $e->getMessage(),
+                    'has_cloudinary' => !empty(config('filesystems.disks.cloudinary.cloud_name'))
+                ]);
             }
-        } catch (\Exception $e) {
-            \Log::warning('File upload failed, continuing without files', [
-                'error' => $e->getMessage(),
-                'has_cloudinary' => !empty(config('filesystems.disks.cloudinary.cloud_name'))
-            ]);
-            // Continue without files instead of failing
-            $photoPath = $intake?->photo_path;
-            $proofPath = $intake?->id_proof_path;
         }
 
         // Generate customer code BEFORE transaction (involves DB query)
@@ -252,22 +259,31 @@ class CustomerController extends Controller
      */
     public function deactivate(Request $request, Customer $customer)
     {
-        $activeBooking = $customer->bookings()->where('status', 'active')->first();
-
-        $deposit = (float) ($activeBooking->advance_paid ?? 0);
-        $outstanding = $customer->monthlyCharges()->unpaid()->sum('total_amount')
-            + $customer->dues()->where('status', 'pending')->sum('amount');
-
-        $validated = $request->validate([
-            'deposit_deduction_amount' => ['nullable', 'numeric', 'min:0', 'max:' . max($deposit - $outstanding, 0)],
-            'deposit_deduction_reason' => 'nullable|string|max:500|required_with:deposit_deduction_amount',
-        ]);
-
-        $deduction = (float) ($validated['deposit_deduction_amount'] ?? 0);
-        $refund = max($deposit - $outstanding - $deduction, 0);
-
-        // Note: Removed DB transaction due to Neon PostgreSQL serverless connection pooling issues
+        // Note: Removed DB transaction due to Neon PostgreSQL serverless connection pooling issues.
+        // Everything below — including the deposit/outstanding lookups the validation rules depend
+        // on — is inside the try so a transient DB error here still gets the graceful error path
+        // instead of an unhandled 500.
         try {
+            $activeBooking = $customer->bookings()->where('status', 'active')->first();
+
+            $deposit = (float) ($activeBooking->advance_paid ?? 0);
+            $outstanding = $customer->monthlyCharges()->unpaid()->sum('total_amount')
+                + $customer->dues()->where('status', 'pending')->sum('amount');
+
+            // Not required_with: the vacate modal's Alpine x-model always submits a numeric
+            // "0" for an untouched deduction field, and required_with treats "0" as present —
+            // that would block every ordinary no-deduction vacate. Only require a reason when
+            // an actual (> 0) deduction was entered.
+            $hasDeduction = (float) $request->input('deposit_deduction_amount', 0) > 0;
+
+            $validated = $request->validate([
+                'deposit_deduction_amount' => ['nullable', 'numeric', 'min:0', 'max:' . max($deposit - $outstanding, 0)],
+                'deposit_deduction_reason' => [$hasDeduction ? 'required' : 'nullable', 'string', 'max:500'],
+            ]);
+
+            $deduction = (float) ($validated['deposit_deduction_amount'] ?? 0);
+            $refund = max($deposit - $outstanding - $deduction, 0);
+
             // Get active booking and free up the bed
             if ($activeBooking) {
                 // Update booking status to completed
@@ -296,11 +312,13 @@ class CustomerController extends Controller
                 'deposit_refund_amount' => $refund,
             ]);
 
-            $refundNote = $activeBooking ? " Deposit settled — ₹{$refund} refund due." : '';
+            $refundNote = $activeBooking ? ' Deposit settled — ' . money($refund) . ' refund due.' : '';
 
             return redirect()->route('admin.customers.index')
                 ->with('success', "Customer {$customer->name} ({$customer->customer_code}) has been vacated successfully. The bed is now available.{$refundNote}");
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             \Log::error('Customer deactivation failed', [
                 'customer_id' => $customer->id,
@@ -317,7 +335,7 @@ class CustomerController extends Controller
     public function updatePoliceVerification(Request $request, Customer $customer)
     {
         $validated = $request->validate([
-            'id_proof_type' => 'nullable|string|max:50',
+            'id_proof_type' => 'nullable|string|in:' . implode(',', Customer::ID_PROOF_TYPES),
             'id_proof_number' => 'nullable|string|max:50',
             'police_verification_status' => 'required|in:' . implode(',', array_keys(Customer::VERIFICATION_STATUSES)),
             'police_verification_notes' => 'nullable|string|max:1000',

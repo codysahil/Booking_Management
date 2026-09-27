@@ -92,6 +92,48 @@ class IntakeApplicationTest extends TestCase
         $this->assertSame(0, IntakeApplication::count());
     }
 
+    /**
+     * Laravel's plain exists:branches,id rule runs a raw query-builder check that
+     * bypasses Branch's tenant scope — without an explicit tenant_id constraint,
+     * a submitter on tenant A's public link could reference tenant B's branch.
+     */
+    public function test_a_branch_id_belonging_to_another_tenant_is_rejected()
+    {
+        $tenantA = Tenant::factory()->create();
+        $tenantB = Tenant::factory()->create();
+
+        app()->instance('currentTenantId', $tenantB->id);
+        $branchB = \App\Models\Branch::create(['name' => 'Tenant B Branch', 'address' => 'Addr']);
+        app()->forgetInstance('currentTenantId');
+
+        $response = $this->post(route('register.store', $tenantA), [
+            'name' => 'Cross Tenant Branch', 'phone' => '9876500093', 'dob' => '2001-05-20',
+            'address' => 'Addr', 'guardian_phone' => '9876500092',
+            'branch_id' => $branchB->id,
+        ]);
+
+        $response->assertSessionHasErrors('branch_id');
+        $this->assertSame(0, IntakeApplication::withoutGlobalScopes()->where('name', 'Cross Tenant Branch')->count());
+    }
+
+    public function test_a_branch_id_belonging_to_the_same_tenant_is_accepted()
+    {
+        $tenant = Tenant::factory()->create();
+
+        app()->instance('currentTenantId', $tenant->id);
+        $branch = \App\Models\Branch::create(['name' => 'Own Branch', 'address' => 'Addr']);
+        app()->forgetInstance('currentTenantId');
+
+        $response = $this->post(route('register.store', $tenant), [
+            'name' => 'Own Branch Applicant', 'phone' => '9876500091', 'dob' => '2001-05-20',
+            'address' => 'Addr', 'guardian_phone' => '9876500090',
+            'branch_id' => $branch->id,
+        ]);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('intake_applications', ['name' => 'Own Branch Applicant', 'branch_id' => $branch->id]);
+    }
+
     public function test_an_application_is_scoped_to_the_tenant_it_was_submitted_to_even_with_another_tenant_bound()
     {
         $tenantA = Tenant::factory()->create();

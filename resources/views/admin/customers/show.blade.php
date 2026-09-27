@@ -25,10 +25,10 @@
                 @if($customer->is_active)
                 @php $activeBooking = $customer->bookings->firstWhere('status', 'active'); @endphp
                 <div x-data="{
-                    open: false,
+                    open: {{ $errors->hasAny(['deposit_deduction_amount', 'deposit_deduction_reason']) ? 'true' : 'false' }},
                     deposit: {{ (float) ($activeBooking->advance_paid ?? 0) }},
                     outstanding: {{ (float) $pendingAmount }},
-                    deduction: 0,
+                    deduction: {{ (float) old('deposit_deduction_amount', 0) }},
                     get refund() { return Math.max(this.deposit - this.outstanding - (parseFloat(this.deduction) || 0), 0) },
                 }">
                     <button type="button" @click="open = true"
